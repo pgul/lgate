@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2004/07/04 08:04:11  gul
+ * Bugfix: gcc behavior changed in 3.3.3 for "*p++"
+ *
  * Revision 2.2  2002/09/22 09:28:33  gul
  * define O_DENYNONE
  *
@@ -46,13 +49,13 @@
 #ifndef HAVE_STRUPR
 char *strupr(char *s)
 { char *p;
-  for (p=s; *p; *p++=toupper(*p));
+  for (p=s; *p; p++) *p=toupper(*p);
   return s;
 }
 
 char *strlwr(char *s)
 { char *p;
-  for (p=s; *p; *p++=tolower(*p));
+  for (p=s; *p; p++) *p=tolower(*p);
   return s;
 }
 #endif
