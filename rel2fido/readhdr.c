@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2002/10/29 19:40:13  gul
+ * MSGID generation minor fix
+ *
  * Revision 2.2  2002/10/29 19:05:30  gul
  * Format text, translate comments
  *
@@ -511,7 +514,7 @@ path:
           <z_n/f[_p]_xxxxxxxx@domain> or
           <z-n-f[-p]-xxxxxxxx[-domain]@domain> or
           <xxxxxxxx@[pP.]fF.nN.zZ.domain> */
-        fidomsgid(str+12, fmsgid, domainid, &msgid);
+        fidomsgid(p, fmsgid, domainid, &msgid);
       }
       if (*p=='<')
       { 
