@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/20 01:33:40  gul
+ * Added some debug messages
+ *
  * Revision 2.2  2001/01/19 17:54:28  gul
  * Translate comments and cosmetic changes
  *
@@ -89,6 +92,7 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
       *p1=c;
       continue;
     }
+    debug(4, "Encoding file %s, size %lu", sfile, filelength(fileno(f)));
     ext=strrchr(p2, '.');
     if (ext==NULL) ext=p1; /* null string */
     else p++;

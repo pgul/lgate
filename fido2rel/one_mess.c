@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/20 01:33:40  gul
+ * Added some debug messages
+ *
  * Revision 2.2  2001/01/19 17:42:47  gul
  * Translate comments and cosmetic changes
  *
@@ -247,7 +250,7 @@ int one_message(char *msgname)
       }
       if (topoint!=myaka[curaka].point)
       { /* is this aka exists? */
-        for (i=0;i<naka;i++)
+        for (i=0; i<naka; i++)
           if ((myaka[i].node==myaka[curaka].node) &&
               (myaka[i].net==myaka[curaka].net) &&
               (myaka[i].point==topoint)) break;
@@ -639,7 +642,7 @@ lbadmsg:
         {
           p=klopt;
           i=-1; /* network */
-          for (;*p;)
+          while (*p)
           { if (npath==MAX_PATH)
               break;
             while (*p==' ') p++;
@@ -1987,7 +1990,7 @@ plaintext:
     if (virt_putc('\n', fout)==EOF)
       goto errwrite1;
     /* Done, now we need only copy message body */
-    debug(6, "Main: put message body");
+    debug(6, "Main: put message body, size %lu", txtsize);
     begline=1;
     p=str;
     imemtxt=0; /* total size saved in txtsize */

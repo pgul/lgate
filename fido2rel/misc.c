@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/01/20 01:33:40  gul
+ * Added some debug messages
+ *
  * Revision 2.3  2001/01/19 17:43:06  gul
  * Cosmetic changes
  *
@@ -625,7 +628,7 @@ void findlet(void)
           close(h);
           continue;
         }
-        debug(4, "FindLet: message %s for us", msgname);
+        debug(4, "FindLet: message %s size %lu bytes for us", msgname, filelength(h));
         msghdr_byteorder(&msghdr);
         if (one_message(msgname))
         { closedir(d);
@@ -672,7 +675,7 @@ void findlet(void)
     debug(11, "FindLet: no more messages");
 }
 
-static void one_pkt(char * msgname)
+static void one_pkt(char *msgname)
 { int i, r=0;
 
   debug(11, "One_Pkt: found %s", msgname);
@@ -775,6 +778,7 @@ static void one_pkt(char * msgname)
 #ifdef __OS2__
   DosSetFHState(h, OPEN_FLAGS_NOINHERIT); /* else we cannot delete because of uux running */
 #endif
+  debug(4, "%s size %lu bytes for us", msgname, filelength(h));
 
   for (; h!=-1;)
   { /* is there another messages? */
