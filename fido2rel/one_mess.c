@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.15  2002/11/17 20:56:16  gul
+ * gcc/glibc workaround, buggy memmove
+ *
  * Revision 2.14  2002/09/30 14:30:51  gul
  * bugfix
  *
@@ -1993,9 +1996,11 @@ plaintext:
       if (p1) p=p1+strlen(echoes[area].usenet);
       if ((p1==NULL || (*(p1-1)!='|' && *(p1-1)!='<') || *p!='|') &&
           strlen(msgid)+strlen(echoes[area].usenet)+1<sizeof(msgid))
-      { memmove(msgid+strlen(echoes[area].usenet)+1, msgid, strlen(msgid));
+      { int i=strlen(echoes[area].usenet);
+	for (p=msgid+strlen(msgid); p>=msgid; p--) p[i+1] = p[0];
+	/* memmove(msgid+strlen(echoes[area].usenet)+1, msgid, strlen(msgid));*/
         strcpy(msgid, echoes[area].usenet);
-        msgid[strlen(echoes[area].usenet)]='|';
+        msgid[i]='|';
       }
     }
     if (!isfield("Message-Id:"))
