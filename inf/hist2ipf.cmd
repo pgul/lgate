@@ -4,8 +4,8 @@
  * $Id$
 */
 
-file='d:\tc\work\gate\postavka\history.txt';
-tempfile='c:\tmp\history.tmp';
+file='history.txt';
+tempfile='history.tmp';
 
 call RxFuncAdd 'SysFileDelete', 'RexxUtil', 'SysFileDelete'
 

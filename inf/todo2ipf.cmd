@@ -4,7 +4,7 @@
  * $Id$
 */
 
-file='d:\tc\work\gate\postavka\todo.txt'
+file='todo.txt'
 
 inlist=0;
 do while chars(file) > 0
