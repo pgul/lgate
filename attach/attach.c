@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/07/20 16:44:38  gul
+ * minor bugfix
+ *
  * Revision 2.0  2001/01/10 20:42:15  gul
  * We are under CVS for now
  *
@@ -97,31 +100,31 @@ static int sendfile(char * str, int i, unsigned long attrib, semtype sem)
     r=uucp(str,hosts[i].host);
     if (sem==FD_SEM)
       if (DelFDSem(&hosts[i].addr,semdir))
-        logwrite('!',"Cant unlink semaphore: %s", strerror(errno));
+        logwrite('!', "Cant unlink semaphore: %s\n", strerror(errno));
     if (r)
-    { logwrite('?',"Error! Can't send file %s to %s!\n",str,hosts[i].host);
+    { logwrite('?', "Error! Can't send file %s to %s!\n",str,hosts[i].host);
       waserr=1;
-      movebad(str,attrib);
+      movebad(str, attrib);
       retcode|=RET_ERR;
       return 1;
     }
-    logwrite('$',"File %s size %lu sent to %s\n",str,statbuf.st_size,hosts[i].host);
+    logwrite('$', "File %s size %lu sent to %s\n", str, statbuf.st_size, hosts[i].host);
     retcode|=RET_SENT;
     if (attrib & msgKFS)
-    { logwrite('$',"Deleting sent file %s\n",str);
+    { logwrite('$', "Deleting sent file %s\n", str);
       unlink(str);
     }
     else if (attrib & msgTFS)
-    { logwrite('$',"Truncating sent file %s\n",str);
-      r=myopen(str,O_RDWR|O_EXCL);
+    { logwrite('$', "Truncating sent file %s\n", str);
+      r=myopen(str, O_RDWR|O_EXCL);
       if (r!=-1)
-      { chsize(r,0);
+      { chsize(r, 0);
         close(r);
       }
       else
       { debug(1, "Main: can't open %s: %s", str, strerror(errno));
         printf("Can't truncate file!\n");
-        logwrite('!',"Can't truncate file!\n");
+        logwrite('!', "Can't truncate file!\n");
         retcode|=RET_WARN;
       }
     }
@@ -375,7 +378,7 @@ int main(int argc, char * argv[])
 #endif
   }
   else
-  { logwrite(bypipe ? '!' : '?', "Can't create attuucp semaphore: %s!",
+  { logwrite(bypipe ? '!' : '?', "Can't create attuucp semaphore: %s!\n",
              strerror(errno));
     if (!bypipe)
       return RET_ERR;
