@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/26 14:43:50  gul
+ * init holdsize=0, not -1
+ *
  * Revision 2.1  2001/01/21 10:20:02  gul
  * new cfg param 'fromtop'
  *
@@ -348,7 +351,7 @@ int config(void)
   keepatt=ATT_KEEP;
   routeattach=0;
   shortvia=1;
-  holdsize=-1;
+  holdsize=0;
   curaka=-1;
   lechonames=0;
   replyform=REPLY_EMPTY;
