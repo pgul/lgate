@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2003/03/23 10:38:24  gul
+ * bugfix
+ *
  * Revision 2.9  2003/02/16 09:41:57  gul
  * bugfix: sometimes extra NUL-bytes occured at the end of pkt
  *
@@ -421,7 +424,7 @@ errwrite:
     fprintf(frej, ".%u", mpoint);
   fprintf(frej, " %08lx\r", curtime*100+getpid()%100+seqf++);
   if (!notid)
-    fprintf(frej, "%s: %s\r", packmail ? "TID" : "PID", NAZVA);
+    fprintf(frej, "\x01%s: %s\r", packmail ? "TID" : "PID", NAZVA);
   tplout=1;
   r=init_tpl(tpl_name);
   setvars(reason);
