@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2002/03/21 14:54:14  gul
+ * Gw-To, Gw-Cc, Gw-Bcc works now
+ *
  * Revision 2.6  2002/03/21 13:43:25  gul
  * Remove dest addr list length limitation
  *
@@ -69,7 +72,6 @@
 #define MINMSGLEN 4096
 
 #define eoline() for (;strchr(str, '\n')==NULL;) if (hgets(str, sizeof(str), h)==0) break;
-
 static void reject(int reason, char *to);
 static int  memgets(char *s, int size);
 
@@ -79,7 +81,8 @@ char *header;
 int  retcode, frescan=0;
 char *myintsetname, *myextsetname;
 
-static char nagate[1024], nafig[1024], curto[1024];
+static char *nagate, *nafig, *curto;
+static int  sizenagate, sizenafig, sizecurto;
 static int  rejreason, currcv;
 static char msgid[256], errstr[128];
 static char bound[80];
@@ -116,6 +119,35 @@ static int  msgtz;
 #ifndef __MSDOS__
 static void *msgidregbuf1, *msgidregbuf2;
 #endif
+
+static void xstrcpy(char **dest, int *dsize, char *src)
+{ if (*dsize<=strlen(src))
+  { if (*dsize) free(dest);
+    *dest=strdup(src);
+    *dsize=strlen(src)+1;
+  }
+  else strcpy(*dest, src);
+}
+
+static void xstrcat(char **dest, int *dsize, char *src)
+{ char *new;
+  int ldest, lsrc, newsize;
+  lsrc=strlen(src);
+  ldest=(*dest && **dest) ? strlen(*dest)+1 : 0;
+  newsize=*dsize;
+  while (newsize<=lsrc+ldest) newsize+=128;
+  if (newsize>*dsize)
+  { new=*dest ? realloc(*dest, newsize) : malloc(newsize);
+    if (new==NULL)
+    { logwrite('!', "Not enough memory!\n"); 
+      return;
+    }
+    *dest=new;
+    *dsize=newsize;
+  }
+  if (ldest) (*dest)[ldest-1]=' ';
+  strcpy(*dest+ldest, src);
+}
 
 static void tofield(char *str, char **to, int *sizeto)
 {
@@ -1113,8 +1145,6 @@ plaintext:
           tozone, tonet, tonode, topoint);
     debug(6, "Main: using aka %d:%d/%d.%d",
           myaka[curaka].zone, myaka[curaka].net, myaka[curaka].node, myaka[curaka].point);
-    if (to[0])
-      debug(3, "Main: message to '%s'", to);
     if (curgate!=ngates)
     { if ((attr & (msgIMM | msgDIRECT | msgCRASH)) && (!packed))
       { if (memtxt) freebuf(memtxt);
@@ -1134,6 +1164,16 @@ plaintext:
             continue;
           }
           *p1++=*p++;
+          if (p1-nagate>=sizenagate-1)
+          { char *newnagate=realloc(nagate, sizenagate+=128);
+            if (newnagate==NULL)
+            { logwrite('!', "Not enough memory for dest addr list, truncated\n");
+              sizenagate-=128;
+              break;
+            }
+            p1+=(newnagate-nagate);
+            nagate=newnagate;
+          }
         }
         *p1++='\0';
         { char c[128];
@@ -1151,7 +1191,9 @@ plaintext:
           bufcopy(memtxt, i+4, "\n", 1);
         }
       }
+      /* todo: put removed Gw-To, Gw-Cc, Gw-Bcc */
       fido2rfc(to, msghdr.to, tozone, tonet, tonode, topoint, gates[curgate].domain);
+      gw_to[0]='\0';
       debug(3, "Main: address is '%s'", to);
       /* process chdomain */
       for (i=0; i<ncdomain; i++)
@@ -1176,6 +1218,14 @@ plaintext:
       }
       debug(3, "Main: dest address after chdomain is '%s'", to);
     }
+
+    if (gw_to[0])
+    { tofield(gw_to, &to, &sizeto);
+      gw_to[0]='\0';
+    }
+
+    if (to[0])
+      debug(3, "Main: message to '%s'", to);
 
     txtsize=imemtxt;
     debug(8, "Main: text size is %ld", txtsize);
@@ -1258,14 +1308,14 @@ plaintext:
         while (isspace(*p) || (*p==',')) p++;
         p1=strpbrk(p, " ,");
         if (p1) *p1='\0';
-        strcpy(curto, p);
+        xstrcpy(&curto, &sizecurto, p);
         debug(5, "To-address is '%s'", curto);
         if ((curto[0]=='<') && (curto[strlen(curto)-1]=='>'))
         { strcpy(curto, curto+1);
           curto[strlen(curto)-1]='\0';
         }
         if (curto[0]==0)
-          strcpy(curto, msghdr.to);
+          xstrcpy(&curto, &sizecurto, msghdr.to);
         if (strpbrk(curto, "<>"))
         { /* prevent security hole */
           char *p, *p1=NULL;
@@ -1274,8 +1324,7 @@ plaintext:
           if (p) p1=strchr(p, '>');
 #if 0
           if (p==NULL || p1==NULL)
-          { if (nafig[0]) strcat(nafig, " ");
-            strcat(nafig, curto);
+          { xstrcat(&nafig, &sizenafig, curto);
             continue;
           }
           *p1='\0';
@@ -1288,7 +1337,7 @@ plaintext:
 #endif
         }
         if (curto[0]==0)
-          strcpy(curto, "All");
+          xstrcpy(&curto, &sizecurto, "All");
         debug(6, "Main: run external checker");
         r=extcheck(curto, &area);
         debug(6, "Main: external checker retcode %d", r);
@@ -1312,14 +1361,12 @@ plaintext:
           continue;
         }
         if ((r==1) && (area==-1)) /* reject */
-        { if (nafig[0]) strcat(nafig, " ");
-          rejreason=EXTERNAL;
-          strcat(nafig, curto);
+        { rejreason=EXTERNAL;
+          xstrcat(&nafig, &sizenafig, curto);
           continue;
         }
         if (r==2) /* free */
-        { if (nagate[0]) strcat(nagate, " ");
-          strcat(nagate, curto);
+        { xstrcat(&nagate, &sizenagate, curto);
           continue;
         }
         /* the rest is normal */
@@ -1354,8 +1401,7 @@ plaintext:
               }
               if (i==nnotwit)
               { rejreason=TWITADDR;
-                if (nafig[0]) strcat(nafig, " ");
-                strcat(nafig, curto);
+                xstrcat(&nafig, &sizenafig, curto);
                 continue;
               }
             }
@@ -1368,8 +1414,7 @@ plaintext:
               }
               if (i==nattfrom)
               { rejreason=FILEATT;
-                if (nafig[0]) strcat(nafig, " ");
-                strcat(nafig, curto);
+                xstrcat(&nafig, &sizenafig, curto);
                 continue;
               }
             }
@@ -1379,43 +1424,36 @@ plaintext:
               continue;
             if (r==1) /* reject */
             { rejreason=DEST;
-              if (nafig[0]) strcat(nafig, " ");
-              strcat(nafig, curto);
+              xstrcat(&nafig, &sizenafig, curto);
               continue;
             }
             if (r==2) /* free */
-            { if (nagate[0]) strcat(nagate, " ");
-              strcat(nagate, curto);
+            { xstrcat(&nagate, &sizenagate, curto);
               continue;
             }
             /* the rest is ok */
             /* size */
             if ((maxsize!=0) && (txtsize>maxsize*1024l))
             { rejreason=SIZE;
-              if (nafig[0]) strcat(nafig, " ");
-              strcat(nafig, curto);
+              xstrcat(&nafig, &sizenafig, curto);
               continue;
             }
             /* binary */
             if (nwords>5)
               if ((wlen/nwords>MAXWLEN) && (uucode==0))
               { rejreason=BINARY;
-                if (nafig[0]) strcat(nafig, " ");
-                strcat(nafig, curto);
+                xstrcat(&nafig, &sizenafig, curto);
                 continue;
               }
-            if (nagate[0]) strcat(nagate, " ");
-            strcat(nagate, curto);
+            xstrcat(&nagate, &sizenagate, curto);
           } /* not privel */
           else
-          { if (nagate[0]) strcat(nagate, " ");
-            strcat(nagate, curto);
+          { xstrcat(&nagate, &sizenagate, curto);
             continue;
           }
         } /* netmail */
         else
-        { if (nagate[0]) strcat(nagate, " ");
-          strcat(nagate, curto);
+        { xstrcat(&nagate, &sizenagate, curto);
           continue;
         }
       } /* to-addresses loop */
@@ -1432,7 +1470,8 @@ plaintext:
         memtxt=NULL;
         return 0;
       }
-      strcpy(to, nagate);
+      to='\0';
+      tofield(nagate, &to, &sizeto);
     }
 
     set_table(myintsetname);
