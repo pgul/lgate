@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2003/02/03 13:16:22  gul
+ * Creanup source
+ *
  * Revision 2.6  2002/11/17 20:55:26  gul
  * New option "tid" in gate.cfg
  *
@@ -364,19 +367,19 @@ void genlett(int reason, char *toname,
       unlink(rejmsgname);
       return;
     }
-    if (frej!=NULL)
-    { for (i=0; i<5; i++)
-        if (flock(h, LOCK_EX|LOCK_NB))
-          sleep(1);
-        else
-          break;
-      if (i==5)
-      { fclose(frej);
-        frej=NULL;
-      }
+    for (i=0; i<5; i++)
+      if (flock(h, LOCK_EX|LOCK_NB))
+        sleep(1);
       else
-        writepkthdr(frej);
+        break;
+    if (i==5)
+    { fclose(frej);
+      frej=NULL;
+      unlink(rejmsgname);
+      log('?', "Can't lock %s: %s!\n", rejmsgname, strerror(errno));
     }
+    else
+      writepkthdr(frej);
   }
   debug(6, "GenLett: msgname is %s", rejmsgname);
   if (frej==NULL)
