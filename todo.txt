@@ -1,6 +1,11 @@
+- cygwin check:
+  - close-on-exec (no inherit);
+  - libperl
+- rel2fido: разрешать -c<config> при setuid, если владелец конфига -
+  root или тот же user; не искать config в curdir при suid.
 - rel2fido: don't recode msgs with incorrect charset (unexistant chars, '?').
+- extcharset=us-ascii:koi8-r:koi8-u
 - ftrans "U:\\FILES.OUT\\OUTBOUND\\" "/fido/files.out/outbound/"
-- attuucp: q-p attaches
 - attuucp: transx compatibility
 - external checker: возможность сделать echomail из netmail и наоборот.
 - External filter.
@@ -24,6 +29,7 @@
 - xms/dpmi support.
 - lgate/win32
 - fido2rel: разбивать аттачи на части.
+- lgate/dos: int24 handler (autofail).
 ? сначала проверять itwit*, а потом уже валидность "To:"
 
    Не уверен, надо ли и если надо, то как именно, поэтому далеко

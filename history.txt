@@ -1224,4 +1224,6 @@ ver 7.02 -
   ! rel2fido: иногда (при гейтовании из UUPC spool при pack=no) msg
     мог попадать в pktin под именем *.pkt.
   ! rel2fido: "Memory allocation failed" fixed.
+  ! fido2rel: fileattach gating fixed.
+  + attuucp: декодирование аттачей в quoted-printable.
 
