@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/07/09 10:58:32  gul
+ * copyfile() fails if source is r/o
+ *
  * Revision 2.0  2001/01/10 20:42:19  gul
  * We are under CVS for now
  *
@@ -32,7 +35,7 @@ int copyfile(char *from, char *to)
 
   if (access(to, 0)==0)
     return 1;
-  fin=open(from, O_BINARY|O_RDWR);
+  fin=open(from, O_BINARY|O_RDONLY);
   if (fin==-1) return 1;
   fout=open(to, O_BINARY|O_CREAT|O_RDWR|O_EXCL, S_IREAD|S_IWRITE);
   if (fout==-1)
