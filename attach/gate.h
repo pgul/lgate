@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/07/20 21:22:52  gul
+ * multipart/mixed decode cleanup
+ *
  * Revision 2.3  2001/07/20 14:55:22  gul
  * Decode quoted-printable attaches
  *
@@ -63,8 +66,8 @@ int  isfile(int handle);
 void getvalue(char *field, char *value, unsigned valsize);
 void getparam(char *field, char *param, char *value, unsigned valsize);
 int  do_uudecode(char *infile, char *outfile);
-int  do_unbase64(char *infile, char *outfile);
-int  do_unqp(char *infile, char *outfile);
+int  do_unbase64(char *infile, char *outfile, int decodepart);
+int  do_unqp(char *infile, char *outfile, int decodepart);
 int  str_unbase64(char *in, char *out);
 void str_base64(char *in, char *out, int len);
 #ifdef _IOFBF  /* stdio.h included */

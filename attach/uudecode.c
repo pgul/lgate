@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/07/20 21:22:52  gul
+ * multipart/mixed decode cleanup
+ *
  * Revision 2.2  2001/07/20 16:35:35  gul
  * folded Content-Disposition header held
  *
@@ -65,7 +68,7 @@ static enctype enc;
 char *dayext[]={"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
 
 int isbeg(char *str);
-static void onelet(pwdtype passwd, int nhost);
+static void onelet(pwdtype passwd, int nhost, int decodepart);
 static char tmp_uue[FNAME_MAX], tmp_arc[FNAME_MAX];
 static char arcname[FNAME_MAX], execparam[1024];
 static time_t ftime;
@@ -89,10 +92,10 @@ void makename(char *src, char *arcname, char *destdir)
 }
 
 void uudecode(char *filebox)
-{ int  inhdr, inparthdr, emptyline, nhost;
+{ int  inhdr, inparthdr, emptyline, nhost, npart, decodepart;
   pwdtype passwd;
   char password[MAXPASSWD];
-  char sstr[1024];
+  char sstr[1024], s2[64];
 
   arcname[0]=0;
   if (bypipe)
@@ -128,6 +131,7 @@ void uudecode(char *filebox)
   boundary[0]='\0';
   ftime=0;
   nhost=nhosts;
+  npart=decodepart=0;
   nstr[0]=from[0]='\0';
   while (fgets(sstr, sizeof(sstr), fin))
   {
@@ -199,7 +203,7 @@ newmess:
         { enc=ENC_UUE;
           if (passwd==UNSECURE) passwd=RESEND;
         }
-        onelet(passwd, nhost);
+        onelet(passwd, nhost, decodepart);
       }
       passwd = unsecure[0] ? UNSECURE : RESEND;
       password[0]=boundary[0]=from[0]='\0';
@@ -224,6 +228,7 @@ newmess:
       }
       arcname[0]=tmp_arc[0]=0;
       enc=ENC_UUCP;
+      npart=decodepart=0;
       continue;
     }
     if (!fout)
@@ -270,19 +275,21 @@ newmess:
     }
     if ((inhdr || inparthdr) && (strnicmp(sstr, "Content-", 8)==0))
     { if (strnicmp(sstr, "Content-Transfer-Encoding:", 26)==0)
-      { for (p=sstr+26; (*p==' ') || (*p=='\n'); p++);
-        if (strnicmp(p, "base64", 6)==0)
-          enc=ENC_BASE64;
-        if (strnicmp(p, "quoted-printable", 16)==0)
-          enc=ENC_QP;
-        else if (strnicmp(p, "x-pgp", 5)==0)
-          enc=ENC_PGP;
-        else if ((strnicmp(p, "x-uue", 5)==0) ||
-                 (strnicmp(p, "x-uucode", 8)==0) ||
-                 (strnicmp(p, "x-uuencode", 10)==0))
-          enc=ENC_UUE;
+      { if (decodepart==0 || decodepart==npart)
+        { for (p=sstr+26; (*p==' ') || (*p=='\n'); p++);
+          if (strnicmp(p, "base64", 6)==0)
+            enc=ENC_BASE64;
+          if (strnicmp(p, "quoted-printable", 16)==0)
+            enc=ENC_QP;
+          else if (strnicmp(p, "x-pgp", 5)==0)
+            enc=ENC_PGP;
+          else if ((strnicmp(p, "x-uue", 5)==0) ||
+                   (strnicmp(p, "x-uucode", 8)==0) ||
+                   (strnicmp(p, "x-uuencode", 10)==0))
+            enc=ENC_UUE;
+        }
       }
-      if (strnicmp(sstr, "Content-Type:", 13)==0)
+      else if (strnicmp(sstr, "Content-Type:", 13)==0)
       { char scrc32[32];
         int  gotnextline=0;
         p=sstr+strlen(sstr);
@@ -303,17 +310,29 @@ newmess:
           splited=1;
         else if (inhdr && strnicmp(p, "multipart/mixed", 15)==0)
           getparam(sstr, "boundary", boundary, sizeof(boundary));
+#if 1
+        else if (strnicmp(p, "message/", 8) &&
+                 strnicmp(p, "multipart/", 10) &&
+                 strnicmp(p, "text", 4))
+          if (decodepart==0)
+            decodepart=npart;
+#endif
         if (tmp_arc[0]=='\0')
-          getparam(sstr, "name", tmp_arc, sizeof(tmp_arc));
-        getparam(sstr, "crc32", scrc32, sizeof(scrc32));
-        if (scrc32[0])
-          sscanf(scrc32, "%lX", &fcrc32);
-        if (gotnextline)
-        { strcpy(sstr, sstr+strlen(sstr)+1);
-          goto nextline;
+        { getparam(sstr, "name", tmp_arc, sizeof(tmp_arc));
+          if (tmp_arc[0])
+            decodepart=npart;
+        }
+        if (decodepart==npart || decodepart==0)
+        { getparam(sstr, "crc32", scrc32, sizeof(scrc32));
+          if (scrc32[0])
+            sscanf(scrc32, "%lX", &fcrc32);
+          if (gotnextline)
+          { strcpy(sstr, sstr+strlen(sstr)+1);
+            goto nextline;
+          }
         }
       }
-      if (strnicmp(sstr, "Content-Disposition:", 20)==0)
+      else if (strnicmp(sstr, "Content-Disposition:", 20)==0)
       { int  gotnextline=0;
         p=sstr+strlen(sstr);
         while (p-sstr<sizeof(sstr)-1)
@@ -328,9 +347,14 @@ newmess:
             fputs(p, fout);
           p+=strlen(p);
         }
-        getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
-        if (tmp_arc[0]=='\0')
-          getvalue(sstr, tmp_arc, sizeof(tmp_arc));
+        getvalue(sstr, s2, sizeof(s2));
+        if (decodepart==0 && stricmp(s2, "attachment")==0)
+          decodepart=npart;
+        if (decodepart==npart || decodepart==0)
+        { if (tmp_arc[0]=='\0')
+            getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
+          if (tmp_arc) decodepart=npart;
+        }
         if (gotnextline)
         { strcpy(sstr, sstr+strlen(sstr)+1);
           goto nextline;
@@ -416,6 +440,7 @@ newmess:
     else if ((!inhdr) && (!inparthdr) && (enc==ENC_UUE || enc==ENC_UUCP))
     { if ((strnicmp(sstr, "begin ", 6)==0) && isdigit(sstr[6]))
       { enc=ENC_UUE;
+        decodepart=npart;
         if (arcname[0]==0)
         { if (sscanf(sstr+6, "%d %s", &n, tmp_arc)==2)
             mkarcname(tmp_arc, arcname, passwd);
@@ -428,7 +453,9 @@ newmess:
       if (sstr[0]=='-' && sstr[1]=='-' && 
           strncmp(sstr+2, boundary, strlen(boundary))==0 &&
           sstr[strlen(boundary)+2]=='\n')
-        inparthdr=1;
+      { inparthdr=1;
+        npart++;
+      }
   }
   if (!bypipe)
   { if (fout)
@@ -443,7 +470,11 @@ newmess:
     { fclose(fout);
       fout = NULL;
     }
-    onelet(passwd, nhost);
+    if (enc==ENC_UUCP)
+    { enc=ENC_UUE;
+      if (passwd==UNSECURE) passwd=RESEND;
+    }
+    onelet(passwd, nhost, decodepart);
 #if 0
     if (!bypipe)
       unlink(filebox);
@@ -841,7 +872,7 @@ sendbad:
   closedir(d);
 }
 
-static void onelet(pwdtype passwd, int nhost)
+static void onelet(pwdtype passwd, int nhost, int decodepart)
 { struct stat statbuf;
   int r;
 
@@ -976,11 +1007,11 @@ baduuderet:
     }
   }
   else if (enc == ENC_BASE64)
-  { if (do_unbase64(tmp_uue, tmp_arc))
+  { if (do_unbase64(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
   }
   else if (enc == ENC_QP)
-  { if (do_unqp(tmp_uue, tmp_arc))
+  { if (do_unqp(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
   } else
   { if (do_uudecode(tmp_uue, tmp_arc))

@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/07/20 21:22:52  gul
+ * multipart/mixed decode cleanup
+ *
  * Revision 2.3  2001/07/20 16:13:26  gul
  * q-p decode bugfix
  *
@@ -45,23 +48,23 @@
 /* single-character decode */
 #define DEC(c)		cunbase64[c]
 
-int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *));
+int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int decode(FILE *, FILE *));
 static int decode_b64(FILE *in, FILE *out);
 static int decode_qp(FILE *in, FILE *out);
 static char buf[128];
 
-int do_unbase64(char *infile, char *outfile)
-{ return do_unmime(infile, outfile, decode_b64);
+int do_unbase64(char *infile, char *outfile, int decodepart)
+{ return do_unmime(infile, outfile, decodepart, "base64", decode_b64);
 }
 
-int do_unqp(char *infile, char *outfile)
-{ return do_unmime(infile, outfile, decode_qp);
+int do_unqp(char *infile, char *outfile, int decodepart)
+{ return do_unmime(infile, outfile, decodepart, "quoted-printable", decode_qp);
 }
 
-int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
+int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int decode(FILE *, FILE *))
 {
   FILE *in, *out;
-  int  i, r;
+  int  i, r, npart;
 
   if (infile[0] == '\0')
     in = stdin;
@@ -102,6 +105,7 @@ int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
     return 3;
   }
   /* skip header */
+  npart=0;
   for (r=0; (i=fgetc(in))!=EOF; r=i)
     if (i=='\n' && r=='\n') break;
   if (i!=EOF && boundary[0])
@@ -118,13 +122,16 @@ int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
           strncmp(str+2, boundary, strlen(boundary))==0 &&
           str[strlen(boundary)+2]=='\n')
       { inparthdr=1;
+        npart++;
+        if (npart==decodepart)
+          inparthdr=2;
         continue;
       }
       if (!inparthdr) continue;
       if (strncmp(str, "Content-Transfer-Encoding:", 26))
         continue;
       for (p=str+26; isspace(*p); p++);
-      if (strnicmp(p, "base64", 6) && strnicmp(p, "quoted-printable", 16))
+      if (strnicmp(p, encoding, strlen(encoding)))
         continue;
       inparthdr=2;
     }
@@ -148,7 +155,7 @@ int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
     if (r==3) /* error write */
       logwrite('?', "Can't write file %s: %s\n", outfile, strerror(errno));
     else if (r<3)
-      logwrite('?', "Incorrect %s-coding\n", (decode==decode_b64 ? "base64" : "qp"));
+      logwrite('?', "Incorrect %s-coding\n", encoding);
   }
   return r;
 }
@@ -274,40 +281,102 @@ int str_unbase64(char *in, char *out)
 
 static int decode_qp(FILE *in, FILE *out)
 {
-  int c;
-  char s[3];
+  int c, lastc=0;
+  char s[4];
+  int bmatch=0;
+  char *pbound=NULL;
 
+  s[0]='\0';
   for (;;)
-  { c = fgetc(in);
-gotqpbyte:
-    if (c==EOF) return 0;
-    if (c=='\n')
-    { if (fputc('\r', out)==EOF) return 3;
-    } else if (c=='\r')
-    { if (fputc(c, out)==EOF) return 3;
-      c = fgetc(in);
-      if (c != '\n')
-        goto gotqpbyte;
+  { if (pbound)
+    { 
+      if (pbound+4-boundary==bmatch)
+      { bmatch=0;
+        pbound=NULL;
+        c=lastc;
+      }
+      else if (pbound==boundary-4)
+        c='\r';
+      else if (pbound==boundary-3)
+        c='\n';
+      else if (pbound==boundary-2)
+        c='-';
+      else if (pbound==boundary-1)
+        c='-';
+      else
+        c=*pbound;
+      if (pbound) pbound++;
+    } else
+    { c = fgetc(in);
+      if (c=='\r' && bmatch==0)
+      { bmatch=1;
+        continue;
+      }
+      if (c=='\n' && bmatch<=1)
+      { bmatch=2;
+        continue;
+      }
+      if (c=='-' && (bmatch==2 || bmatch==3))
+      { bmatch++;
+        continue;
+      }
+      if (bmatch && boundary[0]=='\0')
+      { lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
+      if (bmatch==strlen(boundary)+4)
+      { if (c=='\r' || c=='-') continue;
+        if (c=='\n') /* boundary matched! */
+          return 0;
+        lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
+      if (bmatch>=4)
+      { if (c==boundary[bmatch-4])
+        { bmatch++;
+        } else
+        { lastc=c;
+          pbound=boundary-4;
+        }
+        continue;
+      }
+      if (bmatch)
+      { lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
     }
+    if (s[0])
+    { if (isxdigit(c))
+      { if (s[1])
+        { if (!isxdigit(s[1])) return 2;
+          s[2]=c;
+          s[3]='\0';
+          if (fputc(strtol(s+1, NULL, 16), out)==EOF) return 3;
+          s[0]='\0';
+          continue;
+        }
+        s[1]=c;
+        s[2]='\0';
+        continue;
+      } else if (c=='\n' && s[1]=='\r')
+      { s[0]='\0';
+        continue;
+      } else if (c=='\r' && s[1]=='\0')
+      { s[1]=c;
+        s[2]='\0';
+        continue;
+      } else
+        return 2;
+    }
+    if (c==EOF) return 0;
     if (c!='=')
     { if (fputc(c, out)==EOF) return 3;
       continue;
     }
-    c=fgetc(in);
-    if (c==EOF) return 2;
-    if (c=='\r')
-    { c=fgetc(in);
-      if (c!='\n') return 2;
-      continue;
-    }
-    if (c=='\n') continue;
-    if (!isxdigit(c)) return 2;
     s[0]=c;
-    c=fgetc(in);
-    if (c==EOF) return 2;
-    if (!isxdigit(c)) return 2;
-    s[1]=c;
-    s[2]='\0';
-    if (fputc(strtol(s, NULL, 16), out)==EOF) return 3;
+    s[1]='\0';
   }
 }

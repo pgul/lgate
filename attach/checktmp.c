@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/07/20 21:22:52  gul
+ * multipart/mixed decode cleanup
+ *
  * Revision 2.3  2001/07/20 16:35:35  gul
  * folded Content-Disposition header held
  *
@@ -115,12 +118,12 @@ static void alltopostmast(struct listtype *last)
 
 void checktmp(void)
 { int r;
-  int curpart, parts, inparthdr;
+  int curpart, parts, inparthdr, npart=0, decodepart=0;
   int day, mon, year, hour, min, sec;
   char *p, *p1;
   struct stat statbuf;
 
-  /* 1. Строим list */
+  /* 1. Build list */
 
   flist=NULL;
   d=opendir(incomplete);
@@ -151,7 +154,7 @@ void checktmp(void)
     inname[0]='\0';
     password[0]='\0';
     boundary[0]='\0';
-    curpart=parts=0;
+    curpart=parts=npart=decodepart=0;
     while (fgets(str, sizeof(str), fin))
     {
 gotline:
@@ -171,12 +174,15 @@ gotline:
       if (strnicmp(str, "Content-Transfer-Encoding:", 26)==0)
       { for (p=str+26; (*p==' ') || (*p=='\t'); p++);
         debug(8, "CheckTmp: content-transfer-encoding is %s", p);
-        if (strnicmp(p, "base64", 6)==0)
-          enc=ENC_BASE64;
-        else if (strnicmp(p, "quoted-printable", 16)==0)
-          enc=ENC_QP;
-        else if (strnicmp(p, "x-pgp", 5)==0)
-          enc=ENC_PGP;
+        if (decodepart==0 || decodepart==npart)
+        {
+          if (strnicmp(p, "base64", 6)==0)
+            enc=ENC_BASE64;
+          else if (strnicmp(p, "quoted-printable", 16)==0)
+            enc=ENC_QP;
+          else if (strnicmp(p, "x-pgp", 5)==0)
+            enc=ENC_PGP;
+        }
       }
       if (strnicmp(str, "Content-Type:", 13)==0)
       { strcpy(cont_type, str);
@@ -528,6 +534,7 @@ errfputs:
             if (strncmp(str+2, boundary, strlen(boundary))==0 &&
                 str[strlen(boundary)+2]=='\n')
             { inparthdr=1;
+              npart++;
               continue;
             }
           if (inparthdr)
@@ -537,9 +544,13 @@ errfputs:
               { if ((str[0]==' ') || (str[0]=='\t'))
                   strncat(cont_type, str, sizeof(cont_type));
                 else
-                { getparam(cont_type, "name", inname, sizeof(inname));
-                  if (inname[0])
-                    strncpy(last->arcname, inname, sizeof(last->arcname));
+                { if (decodepart==0 || decodepart==npart || inname[0]==0)
+                  { getparam(cont_type, "name", inname, sizeof(inname));
+                    if (inname[0])
+                    { strncpy(last->arcname, inname, sizeof(last->arcname));
+                      decodepart=npart;
+                    }
+                  }
                   goto gotline1;
                 }
               }
@@ -547,12 +558,14 @@ errfputs:
             }
             else if (strnicmp(str, "Content-Transfer-Encoding:", 26)==0)
             { for (p=str+26; isspace(*p); p++);
-              if (strnicmp(p, "base64", 6)==0)
-                last->enc=ENC_BASE64;
-              else if (strnicmp(p, "quoted-printable", 16)==0)
-                last->enc=ENC_QP;
-              else if (strnicmp(p, "x-pgp", 5)==0)
-                last->enc=ENC_PGP;
+              if (decodepart==0 || decodepart==npart)
+              { if (strnicmp(p, "base64", 6)==0)
+                  last->enc=ENC_BASE64;
+                else if (strnicmp(p, "quoted-printable", 16)==0)
+                  last->enc=ENC_QP;
+                else if (strnicmp(p, "x-pgp", 5)==0)
+                  last->enc=ENC_PGP;
+              }
             }
             else if (strnicmp(str, "Content-Disposition:", 20)==0)
             { strcpy(sstr, str);
@@ -560,9 +573,13 @@ errfputs:
               { if ((str[0]==' ') || (str[0]=='\t'))
                   strncat(sstr, str, sizeof(sstr));
                 else
-                { getparam(sstr, "filename", inname, sizeof(inname));
-                  if (inname[0])
-                    strncpy(last->arcname, inname, sizeof(last->arcname));
+                { if (decodepart==0 || decodepart==npart || inname[0]==0)
+                  { getparam(sstr, "filename", inname, sizeof(inname));
+                    if (inname[0])
+                    { strncpy(last->arcname, inname, sizeof(last->arcname));
+                      decodepart=npart;
+                    }
+                  }
                   goto gotline1;
                 }
               }
@@ -659,11 +676,11 @@ errfputs:
     { /* internal */
       if (last->enc==ENC_BASE64)
       { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
-        r=do_unbase64(tmpname, tmp_arc);
+        r=do_unbase64(tmpname, tmp_arc, decodepart);
       }
       else if (last->enc==ENC_QP)
       { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
-        r=do_unqp(tmpname, tmp_arc);
+        r=do_unqp(tmpname, tmp_arc, decodepart);
       }
       else
       { debug(5, "CheckTmp: run internal uudecode %s to %s", tmpname, tmp_arc);
