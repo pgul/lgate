@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2002/09/22 10:58:36  gul
+ * several bugfixes
+ *
  * Revision 2.8  2002/03/21 15:27:50  gul
  * Possible buffer overflow fix, remove cmdline length limitation
  *
@@ -74,6 +77,10 @@
 #define RESERV    8192
 #define MINMSGLEN 4096
 
+#ifndef DEFINED_STRSIGNAL
+char *strsignal(int sig);
+#endif
+
 #define eoline() for (;strchr(str, '\n')==NULL;) if (hgets(str, sizeof(str), h)==0) break;
 static void reject(int reason, char *to);
 static int  memgets(char *s, int size);
@@ -122,7 +129,7 @@ static void *msgidregbuf1, *msgidregbuf2;
 
 static void xstrcpy(char **dest, int *dsize, char *src)
 { if (*dsize<=strlen(src))
-  { if (*dsize) free(dest);
+  { if (*dsize && *dest) free(*dest);
     *dest=strdup(src);
     *dsize=strlen(src)+1;
   }
@@ -142,6 +149,7 @@ static int xexpand(char **dest, int *dsize, int lsrc)
     { logwrite('!', "Not enough memory!\n"); 
       return -1;
     }
+    if (*dest==NULL) *new='\0';	/* for xstrcat() to NULL string */
     *dest=new;
     *dsize=newsize;
   }
@@ -158,6 +166,8 @@ static void xstrcat(char **dest, int *dsize, char *src)
   strcpy(*dest+ldest, src);
 }
 
+/* add str to *to */
+/* realloc *to if needed */
 static void tofield(char *str, char **to, int *sizeto)
 {
   char *p;
@@ -165,12 +175,15 @@ static void tofield(char *str, char **to, int *sizeto)
 
   getaddr(str);
   lenstr=strlen(str);
-  lento=strlen(*to);
+  lento=*to ? strlen(*to) : 0;
   if (lenstr+lento+2>*sizeto)
   { newsize=*sizeto;
     while (lenstr+lento+2>newsize)
       newsize+=128;
-    p=realloc(*to, newsize);
+    if (*to)
+      p=realloc(*to, newsize);
+    else
+      p=malloc(newsize);
     if (p==NULL)
     { logwrite('!', "Not enough memory for dest addr list, truncated\n");
       return;
@@ -183,8 +196,8 @@ static void tofield(char *str, char **to, int *sizeto)
     lento++;
   }
   strcpy(to[0]+lento, str);
-  str=strchr(to[0]+lento, '\n');
-  if (str) *str=0;
+  p=strchr(to[0]+lento, '\n');
+  if (p) *p=0;
   stripspc(to[0]+lento);
 }
 
@@ -1164,7 +1177,10 @@ plaintext:
       /* put address To */
       if ((strchr(msghdr.to, '@')==NULL) && to[0])
       { /* Put removed line "To:" */
-        for (p=to,p1=nagate; *p;)
+        if (sizenagate==0)
+          if ((nagate=malloc(sizenagate=128))==NULL)
+            logwrite('!', "Not enough memory\n");
+        for (p=to,p1=nagate; p1 && *p;)
         { if (isspace(*p) || (*p==','))
           { strcpy(p1, ", ");
             p1+=2;
@@ -1173,7 +1189,7 @@ plaintext:
             continue;
           }
           *p1++=*p++;
-          if (p1-nagate>=sizenagate-1)
+          if (p1-nagate+3>=sizenagate)
           { char *newnagate=realloc(nagate, sizenagate+=128);
             if (newnagate==NULL)
             { logwrite('!', "Not enough memory for dest addr list, truncated\n");
@@ -1309,7 +1325,8 @@ plaintext:
     if ((area!=-1) || (curgate==ngates))
     {
       /* external checking */
-      nagate[0]=nafig[0]=0;
+      if (nagate) nagate[0]=0;
+      if (nafig)  nafig[0]=0;
       rejreason=DEST;
       for (p=to,p1=NULL; p; p=p1)
       {
@@ -1466,21 +1483,22 @@ plaintext:
           continue;
         }
       } /* to-addresses loop */
-      debug(3, "Main: nagate='%s', nafig='%s'", nagate, nafig);
-      if (nafig[0] || nagate[0]==0)
-      { if (nafig[0]=='\0') rejreason=NOADDR;
-        reject(rejreason, nafig);
+      debug(3, "Main: nagate='%s', nafig='%s'",
+            nagate ? nagate : "", nafig ? nafig : "");
+      if ((nafig && nafig[0]) || nagate==NULL || nagate[0]==0)
+      { if (!nafig || nafig[0]=='\0') rejreason=NOADDR;
+        reject(rejreason, nafig ? nafig : "");
       }
       else
         rejreason=0;
-      if (nagate[0]==0)
+      if (!nagate || nagate[0]==0)
       { badmsg(strreason(rejreason, 2));
         if (memtxt) freebuf(memtxt);
         memtxt=NULL;
         return 0;
       }
-      to='\0';
-      tofield(nagate, &to, &sizeto);
+      *to='\0';
+      tofield(nagate ? nagate : "", &to, &sizeto);
     }
 
     set_table(myintsetname);
@@ -2410,7 +2428,7 @@ static void reject(int reason, char *to)
   debug(3, "Reject: message to %s, reason %d", to, reason);
   genlett(reason, msghdr.from, zone, net, node, point, 0);
   genlett(reason, master, mastzone, mastnet, mastnode, mastpoint, 1);
-  if (nagate[0])
+  if (nagate && nagate[0])
   { if (point)
       sprintf(str, "%u:%u/%u.%u", zone, net, node, point);
     else
