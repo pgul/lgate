@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/19 17:42:47  gul
+ * Translate comments and cosmetic changes
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -53,7 +56,7 @@
 #define RESERV    8192
 #define MINMSGLEN 4096
 
-#define eoline() for (;strchr(str,'\n')==NULL;) if (hgets(str,sizeof(str),h)==0) break;
+#define eoline() for (;strchr(str, '\n')==NULL;) if (hgets(str, sizeof(str), h)==0) break;
 
 static void reject(int reason, char *to);
 static int  memgets(char *s, int size);
@@ -64,8 +67,8 @@ char *header;
 int  retcode, frescan=0;
 char *myintsetname, *myextsetname;
 
-static char nagate[1024],nafig[1024],curto[1024];
-static int  rejreason,currcv;
+static char nagate[1024], nafig[1024], curto[1024];
+static int  rejreason, currcv;
 static char msgid[256], errstr[128];
 static char bound[80];
 static char tmpout[FNAME_MAX];
@@ -76,7 +79,7 @@ static char cmdline[0x8000]; /* long arg list */
 #endif
 static char rfcid;
 static char pref[MAXPREFIX+1];
-static char klname[2048],klopt[2048]; /* not less then sizeof(str)! */
+static char klname[2048], klopt[2048]; /* not less then sizeof(str)! */
 static char filelist[80];
 static unsigned long attr;
 static char *p, *p1;
@@ -113,7 +116,7 @@ static void tofield(char *str, char *to)
       return;
     *p=0;
     if (strlen(str)+strlen(to)+2<=sizeof(to))
-    { if (to[0]) strcat(to," ");
+    { if (to[0]) strcat(to, " ");
       strcat(to, str);
       p=strchr(to, '\n');
       if (p) *p=0;
@@ -137,7 +140,7 @@ int one_message(char *msgname)
     debug(9, "Main: found message in %s", msgname);
     curtime=time(NULL);
     curtm=localtime(&curtime);
-    /* смотрим, нужно ли посылать */
+    /* look, if we need to send this */
     topoint=0;
     tozone=myaka[0].zone;
     tonet=msghdr.dest_net;
@@ -212,8 +215,8 @@ int one_message(char *msgname)
         return 0;
     }
     if ((msghdr.attr & msgFILEATT) && (msghdr.attr & msgLOCAL) &&
-        (strchr(msghdr.to,'@')==NULL) && (!packed))
-    { /* если пустое - удаляем */
+        (strchr(msghdr.to, '@')==NULL) && (!packed))
+    { /* remove if empty */
       u1=0;
       cont=0;
       attr=msghdr.attr;
@@ -243,7 +246,7 @@ int one_message(char *msgname)
           u1=1;
       }
       if (topoint!=myaka[curaka].point)
-      { /* не существует ли именно этого aka? */
+      { /* is this aka exists? */
         for (i=0;i<naka;i++)
           if ((myaka[i].node==myaka[curaka].node) &&
               (myaka[i].net==myaka[curaka].net) &&
@@ -294,14 +297,14 @@ int one_message(char *msgname)
       }
     }
     debug(6, "Main: header looks like for me");
-    /* вроде, надо посылать */
-    /* проверяем на ограничения */
-    /* попутно пишем временный файл с текстом письма */
+    /* look like, we should sent this */
+    /* check for restrictions */
+    /* and write temp file with message text */
     if (curaka==naka)
       curaka=0;
     msgtz=0;
 
-    /* выясняем имена временных файлов */
+    /* get temp files names */
     mktempname(NAMEOUT, tmpout);
     msgbuflen=filelength(h);
 #if 1
@@ -349,15 +352,15 @@ lbadmsg:
         if (*p & 0x80) wascyr=1;
       switch (cont)
       {
-        case 3: /* в тело письма */
+        case 3: /* to message body */
                 if (strchr(str, '\n'))
                   cont=0;
                 goto plaintext;
-        case 2: /* в заголовок */
+        case 2: /* to header */
                 chkkludges;
                 strcpy(pheader[cheader-1]+strlen(pheader[cheader-1]), str);
                 pheader[cheader]+=strlen(str);
-        case 1: /* нафиг */
+        case 1: /* to /dev/null */
                 if (strchr(str, '\n'))
                   cont=0;
                 continue;
@@ -366,7 +369,7 @@ lbadmsg:
       if (strchr(str, '\n')==NULL)
         cont=1;
       if (str[0]==1)
-      { /* клуджик */
+      { /* kludge */
         debug(12, "Main: read kludge line: %s", str+1);
         chkkludges;
         firstline=0;
@@ -440,7 +443,7 @@ lbadmsg:
           continue;
         }
         if (stricmp(klname, "TID")==0)
-        { /* нафиг разные FECHO не нужны */
+        { /* remove FECHO etc. */
           continue;
         }
         if (stricmp(klname, "REPLYADDR")==0)
@@ -541,7 +544,7 @@ lbadmsg:
           if (*p==0)
             continue;
           if ((strlen(p)>8) || strpbrk(p, " \t\n\r,;<>()@!:\"?*"))
-            continue; /* не честный фидошный MSGID - ну его нафиг */
+            continue; /* not clear FTN MSGID - ignore */
           if (point)
             sprintf(msgid, "%s@p%u.f%u.n%u.z%u.", p, point, node, net, zone);
           else
@@ -566,7 +569,7 @@ lbadmsg:
         { if (cont) cont=2;
           sprintf(pheader[cheader], "X-FTN-PID: %s\n", klopt);
           nextline;
-          pheader[cheader]+=5; /* запас для X-Newsreader */
+          pheader[cheader]+=5; /* reserved for X-Newsreader */
           continue;
         }
         if (stricmp(klname, "VIA")==0)
@@ -611,11 +614,11 @@ lbadmsg:
               sprintf(pheader[cheader], "References: <%s@f%u.n%u.z%u.",
                       p, u3, u2, u1);
           }
-          /* пытаемся определить домен */
+          /* try to get domain */
           if ((atoi(klopt)>0) && (atoi(klopt)<7))
             strcat(pheader[cheader], "fidonet.org");
           else
-          { /* ищем у себя соответствующую зону */
+          { /* find corresponding zone */
             for (i=0; i<naka; i++)
               if (myaka[i].zone==atoi(str+8)) break;
             if (i==naka) i=0;
@@ -635,7 +638,7 @@ lbadmsg:
         if (stricmp(klname, "PATH")==0)
         {
           p=klopt;
-          i=-1; /* сетка */
+          i=-1; /* network */
           for (;*p;)
           { if (npath==MAX_PATH)
               break;
@@ -729,7 +732,7 @@ lbadmsg:
           case 3: p="Incorrect user headline";
                   goto lbadmsg;
         }
-        /* остальные клуджи просто переносим в header */
+        /* rest of kludges simple move to header */
         if (cont) cont=2;
         for (p=klname; *p; p++)
         { if (*p & 0x80) break;
@@ -816,7 +819,7 @@ lbadmsg:
         }
         continue;
       }
-      if (strncmp(str, " * Origin: ",11)==0 && !cont)
+      if (strncmp(str, " * Origin: ", 11)==0 && !cont)
         origin_pos=imemtxt;
       else if (strcmp(str, "\n"))
       { origin_pos=-1;
@@ -825,7 +828,7 @@ lbadmsg:
           tear_pos=imemtxt;
         }
         else
-          tear_pos=-1; /* это была не tearline */
+          tear_pos=-1; /* it was not tearline */
       }
       if ((origin_pos!=-1) && strcmp(str, "\n"))
         origin_len=strlen(str);
@@ -868,10 +871,10 @@ lbadmsg:
         if (cont) cont=1; /* don't put to header */
         continue;
       }
-      /* поля заголовка в начале письма - в заголовок */
+      /* copy header fields from message start to rfc-header */
       else if (fromtext)
       { if ((fromtext==2) && ((str[0]==' ') || (str[0]=='\t')))
-        { /* добавляем к предыдущему полю header-а */
+        { /* add to previous header field */
           if (cont) cont=2;
           chkkludges;
           strcat(pheader[cheader-1], str);
@@ -903,8 +906,8 @@ lbadmsg:
         }
       }
       fromtext=0;
-      /* все, остальное просто переписываем */
-      /* и считаем размер и среднюю длину слов */
+      /* all done, the rest simple copy */
+      /* and count size and appropriate word length */
 plaintext:
       if (cont) cont=3;
       while (imemtxt+strlen(str)>=msgbuflen)
@@ -931,7 +934,7 @@ plaintext:
       }
     }
     if (h==-1)
-    { /* шось трапилось */
+    { /* shit happens */
       if (memtxt) freebuf(memtxt);
       memtxt=NULL;
       return 0;
@@ -945,7 +948,7 @@ plaintext:
         str[origin_len] = '\0';
         p=strrchr(str+11, '(');
         if (p)
-        { for (;*(++p);)
+        { while (*(++p))
             if (isdigit(*p))
               break;
           if (*p)
@@ -959,7 +962,7 @@ plaintext:
       }
       if (((area==-1) && (hideorigin & 1)) ||
           ((area!=-1) && (hideorigin & 2)))
-      { /* Пишем X-FTN-Origin в header и не пишем его в текст */
+      { /* Put X-FTN-Origin to header and don't put it to body */
         chkkludges;
         strcpy(pheader[cheader], "X-FTN-");
         frombuf(pheader[cheader]+6, memtxt, origin_pos+3, origin_len);
@@ -978,11 +981,12 @@ plaintext:
       }
     }
     if (tear_pos!=-1)
-    { /* таки это действительно была tearline */
+    { /* it was real tearline tearline */
       if (((area==-1) && (hidetear & 1)) ||
           ((area!=-1) && (hidetear & 2)))
-      { /* Пишем X-FTN-Tearline в header и удаляем из memtxt */
-        chkkludges; /* ну, вместо tearline проверим, влезет ли origin ;) */
+      { /* Put X-FTN-Tearline to header and remove from memtxt */
+        /* ! FIX ME ! */
+        chkkludges; /* check if we have space for origin instead of tearline ;) */
         strcpy(pheader[cheader], "X-FTN-Tearline: ");
         frombuf(pheader[cheader]+16, memtxt, tear_pos+3, tear_len);
         pheader[cheader][tear_len+13]='\0';
@@ -1007,13 +1011,13 @@ plaintext:
 #endif
     curgate=ngates;
     if (area==-1)
-    { /* еще раз адрес назначения с самого начала */
-      /* не существует ли именно этого aka? */
-      /* если pktdest - не наше aka, то смотрим только роутинг */
+    { /* once again process dest address from start */
+      /* is this aka exists? */
+      /* if pktdest is not our aka, check only routing */
       curaka=0;
       if (ourpkt)
-      { /* родной пакет */
-        for (i=0;i<naka;i++)
+      { /* our packet */
+        for (i=0; i<naka; i++)
           if ((myaka[i].node==tonode) &&
               (myaka[i].net==tonet) &&
               (myaka[i].point==topoint) &&
@@ -1023,7 +1027,7 @@ plaintext:
         i=naka;
       curaka=i;
       if (curaka==naka)
-      { /* просматриваем весь роутинг */
+      { /* process all routing */
         for (i=0; i<ngates; i++)
         {
           if ((ourpkt && (gates[i].pktfor.zone==0)) ||
@@ -1049,12 +1053,12 @@ plaintext:
           memtxt=NULL;
           return 0;
         }
-        /* исполняем aka matching */
+        /* do aka matching */
         for (curaka=0; curaka<naka; curaka++)
           if (myaka[curaka].zone==tozone)
             break;
         if ((curaka==naka) && (tozone>0) && (tozone<7))
-        /* ищем фидошное aka */
+        /* find fidonet aka */
           for (curaka=0; curaka<naka; curaka++)
             if ((myaka[curaka].zone>0) && (myaka[curaka].zone<7))
               break;
@@ -1075,9 +1079,9 @@ plaintext:
         return 0;
       }
       debug(4, "Main: message to another gate");
-      /* пишем адрес To */
+      /* put address To */
       if ((strchr(msghdr.to, '@')==NULL) && to[0])
-      { /* Пишем съеденную строку "To:" */
+      { /* Put removed line "To:" */
         for (p=to,p1=nagate; *p;)
         { if (isspace(*p) || (*p==','))
           { strcpy(p1, ", ");
@@ -1106,17 +1110,17 @@ plaintext:
       }
       fido2rfc(to, msghdr.to, tozone, tonet, tonode, topoint, gates[curgate].domain);
       debug(3, "Main: address is '%s'", to);
-      /* отрабатываем chdomain */
-      for (i=0;i<ncdomain;i++)
+      /* process chdomain */
+      for (i=0; i<ncdomain; i++)
       { if (strlen(to)<=strlen(cdomain[i].fido))
           continue;
         p=to+strlen(to)-strlen(cdomain[i].fido);
         if (stricmp(p, cdomain[i].fido))
           continue;
         strcpy(p, cdomain[i].relcom);
-        /* появилось/пропало '@' */
+        /* add/remove '@' */
         if (strchr(cdomain[i].relcom, '@'))
-        { p=strrchr(to,'@');
+        { p=strrchr(to, '@');
           for(p1=to; p1!=p; p1=strchr(p1, '@'))
             *p1='%';
         }
@@ -1135,7 +1139,7 @@ plaintext:
 
     if ((area==-1) && (curgate<ngates) && (attr & msgFILEATT))
     { if (packed)
-      { logwrite('?',"Can't send fileattach to another gate, use attuucp\n");
+      { logwrite('?', "Can't send fileattach to another gate, use attuucp\n");
         badmsg("FileAttach to another gate");
       }
       if (memtxt) freebuf(memtxt);
@@ -1153,14 +1157,14 @@ plaintext:
       return 0;
     }
 
-    /* находим upaka */
+    /* find upaka */
     if (area==-1)
     { if (tozone!=uplink[upaka].zone)
-      { for (i=0;i<nuplink;i++)
+      { for (i=0; i<nuplink; i++)
           if (uplink[i].zone==tozone)
             break;
         if (i==nuplink)
-        { for (i=0;i<nuplink;i++)
+        { for (i=0; i<nuplink; i++)
             if (packed && (tozone>0) && (tozone<7) &&
                (uplink[upaka].zone>0) && (uplink[upaka].zone<7))
               break;
@@ -1172,7 +1176,7 @@ plaintext:
     debug(4, "Main: uplink aka is %d:%d/%d.%d",
           uplink[upaka].zone, uplink[upaka].net, uplink[upaka].node, uplink[upaka].point);
 
-    /* заменяем адрес по полю chaddr= */
+    /* change address by chaddr= */
     achanged=0;
     if (curgate==ngates)
       for (i=0; i<ncaddr; i++)
@@ -1186,7 +1190,7 @@ plaintext:
         }
       }
     if (achanged==0)
-    { /* заменяем адрес */
+    { /* change address */
       strcpy(from, msghdr.from);
       if (strchr(from, '@')==NULL)
         fido2rfc(from, msghdr.from, zone, net, node, point, myaka[curaka].domain);
@@ -1209,12 +1213,12 @@ plaintext:
       {
         if (p1) *p1=' ';
         while (isspace(*p) || (*p==',')) p++;
-        p1=strpbrk(p," ,");
+        p1=strpbrk(p, " ,");
         if (p1) *p1='\0';
-        strcpy(curto,p);
+        strcpy(curto, p);
         debug(5, "To-address is '%s'", curto);
         if ((curto[0]=='<') && (curto[strlen(curto)-1]=='>'))
-        { strcpy(curto,curto+1);
+        { strcpy(curto, curto+1);
           curto[strlen(curto)-1]='\0';
         }
         if (curto[0]==0)
@@ -1227,7 +1231,7 @@ plaintext:
           if (p) p1=strchr(p, '>');
 #if 0
           if (p==NULL || p1==NULL)
-          { if (nafig[0]) strcat(nafig," ");
+          { if (nafig[0]) strcat(nafig, " ");
             strcat(nafig, curto);
             continue;
           }
@@ -1245,7 +1249,7 @@ plaintext:
         debug(6, "Main: run external checker");
         r=extcheck(curto, &area);
         debug(6, "Main: external checker retcode %d", r);
-        if (r==0) /* не адрес, а недоразумение */
+        if (r==0) /* it's not address */
         { if (area==-1)
           { if (point)
               logwrite('?', "Message from %s %u:%u/%u.%u to %s moved to /dev/null\n",
@@ -1265,7 +1269,7 @@ plaintext:
           continue;
         }
         if ((r==1) && (area==-1)) /* reject */
-        { if (nafig[0]) strcat(nafig," ");
+        { if (nafig[0]) strcat(nafig, " ");
           rejreason=EXTERNAL;
           strcat(nafig, curto);
           continue;
@@ -1275,14 +1279,14 @@ plaintext:
           strcat(nagate, curto);
           continue;
         }
-        /* остались нормальные */
+        /* the rest is normal */
         if (area==-1)
         {
           debug(8, "Main: check twit, size, dest_addr, binary");
           if (strchr(curto, '@') == NULL)
             continue;
-          /* смотрим еще раз, надо ли посылать */
-          /* сначала на privel address, потом на twit, size, dest addr и binary */
+          /* check again if we should send it */
+          /* at first for privel address, then for twit, size, dest addr and binary */
           for (i=0; i<npaddr; i++)
           { if (checkmask(zone, net, node, point, paddr[i].zone, paddr[i].net,
                 paddr[i].node, paddr[i].point))
@@ -1298,7 +1302,7 @@ plaintext:
                   break;
             }
             if (i<ntwit)
-            { /* проверяем !twit */
+            { /* check twit */
               for (i=0; i<nnotwit; i++)
               { if (checkmask(zone, net, node, point, notwit[i].zone, notwit[i].net,
                     notwit[i].node, notwit[i].point))
@@ -1326,9 +1330,9 @@ plaintext:
                 continue;
               }
             }
-            /* проверяем список адресов to */
+            /* check 'to' addresses list */
             r=checkaddr(curto);
-            if (r==0) /* не адрес, а недоразумение */
+            if (r==0) /* not address */
               continue;
             if (r==1) /* reject */
             { rejreason=DEST;
@@ -1341,7 +1345,7 @@ plaintext:
               strcat(nagate, curto);
               continue;
             }
-            /* остались нормальные */
+            /* the rest is ok */
             /* size */
             if ((maxsize!=0) && (txtsize>maxsize*1024l))
             { rejreason=SIZE;
@@ -1391,7 +1395,7 @@ plaintext:
     set_table(myintsetname);
 
     if (area!=-1)
-    { /* дописываем себя в path */
+    { /* add own address to path */
       debug(8, "Main: add to Path");
       curaka=group[echoes[area].group].aka;
       if ((npath!=MAX_PATH) && (myaka[curaka].point==0))
@@ -1406,7 +1410,7 @@ plaintext:
           (group[echoes[area].group].type==G_DIR))
       { sprintf(pheader[cheader], "Path: %s!", local);
         p=pheader[cheader]+strlen(pheader[cheader]);
-        for (i=0;i<npath;i++)
+        for (i=0; i<npath; i++)
         {
           if ((p+ZAPAS>header+MAXHEADER) ||
               (cheader>=MAXFIELDS))
@@ -1428,16 +1432,16 @@ plaintext:
       }
     }
     if (area!=-1)
-    { strcpy(str,echoes[area].fido);
+    { strcpy(str, echoes[area].fido);
       if (point)
         logwrite('-', "Area: %s, From %s %u:%u/%u.%u\tto %s\n",
-                 str, msghdr.from, zone,net, node,point, to);
+                 str, msghdr.from, zone, net, node, point, to);
       else
         logwrite('-', "Area: %s, From %s %u:%u/%u\tto %s\n",
                  str, msghdr.from, zone, net, node, to);
     }
-    /* Пишем header */
-    /* дописываем свое received */
+    /* Put header */
+    /* Add own received */
     if (area==-1)
     { if (!packed)
       {
@@ -1450,7 +1454,7 @@ plaintext:
         }
         sprintf(pheader[cheader], "Received: by ");
         p=pheader[cheader]+strlen(pheader[cheader]);
-        sprintf(p,"%u:%u/%u", uplink[upaka].zone,
+        sprintf(p, "%u:%u/%u", uplink[upaka].zone,
                 uplink[upaka].net, uplink[upaka].node);
         p+=strlen(p);
         if (uplink[upaka].point)
@@ -1468,7 +1472,7 @@ plaintext:
         nextline;
       }
       if ((curgate==ngates) || gatevia)
-      { /* при двойном гейтовании и gatevia=no via гейта не ставим */
+      { /* dont put own via if gatevia=no via and double-gating */
         if ((pheader[cheader]+128>header+MAXHEADER) ||
             (cheader>=MAXFIELDS))
         { logwrite('?', "Too many kludges, messages moved to badmail!\n");
@@ -1496,12 +1500,12 @@ plaintext:
         nextline;
       }
     }
-    /* считаем received */
+    /* count received */
     for (currcv=i=0; i<cheader; i++)
       if (strncmp(pheader[i], "Received: ", 10)==0)
         currcv++;
     debug(8, "Main: received counter is %d", currcv);
-    /* Тасуем поля заголовка, received в начало и в обратном порядке */
+    /* Sort header fields, 'received' to start and in reverse order */
     if ((curgate==ngates) && rcv2via && ((maxrcv==0) || (currcv<=maxrcv)))
     { for (i=0; i<cheader; i++)
       { if (strncmp(pheader[i], "Received: ", 10)==0)
@@ -1514,15 +1518,15 @@ plaintext:
           pheader[i][0]='\0'; /* todo(?): convert to "Received: from ... */
       }
     }
-    else /* route-to/to-ifmail или !rcv2via или перебор max-received */
-      /* заменяем "received: by" на "x-ftn-via:" */
+    else /* route-to/to-ifmail or !rcv2via or all more then max-received */
+      /* change "received: by" to "x-ftn-via:" */
       for (i=0; i<cheader; i++)
         if (strncmp(pheader[i], "Received: by ", 13)==0)
         { strcpy(pheader[i], "X-FTN-Via: ");
           strcpy(pheader[i]+11, pheader[i]+13);
         }
     if ((curgate==ngates) && (!savehdr))
-    { /* убираем все x-ftn нафиг */
+    { /* remove all x-ftn */
       for (i=0; i<cheader; i++)
       { if (strnicmp(pheader[i], "X-FTN-", 6))
           continue;
@@ -1537,7 +1541,7 @@ plaintext:
         pheader[i][0]=0;
       }
     }
-    /* если !to-ifmail заменяем X-FTN-PID на X-Mailer */
+    /* change X-FTN-PID to X-Mailer if not to-ifmail */
     if ((curgate==ngates) || (gates[curgate].yes!=2) || (area!=-1))
     { for (i=0; i<cheader; i++)
       { if (strnicmp(pheader[i], "X-FTN-PID:", 10)==0)
@@ -1560,15 +1564,15 @@ plaintext:
         if (strnicmp(pheader[i], "X-FTN-REPLY:", 12)==0)
           if (strnicmp(pheader[i+1], "References:", 11)==0)
             pheader[i+1][0]=0;
-    /* убираем x-ftn-*, если chaddr и мыло */
+    /* remove x-ftn-*, if chaddr and netmail */
     if ((area==-1) && (achanged))
       for (i=0; i<cheader; i++)
         if (strnicmp(pheader[i], "X-FTN-", 6)==0)
           pheader[i][0]=0;
-    /* убираем Content-Length и Lines (свои поставим) */
+    /* remove Content-Length and Lines (we will put own) */
 #ifdef __MSDOS__
-    /* под msdos свои ставим только при cnews */
-    /* так что в остальных случаях не убираем */
+    /* under msdos put own only with cnews */
+    /* so don't remove in other cases */
     if (area!=-1 &&
         (group[echoes[area].group].type==G_DIR ||
          group[echoes[area].group].type==G_CNEWS))
@@ -1577,7 +1581,7 @@ plaintext:
         if ((strnicmp(pheader[i], "Content-Length:", 15)==0) ||
             (strnicmp(pheader[i], "Lines:", 6)==0))
           pheader[i][0]=0;
-    /* убираем все пустые поля */
+    /* remove all empty fields */
     for (i=0; i<cheader; i++)
       if (pheader[i][0]==0)
       { for (k=i; k<cheader-1; k++)
@@ -1588,7 +1592,7 @@ plaintext:
 
     if ((area==-1) || (group[echoes[area].group].type==G_FEED))
       rclose();
-    /* Пишем заголовок в файл */
+    /* Put header to file */
     for (i=strlen(msghdr.from)-1; i>=0; i--)
     { if ((msghdr.from[i]!=' ') &&
           (msghdr.from[i]!='\t') &&
@@ -1599,7 +1603,7 @@ plaintext:
     debug(3, "Main: put header to virt file");
     fout=virt_fopen(tmpout, "wb+");
     if (fout==NULL)
-    { logwrite('?',"Can't open temporary file %s!\n", tmpout);
+    { logwrite('?', "Can't open temporary file %s!\n", tmpout);
       retcode|=RET_ERR;
       badmsg("Can't open temp file");
       if (memtxt) freebuf(memtxt);
@@ -1614,13 +1618,13 @@ plaintext:
       if ((uupcver!=SENDMAIL) && (uupcver!=KENDRA))
       { virt_fputs("rmail\n--\n", fout); /* end of switches */
         if (area!=-1)
-          virt_fprintf(fout,"%s\n", group[echoes[area].group].newsserv);
+          virt_fprintf(fout, "%s\n", group[echoes[area].group].newsserv);
         else
         { p=to;
           while (p)
           { while (*p==' ') p++;
             if (*p==0) break;
-            p1=strchr(p,' ');
+            p1=strchr(p, ' ');
             if (p1) *p1=0;
             /* aliases */
             for (i=0; i<nalias; i++)
@@ -1723,10 +1727,10 @@ plaintext:
       }
     }
     /* 2nd pass */
-    /* дописываем To:, From:, Subject:, Date: */
-    /* Message-Id: (если не было), Return-Receipt-To: (если надо) */
+    /* Add To:, From:, Subject:, Date: */
+    /* Message-Id: (if no), Return-Receipt-To: (if needed) */
     if ((achanged ||
-        isfield("From: ")) && (curgate==ngates) && (strchr(msghdr.from,'@')==NULL))
+        isfield("From: ")) && (curgate==ngates) && (strchr(msghdr.from, '@')==NULL))
     { if (point)
       { if (virt_fprintf(fout, "X-FTN-Addr: %u:%u/%u.%u\n", zone, net, node, point)==EOF)
           goto errwrite1;
@@ -1749,31 +1753,31 @@ plaintext:
       if (p!=str) free(p);
     }
     if (!isfield("Subject: "))
-    { strcpy(str,"Subject: ");
+    { strcpy(str, "Subject: ");
       if (attr & msgFILEATT)
-      { /* удаляем пути к файлам */
-        char c,*p1,*p2;
+      { /* remove pathes to files */
+        char c, *p1, *p2;
         for (p=msghdr.subj; *p; p=p1)
         { while (isspace(*p) && (p-msghdr.subj<sizeof(msghdr.subj))) p++;
           if (*p=='\0') break;
           if (p-msghdr.subj>=sizeof(msghdr.subj))
             break;
-          for (p1=p;*p1 && !isspace(*p1);p1++)
+          for (p1=p; *p1 && !isspace(*p1); p1++)
             if (p1-msghdr.subj>=sizeof(msghdr.subj))
               break;
           c=*p1;
           *p1='\0';
-          p2=strrchr(p,'/');
+          p2=strrchr(p, '/');
           if (p2) p=p2+1;
 #ifndef UNIX
-          p2=strrchr(p,'\\');
+          p2=strrchr(p, '\\');
           if (p2) p=p2+1;
-          p2=strrchr(p,':');
+          p2=strrchr(p, ':');
           if (p2) p=p2+1;
 #endif
           if (str[strlen(str)-1]!=' ')
-            strcat(str," ");
-          strcat(str,p);
+            strcat(str, " ");
+          strcat(str, p);
           *p1=c;
         }
       }
@@ -1781,7 +1785,7 @@ plaintext:
       { strncpy(str+9, msghdr.subj, sizeof(msghdr.subj));
         str[sizeof(msghdr.subj)+9]=0;
       }
-      for (p=str+9;*p && isspace(*p);p++);
+      for (p=str+9 ;*p && isspace(*p); p++);
       if ((*p==0) && (area!=-1))
         strcat(str, NOSUBJ);
       if (str[9])
@@ -1797,12 +1801,12 @@ plaintext:
       }
     }
     if (attr & (msgRETRECREQ | msgCFM))
-/* Если to-ifmail, то все равно будем писать Return-Receipt-To
+/* Put Return-Receipt-To even if to-ifmail
       if ((curgate==ngates) || (gates[curgate].yes!=2))
 */
         if (!isfield("Return-Receipt-To: "))
         { char *p1;
-          sprintf(str,"Return-Receipt-To: %s\n", from);
+          sprintf(str, "Return-Receipt-To: %s\n", from);
           p=qphdr(str);
           for (p1=p; *p1; p1++)
             if (*p1 & 0x80) wascyr=1;
@@ -1874,7 +1878,7 @@ plaintext:
       debug(11, "Main: set message-id <%s>", msgid);
     }
     if (!isfield("Date: "))
-    { /* пытаемся прочитать Date */
+    { /* try to parse Date */
       dateftn2rfc(msghdr.date, str, msgtz ? msgtz : tz);
       if (virt_fprintf(fout, "Date: %s\n", str)==EOF)
         goto errwrite1;
@@ -1895,8 +1899,8 @@ plaintext:
             goto errwrite1;
     if (area!=-1)
     { int2ext(to);
-      if (stricmp(to,"all") && stricmp(to,"uucp"))
-      { char * p;
+      if (stricmp(to, "all") && stricmp(to, "uucp"))
+      { char *p;
         if (xcomment)
         { char *p1;
           sprintf(str, "X-Comment-To: %s\n", to);
@@ -1930,7 +1934,7 @@ plaintext:
       *p1++='\0';
       strcpy(to, nagate);
       p=NULL;
-      /* если togate и через user%domain1@domain2 - обрезаем domain2 */
+      /* if togate and user%domain1@domain2 - strip domain2 */
       if (curgate!=ngates)
         if (strchr(gates[curgate].domain, '@'))
         { p=strchr(to, '@');
@@ -1982,11 +1986,11 @@ plaintext:
         goto errwrite1;
     if (virt_putc('\n', fout)==EOF)
       goto errwrite1;
-    /* Все, осталось только сам текст переписать */
+    /* Done, now we need only copy message body */
     debug(6, "Main: put message body");
     begline=1;
     p=str;
-    imemtxt=0; /* сколько всего - хранится в txtsize */
+    imemtxt=0; /* total size saved in txtsize */
     while (memgets(p, sizeof(str)-(unsigned)(p-str))/* || (begline==0)*/)
     { int2ext(p);
 #ifdef __OS2__
@@ -1994,7 +1998,7 @@ plaintext:
         str[0]=' '; /* pipe! '\x1a' is EOF :-( */
 #endif
       if (curgate!=ngates)
-      { /* не разбиваем строки */
+      { /* do not split lines */
         if (virt_fputs(str, fout)==EOF)
           goto errwrite1;
         continue;
@@ -2273,7 +2277,7 @@ errwrite2:
     }
     if ((area==-1) && (packed==0))
     { if (rejreason)
-        /* часть адресов отлупилась */
+        /* some addresses rejected */
         badmsg("Bad dest address");
       else if ((attr & msgKILLSENT) || (attr & msgFORWD) ||
           !(attr & msgLOCAL))
@@ -2283,7 +2287,7 @@ errwrite2:
         unlink(msgname);
       }
       else
-      { /* просто ставим аттрибут msgSENT */
+      { /* only set attribute msgSENT */
         lseek(h, (unsigned)(&(msghdr.attr))-(unsigned)(&msghdr), SEEK_SET);
         { msghdr.attr|=msgSENT;
           write(h, &(msghdr.attr), sizeof(msghdr.attr));
@@ -2313,8 +2317,8 @@ static void reject(int reason, char *to)
       sprintf(str, "%u:%u/%u.%u", zone, net, node, point);
     else
       sprintf(str, "%u:%u/%u", zone, net, node);
-    logwrite('!',"From %s %s to %s failed (%s)\n",
-             msghdr.from, str, to, strreason(reason,2));
+    logwrite('!', "From %s %s to %s failed (%s)\n",
+             msghdr.from, str, to, strreason(reason, 2));
   }
   frescan=1;
   debug(7, "Reject: done");
