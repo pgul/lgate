@@ -27,8 +27,13 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(snprintf ftruncate pipe filelength basename)
-AC_CHECK_FUNCS(strcasecmp stricmp strncasecmp strnicmp)
-AC_CHECK_FUNCS(strsignal mktime sopen strupr utime flock)
+AC_CHECK_FUNCS(strcasecmp stricmp strncasecmp strnicmp strsignal)
+AC_MSG_CHECKING(for strsignal in string.h)
+AC_TRY_COMPILE([#include <string.h>
+int strsignal(int);], [], AC_MSG_RESULT(no),
+AC_DEFINE(DEFINED_STRSIGNAL) AC_MSG_RESULT(yes),
+AC_MSG_RESULT(cross-compiling. No assumptions made))
+AC_CHECK_FUNCS(mktime sopen strupr utime flock)
 AC_CHECK_FUNCS(getuid geteuid getgid getegid getpwuid setuid)
 case $ac_cv_func_flock in
  no) AC_CHECK_FUNCS(lockf) ;;
@@ -102,14 +107,27 @@ esac
 dnl -------------------------------------------------------------------------
 dnl Check for sys_signame
 
-AC_MSG_CHECKING(for sys_signame)
-AC_TRY_COMPILE([
+case $ac_cv_func_strsignal in
+  no)
+    AC_MSG_CHECKING(for sys_signame)
+    AC_TRY_COMPILE([
 #include <signal.h>
-], [
-  return sys_signame[1];
-], AC_DEFINE(HAVE_SYS_SIGNAME) AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no)
-)
+#include <string.h>
+         ], [return sys_signame[0];],
+       AC_DEFINE(HAVE_SYS_SIGNAME) AC_MSG_RESULT(yes),
+       AC_MSG_RESULT(no); signame=no)
+    case x$signame in
+      xno)
+        AC_MSG_CHECKING(for sys_siglist)
+        AC_TRY_COMPILE([
+#include <signal.h>
+#include <string.h>
+         ], [return sys_siglist[0];],
+         AC_DEFINE(HAVE_SYS_SIGNAME) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
+         ;;
+    esac
+    ;;
+esac
 
 dnl -------------------------------------------------------------------------
 dnl Check for char **environ
