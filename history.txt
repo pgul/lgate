@@ -1226,4 +1226,8 @@ ver 7.02 -
   ! rel2fido: "Memory allocation failed" fixed.
   ! fido2rel: fileattach gating fixed.
   + attuucp: декодирование аттачей в quoted-printable.
-
+  ! fido2rel: Gw-To, Gw-Cc, Gw-Bcc (FSP-1007) не работали.
+  * fido2rel: убрано ограничение на длину списка адресов назначения.
+  * fido2rel: при /extmsgid имя конференции теперь пишется в начале
+    message-id, т.е. <newsgroup|123@domain>, а не <123@domain|newsgroup>,
+    как раньше.
