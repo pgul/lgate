@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2002/01/07 08:52:35  gul
+ * Bugfix for yesterday changes
+ *
  * Revision 2.5  2002/01/06 21:17:41  gul
  * %hdr in perl hook
  *
@@ -2558,6 +2561,7 @@ chk_fork:
       hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
     }
     if (hstr) free(hstr);
+    hrewind();
 
     ENTER;
     SAVETMPS;
