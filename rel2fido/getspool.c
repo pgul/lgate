@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 18:41:11  gul
+ * fix compiler warnings
+ *
  * Revision 2.1  2001/01/24 01:59:18  gul
  * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
  *
@@ -411,7 +414,7 @@ badc1:strcpy(str, spool_dir);
       else
       { if (conf)
         { closeout();
-          packnews=begdel=0;
+          begdel=packnews=0;
         }
         r=rmailfunc(addrlist);
       }
@@ -420,7 +423,7 @@ badc1:strcpy(str, spool_dir);
     { if (nonet) continue;
       if (conf) 
       { closeout();
-        packnews=begdel=0;
+        begdel=packnews=0;
       }
       r=rbmail();
     }
@@ -429,7 +432,7 @@ badc1:strcpy(str, spool_dir);
     { if (nonet) continue;
       if (conf) 
       { closeout();
-        packnews=begdel=0;
+        begdel=packnews=0;
       }
       r=rcbmail();
     }
@@ -437,7 +440,7 @@ badc1:strcpy(str, spool_dir);
     { if (noecho) continue;
       if (!conf)
       { closeout();
-        packnews=begdel=0;
+        begdel=packnews=0;
       }
       r=rnews();
     }
