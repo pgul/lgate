@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/23 11:19:48  gul
+ * translate comments adn cosmetic changes
+ *
  * Revision 2.0  2001/01/10 20:42:24  gul
  * We are under CVS for now
  *
@@ -68,8 +71,8 @@ char cmdline[CMDLINELEN];
 void *regbufmsg = NULL;
 #endif
 static int  maxmsg;
-static int  tomaster,tpl;
-static char * p;
+static int  tomaster, tpl;
+static char *p;
 static long l;
 
 static int tpl_cont;
@@ -80,14 +83,14 @@ static void reset_badaddr(void)
   hrewind();
   tpl_cont=0;
   if (bypipe) return;
-  /* пропускаем строку From_ */
+  /* ignore From_ line */
   do
     r=hgets();
-  while (r && (strpbrk(str,"\n\r")==NULL));
+  while (r && (strpbrk(str, "\n\r")==NULL));
 }
 
-static int textline(char * s,unsigned size)
-{ char * p;
+static int textline(char *s, unsigned size)
+{ char *p;
   int  r;
 
   r=hgets();
@@ -97,7 +100,7 @@ static int textline(char * s,unsigned size)
       *p='\n';
   if (s!=str)
     strncpy(s, str, size);
-  if (tpl_cont==2) return r; /* уже сам текст пошел */
+  if (tpl_cont==2) return r; /* it's message body */
   if (strchr(str, '\n')==NULL)
   { tpl_cont=1;
     return r;
@@ -215,7 +218,7 @@ void reject(int reason)
     }
     gettextline=voidgets;
     reset_text=voidfunc;
-    /* выясняем переменные */
+    /* set variables for template */
     setvars(reason);
     if (tomaster)
       setvar("ToMaster", "yes");
@@ -331,7 +334,7 @@ void reject(int reason)
           fprintf(fout, "Content-Type: multipart/report; boundary=\"%s\"\n\n",
                   bound);
           fprintf(fout, "This is a Mime-encapsulated message\n");
-          fprintf(fout, "\n--%s\n",bound);
+          fprintf(fout, "\n--%s\n", bound);
           fprintf(fout, "Content-Type: text/plain; charset=us-ascii\n");
         }
         fprintf(fout, "\nUnrecoverable error:\n");
@@ -482,7 +485,7 @@ int getletter(void)
       return 1;
     }
     gotstr[0]=0;
-    /* addr заполнен в params() */
+    /* addr filled in params() */
     debug(3, "GetLetter: single message from stdin");
     if (msg_unmime(-1))
     { badnews();
@@ -528,7 +531,7 @@ int getletter(void)
       unlink(named);
     }
 #ifndef UNIX
-    else if (((uupcver==KENDRA) && strcmp(gotstr,UUPCEXTSEP CRLF)) ||
+    else if (((uupcver==KENDRA) && strcmp(gotstr, UUPCEXTSEP CRLF)) ||
              ((uupcver!=KENDRA) && (isbeg(gotstr)!=0)))
     { flock(fileno(stdin), LOCK_UN);
       dup2(savein, fileno(stdin));
@@ -541,7 +544,7 @@ int getletter(void)
     { r=1;
       while (
 #ifndef UNIX
-             (uupcver==KENDRA) ? (strcmp(gotstr,UUPCEXTSEP CRLF)==0) :
+             (uupcver==KENDRA) ? (strcmp(gotstr, UUPCEXTSEP CRLF)==0) :
 #endif
              (isbeg(gotstr)==0))
       { debug(4, "GetLetter: get from mailbox");
@@ -691,7 +694,7 @@ int rnews(void)
   }
   gotstr[i]=0;
   if (strncmp(gotstr, "#!", 2))
-  { /* начинается не с '#!' */
+  { /* starts not from '#!' */
     debug(4, "rnews: single message");
     return msg_unmime(-1);
   }
@@ -725,7 +728,7 @@ int rnews(void)
   { logwrite('?', "Unknown command in cnews-packet!\n");
     return 1;
   }
-  /* убираем "unbatch" */
+  /* remove "unbatch" */
   debug(4, "Rnews: compressed batch processing");
 #if defined(__OS2__)
   { int in[2], out, pid, tid;
@@ -751,7 +754,7 @@ in[1]->gzip->(out)->rnews()
     r=rnews();
 #if 0
     if (r)
-      DosKillProcess(DKP_PROCESSTREE, pid); /* чтобы не ругался "broken pipe" */
+      DosKillProcess(DKP_PROCESSTREE, pid); /* avoid "broken pipe" error */
 #endif
     dup2(in[0], fileno(stdin));
     close(in[0]);
@@ -902,17 +905,17 @@ char *renamepkt(char *tempname)
 }
 
 int nextmsg(void)
-{ /* не должно трогать str из-за holdmsg()! */
+{ /* save str for holdmsg()! */
   DIR  *dd;
   struct dirent *df;
   int  r;
   struct packet pkt;
   char *realname;
 
-  /* находим самый большой номер msg из netmail */
+  /* find max msg number in netmail */
   if ((!conf) && (!packmail))
   { if (fout)
-    { /* обычно fout закрывает getletter, но если идет разбиение... */
+    { /* usually fout closed by getletter, but if msg splitting... */
       fwrite("", 1, 1, fout);
       fclose(fout);
       fout=NULL;
@@ -952,7 +955,7 @@ int nextmsg(void)
       }
       fout=fdopen(h, "wb");
       if (fout==NULL)
-      { logwrite('?' ,"Can't fdopen %s: %s!\n", msgname, strerror(errno));
+      { logwrite('?', "Can't fdopen %s: %s!\n", msgname, strerror(errno));
         flock(h, LOCK_UN);
         close(h);
         unlink(msgname);
@@ -1048,7 +1051,7 @@ void writehdr(void)
   msghdr_byteorder(&msg);
   if ((!conf) && (!packmail))
   {
-    fwrite(&msg,sizeof(msg),1,fout);
+    fwrite(&msg, sizeof(msg), 1, fout);
     return;
   }
   /* pkt */
