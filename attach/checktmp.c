@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2004/07/20 18:29:25  gul
+ * \r\n -> \n
+ *
  * Revision 2.6  2001/07/26 12:48:55  gul
  * 7bit- and 8bit-encoded attaches bugfix
  *

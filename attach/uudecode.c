@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2004/07/20 18:29:26  gul
+ * \r\n -> \n
+ *
  * Revision 2.6  2004/05/28 13:25:28  gul
  * Accept confirmations without reason
  *

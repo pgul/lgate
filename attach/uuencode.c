@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2004/07/20 18:29:26  gul
+ * \r\n -> \n
+ *
  * Revision 2.2  2004/06/08 11:00:30  gul
  * Workaround reassemble message/partial bug in some MUA
  *
@@ -222,7 +225,7 @@ static void putcommon(FILE *h, int curpart, char *passwd, long confirm)
     fprintf(h, "X-Confirm-To: %s@%s\n", user, local);
 }
 
-static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
+static FILE *puthdr(int parts, int curpart, char *passwd, long confirm, char thebat)
 { FILE *h;
   char *fname;
 
@@ -286,7 +289,7 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
   if (parts>1)
     fprintf(h, "Content-Type: message/partial; id=\"%s\";\n"
                "              number=%d; total=%d\n", part_id, curpart, parts);
-  if ((parts>1) && (curpart==1))
+  if ((parts>1) && (curpart==1) && !thebat)
   { fprintf(h, "\n");
     fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
             time(NULL), (unsigned)getpid(), seqf++, local);
@@ -475,7 +478,7 @@ void flushsend(void)
     debug(8, "FlushSend: %s for %s", nearfname, addrlist);
     fcrc32=filecrc32(nearfname);
     tosend[i].attr|=msgSENT;
-    fsize=(statbuf.st_size*4)/3; /* size after uuencode (not excect) */
+    fsize=(statbuf.st_size*4)/3; /* size after uuencode (not exact) */
     cursize=hosts[tosend[i].host].size;
     sign=hosts[tosend[i].host].pgpsig;
     if (pgpsig)
@@ -484,19 +487,24 @@ void flushsend(void)
     }
     if ((tosend[i].attr & (msgTFS | msgKFS))==0 &&
         hosts[tosend[i].host].passwd[0]=='\0' &&
-        hosts[tosend[i].host].confirm==0)
+        hosts[tosend[i].host].confirm==0 &&
+        hosts[tosend[i].host].enc!=ENC_PGP)
       for (j=i+1; j<nsend; j++)
       { if (tosend[j].attr & msgSENT) continue;
+#ifdef UNIX
+        if (strcmp(tosend[i].filename,tosend[j].filename)) continue;
+#else
         if (stricmp(tosend[i].filename,tosend[j].filename)) continue;
+#endif
         if (hosts[tosend[j].host].passwd[0]) continue;
         if (hosts[tosend[j].host].confirm) continue;
         if (strlen(addrlist)+strlen(hosts[tosend[j].host].host)+2>=sizeof(addrlist))
           continue;
         if (hosts[tosend[i].host].enc!=hosts[tosend[j].host].enc)
           continue;
-        if (hosts[tosend[i].host].enc==ENC_PGP)
-          continue;
         hsize=hosts[tosend[j].host].size;
+        if (hosts[tosend[i].host].thebat!=hosts[tosend[j].host].thebat)
+          hsize=0; /* uncompartible split process as no split */
         if (((cursize==0) && (hsize==0)) || /* do not split */
                (cursize*1024l>=fsize) ||      /* can split, but do not */
                (hsize*1024l>=fsize) ||        /* correct any case */
@@ -538,7 +546,7 @@ void flushsend(void)
     }
     /* put message header */
     if (cursize==0)
-    { h=puthdr(0, 0, hosts[tosend[i].host].passwd, hosts[tosend[i].host].confirm);
+    { h=puthdr(0, 0, hosts[tosend[i].host].passwd, hosts[tosend[i].host].confirm, hosts[tosend[i].host].thebat);
       if (h==NULL)
       { logwrite('?', "%s (%lu bytes) not sent to %s. :-(\n",
                  nearfname, statbuf.st_size, addrlist);
@@ -603,7 +611,7 @@ uuefail:
         addslash(sstr);
         strcat(sstr, hosts[tosend[i].host].confirm ? TMPSENT : TMPUUE);
         mktempname(sstr, tmpname);
-        h=puthdr(parts, curpart, hosts[tosend[i].host].passwd, hosts[tosend[i].host].confirm);
+        h=puthdr(parts, curpart, hosts[tosend[i].host].passwd, hosts[tosend[i].host].confirm, hosts[tosend[i].host].thebat);
         if (h==NULL)
         { fclose(hin);
           unlink(tmpuue);

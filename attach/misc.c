@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2004/07/20 18:29:26  gul
+ * \r\n -> \n
+ *
  * Revision 2.2  2001/01/25 13:14:09  gul
  * quiet var moved to logwrite.c
  *

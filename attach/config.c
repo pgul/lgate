@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 18:29:25  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2002/11/17 20:55:26  gul
  * New option "tid" in gate.cfg
  *
@@ -394,6 +397,7 @@ int config(void)
       hosts[nhosts].enc=ENC_UUE;
       hosts[nhosts].size=0;
       hosts[nhosts].pgpsig=0;
+      hosts[nhosts].thebat=0;
       hosts[nhosts].confirm=0;
       hosts[nhosts].passwd[0]='\0';
       p1=strpbrk(p, " \t");
@@ -416,6 +420,15 @@ int config(void)
           { if (p1==NULL)
               goto invcommand;
             hosts[nhosts].pgpsig=1;
+          }
+        }
+        else if (strnicmp(p, "/thebat", 7)==0)
+        { if (strnicmp(str, "route-files", 11)==0)
+            logwrite('!', "Incorrect \"/thebat\" switch in route-files command ignored\n");
+          else
+          { if (p1==NULL)
+              goto invcommand;
+            hosts[nhosts].thebat=1;
           }
         }
         else if (strnicmp(p, "/confirm", 8)==0)
