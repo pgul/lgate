@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.14  2002/09/30 14:30:51  gul
+ * bugfix
+ *
  * Revision 2.13  2002/09/30 13:44:39  gul
  * bugfix
  *
@@ -698,10 +701,10 @@ lbadmsg:
             }
             else
             { p=strrchr(klopt, ' ');
-              if (p==NULL || *(p-1)!='>')
+              if (p==NULL || *(--p)!='>')
                 continue;
-              memcpy(p1, klopt+1, p-klopt-1);
-              p1[p-klopt-1]='\0';
+              memcpy(p1, klopt+1, p-klopt);
+              p1[p-klopt]='\0';
             }
             /* is newsgroup exists twice in the msgid? */
             if (area!=-1 && group[echoes[area].group].extmsgid)
