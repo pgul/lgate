@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/01/15 18:48:37  gul
+ * Remove nkillattfiles=32 limitation
+ *
  * Revision 2.4  2001/01/26 14:33:39  gul
  * Version changed to 7.02 in *.h
  *
@@ -287,7 +290,7 @@ extern int  writereason, bangfrom, env_chaddr, fromtop;
 extern struct attfiletype
        { char *name;
          unsigned long attr;
-       } killattfiles[NKILLATTFILES];
+       } *killattfiles;
 extern int  nkillattfiles;
 extern struct ftnchrs_type {
          struct ftnchrs_type *next;

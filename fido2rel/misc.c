@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2002/01/15 18:48:37  gul
+ * Remove nkillattfiles=32 limitation
+ *
  * Revision 2.9  2001/07/09 11:14:59  gul
  * "File attached to nobody" warning fixed
  *
@@ -1161,7 +1164,26 @@ int moveatt(char *fname, unsigned long attr)
   strcpy(str, tmpdir);
   strcat(str, p1);
   if (stricmp(str, fname)==0)
-  { if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
+  {
+#if 1
+    static int maxkillattfiles=0;
+    void *newptr;
+    if (nkillattfiles==maxkillattfiles)
+    { if (maxkillattfiles)
+      { newptr=realloc(killattfiles,sizeof(*killattfiles)*(maxkillattfiles*=2));
+        if (newptr==NULL) free(killattfiles);
+        killattfiles=newptr;
+      }
+      else
+        killattfiles=malloc(sizeof(*killattfiles)*(maxkillattfiles=32));
+      if (killattfiles == NULL)
+      { logwrite('!', "Not enough memory (%ld bytes needed)\n", sizeof(*killattfiles)*maxkillattfiles);
+        return 0;
+      }
+    }
+#else
+    if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
+#endif
     { killattfiles[nkillattfiles].name=strdup(p1);
       killattfiles[nkillattfiles++].attr=attr;
     }

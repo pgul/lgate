@@ -12,6 +12,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2002/01/15 18:48:37  gul
+ * Remove nkillattfiles=32 limitation
+ *
  * Revision 2.2  2001/01/19 17:55:17  gul
  * Cosmetic changes
  *
@@ -48,7 +51,7 @@
 void term(int signo);
 
 extern int  retcode, frescan;
-struct attfiletype killattfiles[NKILLATTFILES];
+struct attfiletype *killattfiles;
 int nkillattfiles=0;
 
 static void killtmpatt(void)
