@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2001/04/20 06:07:25  gul
+ * minor bugfix
+ *
  * Revision 2.6  2001/04/19 10:10:44  gul
  * sometimes coredump on large messages with long lines
  *
@@ -1342,8 +1345,14 @@ errlet:
         }
         break;
       }
-      if (ibufpart+strlen(str)+1>(maxpart ? 1024l*maxpart : fsize)+RESPART)
+      if (ibufpart+strlen(str)+sizeof(tearline)+sizeof(origin)+1>
+          (maxpart ? 1024l*maxpart : fsize)+RESPART)
+      { if (cont)
+        { bufcopy(bufpart, ibufpart, "\r", 2);
+          ibufpart++;
+        }
         break;
+      }
       if (cont) continue;
       if (area!=-1)
       {
