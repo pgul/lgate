@@ -2,32 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.11  2002/03/21 13:43:26  gul
- * Remove dest addr list length limitation
- *
- * Revision 2.10  2002/01/15 18:48:37  gul
- * Remove nkillattfiles=32 limitation
- *
- * Revision 2.9  2001/07/09 11:14:59  gul
- * "File attached to nobody" warning fixed
- *
- * Revision 2.8  2001/01/25 18:41:38  gul
- * myname moved to debug.c
- *
- * Revision 2.7  2001/01/25 13:14:09  gul
- * quiet var moved to logwrite.c
- *
- * Revision 2.6  2001/01/25 12:40:07  gul
- * Minor changes for fix compile warnings
- *
- * Revision 2.5  2001/01/21 10:20:00  gul
- * new cfg param 'fromtop'
- *
- * Revision 2.4  2001/01/20 01:33:40  gul
- * Added some debug messages
- *
- * Revision 2.3  2001/01/19 17:43:06  gul
- * Cosmetic changes
+ * Revision 2.2.2.1  2002/10/02 09:37:16  gul
+ * fix compiler errors
  *
  * Revision 2.2  2001/01/16 19:10:14  gul
  * cosmetic changes (translate comments etc.)
@@ -142,25 +118,25 @@ int  xcomment;
 struct caddrtype *caddr;
 struct addrtype *paddr, *twit, *notwit, *attfrom;
 struct message msghdr;
-char *to, *gw_to, from[128];
-int  sizeto, sizegw_to;
+char to[128], gw_to[128], from[128];
 char pktpwd[9];
 char packed;
 char str[2048];
 char *buffer;
 unsigned ibuf;
 unsigned long offs_beg;
-int  h;
+int h;
 char msgname[FNAME_MAX]="";
 struct packet pkthdr;
 struct lrd_type lastread, new_lrd;
-int  lrd;
+int  lrd, quiet;
 char *pheader[MAXFIELDS];
 int  cheader;
 ftnaddress pktdest;
 int  ourpkt;
 int  hidetear, hideorigin;
-int  fsp1004, bangfrom, env_chaddr, fromtop;
+int  fsp1004, bangfrom, env_chaddr;
+char *myname;
 int  writereason=0;
 char inb_dir[FNAME_MAX], charsetsdir[FNAME_MAX], charsetalias[FNAME_MAX];
 #ifdef __MSDOS__
@@ -195,6 +171,7 @@ int params(int argc, char *argv[])
   inconfig=1;
   tossbad=nonet=noecho=help=nglobal=fake=0;
   lrd=LRD_CREATE;
+  quiet=0;
   myname=argv[0];
 #ifdef __OS2__
   { PPIB pib;
@@ -320,9 +297,9 @@ int params(int argc, char *argv[])
   { /* "/?" only */
     return 1;
   }
-#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
+#if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
   if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
-  { puts("You do not allow to use -c switch");
+  { puts("You do not allow to use -c switch\n");
     return RET_ERR;
   }
 #endif
@@ -477,7 +454,7 @@ void retoss(void)
   pkthdr.ProdCodeH=MAJVER;
   pkthdr.ProdCodeL=MINVER;
 #endif
-  strncpy(pkthdr.password, pktpwd, 8);
+  strncpy(pkthdr.password,pktpwd,8);
   pkthdr.OrigZone=uplink[0].zone;
   pkthdr.DestZone=myaka[0].zone;
   pkthdr.AuxNet=0;
@@ -648,7 +625,7 @@ void findlet(void)
           close(h);
           continue;
         }
-        debug(4, "FindLet: message %s size %lu bytes for us", msgname, filelength(h));
+        debug(4, "FindLet: message %s for us", msgname);
         msghdr_byteorder(&msghdr);
         if (one_message(msgname))
         { closedir(d);
@@ -695,7 +672,7 @@ void findlet(void)
     debug(11, "FindLet: no more messages");
 }
 
-static void one_pkt(char *msgname)
+static void one_pkt(char * msgname)
 { int i, r=0;
 
   debug(11, "One_Pkt: found %s", msgname);
@@ -724,7 +701,7 @@ static void one_pkt(char *msgname)
   debug(15, "One_Pkt: pkt passwd='%s'", str);
   debug(17, "One_Pkt: AuxNet=%d, OrigZone_=%d, DestZone_=%d",
         pkthdr.AuxNet, pkthdr.OrigZone_, pkthdr.DestZone_);
-  for (i=0; i<naka; i++)
+  for (i=0;i<naka;i++)
     if ((pkthdr.DestNode==myaka[i].node) &&
         (pkthdr.DestNet==myaka[i].net) &&
         (pkthdr.DestZone==myaka[i].zone) &&
@@ -732,7 +709,7 @@ static void one_pkt(char *msgname)
       break;
   if (i==naka)
   {
-    for (i=0; i<ngates; i++)
+    for (i=0;i<ngates;i++)
       if ((pkthdr.DestNode==gates[i].pktfor.node) &&
           (pkthdr.DestNet==gates[i].pktfor.net) &&
           (pkthdr.DestZone==gates[i].pktfor.zone) &&
@@ -784,7 +761,7 @@ static void one_pkt(char *msgname)
   }
   strncpy(str, pkthdr.password, 8);
   str[8]=0;
-  if (stricmp(str, pktpwd) && pktpwd[0])
+  if (stricmp(str,pktpwd) && pktpwd[0])
   { logwrite('!', "Incorrect password \"%s\" in %s: expected \"%s\"\n",
              str, msgname, pktpwd);
     badpkt();
@@ -798,7 +775,6 @@ static void one_pkt(char *msgname)
 #ifdef __OS2__
   DosSetFHState(h, OPEN_FLAGS_NOINHERIT); /* else we cannot delete because of uux running */
 #endif
-  debug(4, "%s size %lu bytes for us", msgname, filelength(h));
 
   for (; h!=-1;)
   { /* is there another messages? */
@@ -1168,26 +1144,7 @@ int moveatt(char *fname, unsigned long attr)
   strcpy(str, tmpdir);
   strcat(str, p1);
   if (stricmp(str, fname)==0)
-  {
-#if 1
-    static int maxkillattfiles=0;
-    void *newptr;
-    if (nkillattfiles==maxkillattfiles)
-    { if (maxkillattfiles)
-      { newptr=realloc(killattfiles,sizeof(*killattfiles)*(maxkillattfiles*=2));
-        if (newptr==NULL) free(killattfiles);
-        killattfiles=newptr;
-      }
-      else
-        killattfiles=malloc(sizeof(*killattfiles)*(maxkillattfiles=32));
-      if (killattfiles == NULL)
-      { logwrite('!', "Not enough memory (%ld bytes needed)\n", sizeof(*killattfiles)*maxkillattfiles);
-        return 0;
-      }
-    }
-#else
-    if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-#endif
+  { if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
     { killattfiles[nkillattfiles].name=strdup(p1);
       killattfiles[nkillattfiles++].attr=attr;
     }
@@ -1214,7 +1171,6 @@ int moveatt(char *fname, unsigned long attr)
   }
   p=strrchr(str, PATHSEP);
   if (p==NULL) p=str;
-  else p++;
   if (attr & msgKFS)
     if (rename(fname, str)==0)
     { debug(5, "moveatt: %s renamed to %s", fname, str);
@@ -1539,7 +1495,7 @@ lboxes:
       { sprintf(loname, "%s%c%c%c%c%c%c%c%c.%c%c", tboxes,
                 dhex(fpktaddr.zone/32),  dhex(fpktaddr.zone%32),
                 dhex(fpktaddr.net/1024), dhex((fpktaddr.net/32)%32), dhex(fpktaddr.net%32),
-                dhex(fpktaddr.node/1024), dhex((fpktaddr.node/32)%32), dhex(fpktaddr.node%32),
+                dhex(fpktaddr.node/1024),dhex((fpktaddr.node/32)%32),dhex(fpktaddr.node%32),
                 dhex(fpktaddr.point/32), dhex(fpktaddr.point%32));
         checkbox(loname);
         if (killed) break;
@@ -1737,7 +1693,7 @@ int extcheck(char *addr, int *area)
   */
   int  i;
   char *p, *p1;
-  static char tmpaddr[80], conflist[1024];
+  static char tmpaddr[80],conflist[1024];
   int  newarea;
   static char extstr[256];
 #if defined(__OS2__)
@@ -1761,9 +1717,9 @@ int extcheck(char *addr, int *area)
 
   /* external check */
   for (i=0; i<nchecker; i++)
-  { if (stricmp(checker[i].mask, "any")==0) break;
-    if ((*area!=-1) && (stricmp(checker[i].mask, "echo")==0)) break;
-    if ((*area==-1) && (cmpaddr(addr, checker[i].mask)==0)) break;
+  { if (stricmp(checker[i].mask,"any")==0) break;
+    if ((*area!=-1) && (stricmp(checker[i].mask,"echo")==0)) break;
+    if ((*area==-1) && (cmpaddr(addr,checker[i].mask)==0)) break;
   }
   if ((i==nchecker) || (checker[i].cmdline[0]=='\0'))
     return 3;

@@ -2,11 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.3  2001/08/08 08:01:22  gul
- * "\r\n" -> "\n" conversion under unix
- *
- * Revision 2.2  2001/01/25 12:40:07  gul
- * Minor changes for fix compile warnings
+ * Revision 2.1.2.1  2002/10/02 09:36:09  gul
+ * fix compiler errors
  *
  * Revision 2.1  2001/01/15 03:37:10  gul
  * Stack overflow in dos-version fixed.
@@ -169,7 +166,7 @@ static int _templateline(char *str, unsigned size)
   int saveout;
 #endif
 
-  /* read line, substitute [var] */
+  /* читаем строку, подменяем [var] */
   p=str;
   incomment=wascont=0;
   for (;;)
@@ -191,11 +188,8 @@ static int _templateline(char *str, unsigned size)
     }
     if (pvar==NULL && fpipe==NULL)
       c=getc(htpl);
-#ifdef UNIX
-    if (c=='\r') continue; /* should be backslash-r if needed */
-#endif
     if ((c==';') && (pvar==NULL) && (fpipe==NULL) && inconfig)
-    { /* comment */
+    { /* комментарий */
       incomment=1;
       wascont=0;
       continue;
@@ -251,7 +245,7 @@ static int _templateline(char *str, unsigned size)
               fprintf(stderr, "Unexpected %s in config %s line %d!\n",
                       (c==EOF) ? "EOF" : "EOL", curtplfname, curline);
             else
-              logwrite('!', "Unexpected %s in template %s, line %d!\n",
+              logwrite('!',"Unexpected %s in template %s, line %d!\n",
                        (c==EOF) ? "EOF" : "EOL", curtplfname, curline);
           }
           *p=0;
@@ -361,7 +355,7 @@ static int _templateline(char *str, unsigned size)
     curvar=NULL;
 #endif
     for (;;)
-    { /* find matched var */
+    { /* ищем подходящую var */
       c=getc(htpl);
       if (c==EOF)
       { if (tplout)
@@ -530,12 +524,12 @@ void setvar(char *var, char *value)
 { int i, j;
 
   debug(15, "setvar('%s', '%s')", var, value ? value : "NULL");
-  /* find var */
+  /* ищем var */
   for (i=0; i<nsets; i++)
     if (stricmp(set[i].var, var)==0)
       break;
   if (i<nsets)
-  { /* remove var */
+  { /* удаляем переменную */
     free(set[i].var);
     for (j=i; j<nsets-1; j++)
     { set[j].var=set[j+1].var;
@@ -573,12 +567,12 @@ void setglobal(char *var, char *value)
 { int i, j;
 
   debug(15, "setglobal('%s', '%s')", var, value ? value : "NULL");
-  /* find var */
+  /* ищем var */
   for (i=0; i<nglobal; i++)
     if (stricmp(global[i].var, var)==0)
       break;
   if (i<nglobal)
-  { /* remove var */
+  { /* удаляем переменную */
     free(global[i].var);
     for (j=i; j<nglobal-1; j++)
     { global[j].var=global[j+1].var;
@@ -607,7 +601,7 @@ void setglobal(char *var, char *value)
   }
   strcpy(global[nglobal].var, var);
   global[nglobal].value=global[nglobal].var+strlen(var)+1;
-  strcpy(global[nglobal].value, value);
+  strcpy(global[nglobal].value,value);
   nglobal++;
   return;
 }
@@ -664,7 +658,7 @@ int templateline(char *str, unsigned size)
         }
         continue;
       }
-      /* line still continue, cont not changed */
+      /* опять продолжение, cont не меняется */
       if (cont==2)
         continue;
       if (condition)
@@ -688,7 +682,7 @@ int templateline(char *str, unsigned size)
       else
         continue;
     }
-    /* control line (started from '@') */
+    /* управляющая строка (начинается с '@') */
     strcpy(str, p);
     while ((str[1]==' ') || (str[1]=='\t'))
       strcpy(str+1, str+2);
@@ -809,7 +803,7 @@ int templateline(char *str, unsigned size)
                  curtplfname, curline);
       continue;
     }
-    /* now only set leaves */
+    /* остались только set */
     if (strnicmp(str+1, "set ", 4)==0)
     {
       p=strchr(str, '\n');
@@ -824,11 +818,11 @@ int templateline(char *str, unsigned size)
       *p1=0;
       for (p=p1-1; isspace(*p); *p--='\0');
       for (p=str+5; isspace(*p); p++);
-      /* now p - var name */
+      /* теперь p - имя var */
       for (p1++; isspace(*p1); p1++);
       if (*p1=='\"')
-      { /* remove quote chars */
-        for (p2=p1; (p2=strchr(p2+1, '\"'))!=NULL;)
+      { /* убираем кавычки */
+        for (p2=p1; (p2=strchr(p2+1,'\"'))!=NULL;)
           if (*(p2-1)!='\\')
             *p2--='\0';
         p1++;
@@ -890,7 +884,7 @@ void setpath(char *fname)
     }
   }
 #endif
-#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
+#if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
   if (getuid()==geteuid() && getgid()==getegid())
 #endif
   { 
@@ -925,7 +919,7 @@ void setpath(char *fname)
 
   if (strpbrk(fname, "\\:"))
     return;
-  /* if path not specified - to start dir */
+  /* если путь не указан - в каталог запуска */
   p=strrchr(myname, '\\');
   if (p==NULL) p=myname;
   else p++;
@@ -967,7 +961,7 @@ int configline(char *str, unsigned size)
           return r;
         continue;
       }
-      /* line still continue, cont not changed */
+      /* опять продолжение, cont не меняется */
       if (cont==2)
         continue;
       if (condition)
@@ -1104,10 +1098,10 @@ int configline(char *str, unsigned size)
         *p1=0;
         for (p=p1-1; isspace(*p); *p--='\0');
         for (p=str+4; isspace(*p); p++);
-        /* now p - var name */
+        /* теперь p - имя var */
         for (p1++; isspace(*p1); p1++);
         if (*p1=='\"')
-        { /* remove quote chars */
+        { /* убираем кавычки */
           for (p2=p1; (p2=strchr(p2+1, '\"'))!=NULL;)
             if (*(p2-1)!='\\')
               *p2--='\0';
