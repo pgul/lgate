@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.15  2004/03/27 12:21:47  gul
+ * Get only realname from X-Comment-To:
+ *
  * Revision 2.14  2002/11/17 21:00:26  gul
  * Do not put TID to generated .msg
  *
@@ -146,6 +149,7 @@ static unsigned long ibufpart;
 static int  clmn;
 static char fromstr[MAXADDR], replyaddr[MAXADDR];
 static char lastorigin[120];
+static char s1[MAXADDR], s2[SSIZE];
 
 static void freebufpart(void)
 { if (bufpart)
@@ -1012,7 +1016,7 @@ todevnull:
 #endif
          (strnicmp(pheader[i], "\x01RFC-X-Comment-To: ", 19)==0)) && conf)
       if (strcmp(msghdr.to, "All")==0)
-      { 
+      {
         debug(15, "One_Message: make 'To:' from 'Comment-To:'");
         if ((p=strchr(pheader[i], '@'))!=NULL)
         { if ((sscanf(p+1, "f%hu.n%hu.z%hu", &j, &j, &j)==3) ||
@@ -1032,6 +1036,8 @@ todevnull:
         p=strchr(pheader[i], '\r');
         if (p) *p=0;
         for (p=strchr(pheader[i], ' '); isspace(*p); p++);
+        parseaddr(p, s1, s2, -1);
+        p = *s2 ? s2 : s1;
         strncpy(msghdr.to, p, sizeof(msghdr.to)-1);
         msghdr.to[sizeof(msghdr.to)-1]='\0';
         pheader[i][0]=0;
@@ -1134,7 +1140,6 @@ todevnull:
 
   if (area==-1)
   { /* if "To:" contains nothing interesting - remove it */
-    static char s1[MAXADDR], s2[SSIZE];
     for (i=0; i<cheader; i++)
       if (strnicmp(pheader[i], "To: ", 4)==0)
       { parseaddr(pheader[i]+4, s1, s2, 0);
