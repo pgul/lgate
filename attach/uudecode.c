@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2004/05/28 13:25:28  gul
+ * Accept confirmations without reason
+ *
  * Revision 2.5  2001/07/26 12:48:55  gul
  * 7bit- and 8bit-encoded attaches bugfix
  *
@@ -633,11 +636,11 @@ errconfirm:
   if (*p!='<') goto errconfirm;
   msgid=p;
   while (*p && !isspace(*p) && *p!='>') p++;
-  if (*p!='>' || !isspace(p[1]))
+  if (*p!='>' || (p[1] && !isspace(p[1])))
     goto errconfirm;
   p++;
-  *p++='\0';
-  while (isspace(*p)) p++;
+  if (*p) *p++='\0';
+  while (*p && isspace(*p)) p++;
   reason="";
   if (*p=='(')
   { reason=p-1;
