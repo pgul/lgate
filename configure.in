@@ -7,6 +7,9 @@ AC_PROG_AWK
 AC_PROG_CC
 AC_PATH_PROG(PERL, perl, perl)
 
+CFLAGS="-Wall -Wno-char-subscripts -funsigned-char"
+LDFLAGS="-Wall"
+
 dnl Checks for header files.
 AC_CHECK_HEADERS(unistd.h io.h string.h alloca.h dirent.h malloc.h)
 case $ac_cv_header_malloc_h in
@@ -23,8 +26,8 @@ AC_CHECK_HEADERS(sys/time.h libgen.h pwd.h)
 dnl Checks for typedefs, structures, and compiler characteristics.
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(snprintf ftruncate strnicmp strncasecmp pipe)
-AC_CHECK_FUNCS(strcasecmp stricmp strncasecmp strnicmp filelength basename)
+AC_CHECK_FUNCS(snprintf ftruncate pipe filelength basename)
+AC_CHECK_FUNCS(strcasecmp stricmp strncasecmp strnicmp)
 AC_CHECK_FUNCS(strsignal mktime sopen strupr utime flock)
 AC_CHECK_FUNCS(getuid geteuid getgid getegid getpwuid setuid)
 case $ac_cv_func_flock in
@@ -169,13 +172,16 @@ AC_ARG_WITH(perl,
             [  --with-perl             perl hooks support (default no)],
             do_perl=yes, do_perl=no)
 
+AC_SUBST(PERLCFLAGS)
+AC_SUBST(PERLLIBS)
+
 case x$do_perl in
   xyes)
    AC_MSG_CHECKING(for libperl)
    PERLDIR=`$PERL -MConfig -e 'print $Config{archlib}' 2>/dev/null`
-   if PERLCOPT=`$PERL -MExtUtils::Embed -e ccopts 2>/dev/null`
+   if PERLCFLAGS=`$PERL -MExtUtils::Embed -e ccopts 2>/dev/null`
    then
-     PERLLOPT=`$PERL -MExtUtils::Embed -e ldopts`
+     PERLLIBS=`$PERL -MExtUtils::Embed -e ldopts`
      case x$PERLDIR in
        x)
          AC_MSG_RESULT(yes)
@@ -190,12 +196,12 @@ case x$do_perl in
          AC_MSG_RESULT(no)
          ;;
        *)
-         PERLCOPT="-I$PERLDIR/CORE -Dbool=char -DHAS_BOOL"
-         PERLLOPT="$PERLDIR/auto/DynaLoader/DynaLoader.a -L$PERLDIR/CORE -lperl -ldl -lcrypt -lm"
-         AC_CHECK_LIB(dl, main, PERLLOPT="$PERLLOPT -ldl")
-         AC_CHECK_LIB(crypt, main, PERLLOPT="$PERLLOPT -lcrypt")
-         AC_CHECK_LIB(m, main, PERLLOPT="$PERLLOPT -lm")
-         AC_CHECK_LIB(socket, main, PERLLOPT="$PERLLOPT -lsocket")
+         PERLCFLAGS="-I$PERLDIR/CORE -Dbool=char -DHAS_BOOL"
+         PERLLIBS="$PERLDIR/auto/DynaLoader/DynaLoader.a -L$PERLDIR/CORE -lperl -ldl -lcrypt -lm"
+         AC_CHECK_LIB(dl, main, PERLLIBS="$PERLLIBS -ldl")
+         AC_CHECK_LIB(crypt, main, PERLLIBS="$PERLLIBS -lcrypt")
+         AC_CHECK_LIB(m, main, PERLLIBS="$PERLLIBS -lm")
+         AC_CHECK_LIB(socket, main, PERLLIBS="$PERLLIBS -lsocket")
          AC_MSG_RESULT($PERLDIR)
          ;;
      esac
@@ -203,15 +209,15 @@ case x$do_perl in
    ;;
 esac
 
-case x$PERLCOPT in
+case x$PERLCFLAGS in
   x)
     ;;
   *)
     AC_MSG_CHECKING(for working libperl)
     OLD_LIBS=$LIBS
     OLD_CFLAGS=$CFLAGS
-    LIBS="$LIBS $PERLLOPT"
-    CFLAGS="$CFLAGS $PERLCOPT"
+    LIBS="$LIBS $PERLLIBS"
+    CFLAGS="$CFLAGS $PERLCFLAGS"
     AC_TRY_RUN([
      #include <EXTERN.h>
      #include <perl.h>
@@ -255,10 +261,26 @@ case x$PERLCOPT in
      }
      ],
      AC_DEFINE(DO_PERL) AC_MSG_RESULT(yes); WORKING_PERL=yes,
-     AC_MSG_RESULT(no); CFLAGS=$OLD_CFLAGS; LIBS=$OLD_LIBS,
-     AC_MSG_RESULT(cross-compiling. No assumptions made); CFLAGS=$OLD_CFLAGS; LIBS=$OLD_LIBS
+     AC_MSG_RESULT(no); PERLCFLAGS=""; PERLLIBS="",
+     AC_MSG_RESULT(cross-compiling. No assumptions made)
+       PERLCFLAGS=""; PERLLIBS=""
     )
+    CFLAGS="$OLD_CFLAGS"
+    LIBS="$OLD_LIBS"
     ;;
+esac
+
+AC_ARG_WITH(debug,
+            [  --with-debug            generate debug info (default no)],
+            debug=yes, debug=no)
+
+case x$debug in
+  xyes)	CFLAGS="$CFLAGS -g"
+	LDFLAGS="$LDFLAGS -g"
+	;;
+  *)	CFLAGS="$CFLAGS -O2 -s"
+	LDFLAGS="$LDFLAGS -O2 -s"
+	;;
 esac
 
 dnl -------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 CC   = gcc
 prefix=@prefix@
 DEFINES=@DEFS@ -DUNIX -DHAVE_FORK -DSYSCONFDIR=\"@sysconfdir@\"
-CFLAGS=$(DEFINES) -Wall -Wno-char-subscripts -O2 -funsigned-char -s -idirafter ../fidolib
+CFLAGS=$(DEFINES) @CFLAGS@ -idirafter ../fidolib
 LIBS=@LIBS@
 PERL=@PERL@
 

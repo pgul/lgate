@@ -21,7 +21,7 @@ SRCS= \
 
 OBJS=${SRCS:.c=.o} 
 DEFINES=@DEFS@ -DUNIX -DHAVE_FORK
-CFLAGS=$(DEFINES) -Wall -idirafter ../fidolib -idirafter ../lib -Wno-char-subscripts -O2 -funsigned-char -s
+CFLAGS=-c $(DEFINES) @CFLAGS@ -idirafter ../fidolib -idirafter ../lib
 LIBS=@LIBS@
 LIBRARY=../lib/lgate.a ../fidolib/libfido.a
 
@@ -29,13 +29,13 @@ all: $(APPL)
 
 $(APPL): $(OBJS) $(LIBRARY)
 	@echo Linking $@...
-	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBRARY)
+	@$(CC) @LDFLAGS@ -o $@ $(OBJS) $(LIBRARY)
 
 clean:
 	rm -f *.o core *.core *.o *.err
 
 .c.o:
 	@echo Compiling $*.c...
-	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+	@$(CC) $(CFLAGS) -o $*.o $*.c
 
 $(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h
