@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/04/18 21:46:38  gul
+ * Translate comments
+ *
  * Revision 2.0  2001/01/10 20:42:23  gul
  * We are under CVS for now
  *
@@ -42,8 +45,8 @@ int isfile(int h)
 #ifdef __MSDOS__
   if (ioctl(h,0) & 0xA0)
 #elif defined (__OS2__)
-  unsigned long l,pipetype;
-  DosQueryHType(h,&pipetype,&l);
+  unsigned long l, pipetype;
+  DosQueryHType(h, &pipetype, &l);
   if (pipetype!=0)
 #else
   struct stat st;
@@ -53,32 +56,36 @@ int isfile(int h)
   return 1;
 }
 
-int saveargs(int argc, char * argv[])
+int saveargs(int argc, char *argv[])
 {
-  char * p;
+  char *p;
   long l;
-  FILE * f;
+  FILE *f;
   int  c;
   int  n;
   char *str;
 
   str=malloc(CMDLINELEN);
   if (str==NULL) return 1;
-  strcpy(calldir,argv[0]);
-  p=strrchr(calldir,PATHSEP);
-  if (p==NULL) p=strrchr(calldir,':');
+#ifndef UNIX
+  strcpy(calldir, argv[0]);
+  p=strrchr(calldir, PATHSEP);
+  if (p==NULL) p=strrchr(calldir, ':');
   if (p==NULL) p=calldir;
   else p++;
   *p='\0';
-  /* ищем незанятый *.bat */
+#else
+  strcpy(calldir, "/tmp/");
+#endif
+  /* find free *.bat */
   for (l=1; l<999999l; l++)
   {
-    sprintf(namebat,"%s%ld." EXT,calldir,l);
-    sprintf(nametxt,"%s%ld.txt",calldir,l);
-    if (access(namebat,0) && access(nametxt,0))
+    sprintf(namebat, "%s%ld." EXT, calldir, l);
+    sprintf(nametxt, "%s%ld.txt", calldir, l);
+    if (access(namebat, 0) && access(nametxt, 0))
       break;
   }
-  f=fopen(namebat,"w");
+  f=fopen(namebat, "w");
   if (f==NULL) return 3;
 #ifdef __OS2__
   if ((!isatty(fileno(stdin))) && (!isfile(fileno(stdin))))
@@ -109,9 +116,9 @@ int saveargs(int argc, char * argv[])
     fprintf(f, "<%s\n", nametxt);
   fclose(f);
   f=fopen(nametxt,"wb");
-  setmode(fileno(stdin),O_BINARY);
+  setmode(fileno(stdin), O_BINARY);
   while ((c=fgetc(stdin))!=EOF)
-    fputc(c,f);
+    fputc(c, f);
   fclose(f);
   return 0;
 }
