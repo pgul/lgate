@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/11/15 12:28:28  gul
+ * always put date/time if logstyle==FD_LOG
+ *
  * Revision 2.2  2001/01/25 13:14:09  gul
  * quiet var moved to logwrite.c
  *
@@ -89,7 +92,7 @@ void logwrite(char level, char *format,...)
   }
   va_start(arg, format);
   slog[0]='\0';
-  if (logname[0] && strchr(loglevel, level))
+  if (logname[0] && (strchr(loglevel, level) || level=='*'))
   {
     if (access(logname, 0))
       flog=myopen(logname, O_TEXT|O_RDWR|O_CREAT);
