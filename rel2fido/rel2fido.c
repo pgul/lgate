@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/27 21:58:48  gul
+ * translate comments
+ *
  * Revision 2.2  2001/01/26 17:49:04  gul
  * bugfix: truncate message if size=0
  *
@@ -156,7 +159,7 @@ int main(int argc, char *argv[])
   if ((r=config())!=0)
     return retcode|RET_ERR;
   if (tossbad)
-  { /* копируем badmail (если есть) в конец mailbox-а */
+  { /* append badmail (if exists) to mailbox */
     copybad();
   }
 #ifndef UNIX
@@ -188,10 +191,10 @@ int one_message(void)
   char badaddr;
   time_t curtime;
   struct tm *curtm;
-  /* fsize готов, мессага либо в файле f, либо в msgbuf */
+  /* fsize ready, message is in file f or in msgbuf */
 
-/* конвертируем в msg */
-  /* заполняем default заголовок msg */
+/* convert to msg */
+  /* fill default msg header */
   debug(6, "One_Message started, Conf=%d, Addr=%s", conf, addr ? addr : "NULL");
   fix=errl=nonews=curhops=0;
   origin[0]=tearline[0]=xorigin[0]=0;
@@ -204,7 +207,7 @@ int one_message(void)
           curtm->tm_hour, curtm->tm_min, curtm->tm_sec);
   attrib=attr;
   if (conf)
-  { strcpy(msghdr.to,"All");
+  { strcpy(msghdr.to, "All");
     zone=uplink[0].zone;
     node=uplink[0].node;
     net=uplink[0].net;
@@ -228,7 +231,7 @@ int one_message(void)
   xftnaddr.zone=-1;
   msgtz=0;
 
-  /* читаем заголовок */
+  /* read header */
   if (readhdr())
     goto errlet;
   if (xftnfrom[0]==0)
@@ -262,7 +265,7 @@ int one_message(void)
   debug(10, "One_Message: allocating %ld bytes for buffer", l);
   bufpart=createbuf(l);
   if (bufpart==NULL)
-  { logwrite('?',"Not enough memory!\n");
+  { logwrite('?', "Not enough memory!\n");
     retcode|=RET_ERR;
     return RET_ERR;
   }
@@ -284,7 +287,7 @@ int one_message(void)
     fromaddr[0]=fromstr[0]=orig_from[0]='\0';
 
   replyaddr[0]='\0';
-  for (k=0;k<cheader;k++)
+  for (k=0; k<cheader; k++)
     if (strnicmp(pheader[k], "\x01RFC-Reply-To:", 14)==0)
       break;
   if (k<cheader)
@@ -299,7 +302,7 @@ int one_message(void)
         (strnicmp(orig_from, "MAILER-DAEMON", 13)==0) ||
         (strstr(orig_from, "MAILER-DAEMON")))
     { debug(5, "One_Message: message from robot ('%s'), set RRC", orig_from);
-      attrib|=msgRETREC; /* от робота - ставим RRC */
+      attrib|=msgRETREC; /* from robot - set RRC */
     }
 
 #ifdef DO_PERL
@@ -315,7 +318,7 @@ int one_message(void)
   debug(9, "One_Message: NewsGr='%s'", newsgr);
   extret=extcheck(addr, fromaddr, &newsgr
 #ifdef DO_PERL
-                  ,(i<cheader) ? pheader[i]+8 : NULL
+                  , (i<cheader) ? pheader[i]+8 : NULL
 #endif
                   );
   if (stricmp(newsgr, "netmail")==0)
@@ -372,9 +375,9 @@ int one_message(void)
 
   if (wasfrom)
   { parseaddr(fromstr, fromaddr, realname, 1); /* chaddr */
-    /* смотрим, не фидошный ли адрес */
+    /* check if this is fido address */
     if (transaddr(realname, &hiszone, &hisnet, &hisnode, &hispoint, fromaddr)==0)
-    { /* фидошный адрес */
+    { /* fido address */
       xftnfrom[0]=0;
       xftnaddr.zone=-1;
       isftnaddr=1;
@@ -401,7 +404,7 @@ int one_message(void)
   j=zone;
   if (xftnfrom[0] && (xftnaddr.zone!=(uword)-1))
   { /* do we have aka in his zone? */
-    for (i=0;i<naka;i++)
+    for (i=0; i<naka; i++)
     { if (xftnaddr.zone==myaka[i].zone)
         break;
       if ((myaka[i].zone<7) && (xftnaddr.zone<7))
@@ -417,7 +420,7 @@ int one_message(void)
       hisnet=xftnaddr.net;
       hisnode=xftnaddr.node;
       hispoint=xftnaddr.point;
-      strcpy(fromaddr,xftnfrom);
+      strcpy(fromaddr, xftnfrom);
       wasfrom=isftnaddr=1;
       realname[0]=0;
     }
@@ -459,10 +462,10 @@ int one_message(void)
         p=p1;
       }
       chkheader(pheader[cheader-1]);
-      sprintf(pheader[cheader],"\x01REPLYTO %u:%u/%u",
-              myaka[curaka].zone,myaka[curaka].net,myaka[curaka].node);
+      sprintf(pheader[cheader], "\x01REPLYTO %u:%u/%u",
+              myaka[curaka].zone, myaka[curaka].net, myaka[curaka].node);
       if (myaka[curaka].point)
-        sprintf(pheader[cheader]+strlen(pheader[cheader]),".%u",
+        sprintf(pheader[cheader]+strlen(pheader[cheader]), ".%u",
                 myaka[curaka].point);
       if (replyform==REPLY_UUCP)
         strcat(pheader[cheader], " uucp\r");
@@ -471,16 +474,16 @@ int one_message(void)
       else /* empty */
         strcat(pheader[cheader], "\r");
       nline;
-      pheader[cheader]+=8; /* для будущих изменений */
+      pheader[cheader]+=8; /* for future changes */
       if (!forgolded)
       {
         if (strlen(fromaddr)>=sizeof(msghdr.from))
         { chkheader(fromaddr);
-          sprintf(pheader[cheader], "From: %s\r",fromaddr);
+          sprintf(pheader[cheader], "From: %s\r", fromaddr);
           nline;
         }
         else
-          strcpy(msghdr.from,fromaddr);
+          strcpy(msghdr.from, fromaddr);
         if (realname[0])
         { chkheader(realname);
           sprintf(pheader[cheader], "RealName: %s\r", realname);
@@ -507,14 +510,14 @@ int one_message(void)
   msghdr.dest_point=point;
 
   if ((!isftnaddr) || (gatevia==2))
-  { /* Ставим свое via */
+  { /* Put own via */
     debug(6, "One_Message: put my via");
     putvia(s);
     chkheader(s);
-    strcpy(pheader[cheader],s);
+    strcpy(pheader[cheader], s);
     p=pheader[cheader];
     nline;
-    /* ставим это via в начало */
+    /* move this via to begin */
     for (i=0; i<cheader; i++)
       if (strncmp(pheader[i], "\x01Via:", 5)==0) break;
     for (r=cheader-2; r>=(int)i; r--)
@@ -522,18 +525,18 @@ int one_message(void)
     pheader[i]=p;
   }
   if (isftnaddr && !gatevia)
-  { /* удаляем все "Via:" - бывшие "Received:" */
-    debug(8,"OneMessage: deleting all Received");
-    for (i=0;i<cheader;i++)
-      if (strncmp(pheader[i],"\x01Via:",5)==0)
+  { /* remove all "Via:" - was "Received:" */
+    debug(8, "OneMessage: deleting all Received");
+    for (i=0; i<cheader; i++)
+      if (strncmp(pheader[i], "\x01Via:", 5)==0)
         pheader[i][0]=0;
   }
   else
     for (i=0; i<cheader; i++)
-    { if (strnicmp(pheader[i],"\x01Via:",5)==0)
+    { if (strnicmp(pheader[i], "\x01Via:", 5)==0)
       { debug(15, "One_Message: convert 'Via:' to 'Received:'");
-        /* оставляем только секцию "by" и дату */
-        /* раскручиваем домен, если фидошный, и (...) - в начало */
+        /* leave only "by" section and date */
+        /* parse domain, if fidonet and (...) - to begin */
         j=strlen(pheader[i]);
         p=rcvfrom(pheader[i]);
         rcvconv(pheader[i]);
@@ -555,7 +558,7 @@ int one_message(void)
           pheader[i+1]=p;
           cheader++;
         }
-        /* если предыдущий "recd from" совпадает с нынешним "via" - удаляем */
+        /* if prev "recd from" is the same as cur "via" - remove */
         { int  j, r;
           char c, c1;
           for (j=i-1; j>=0; j--)
@@ -667,7 +670,7 @@ int one_message(void)
   }
   if (maxhops && (curhops>maxhops) && !conf)
   { 
-    strcpy(fromaddr,orig_from);
+    strcpy(fromaddr, orig_from);
     logwrite('!', "Too many hops: %d (%d max) from %s to %u:%u/%u.%u!\n",
              curhops, maxhops, fromaddr, zone, net, node, point);
     reject(MANYHOPS);
@@ -677,7 +680,7 @@ wasreject:
       attname[0]='\0';
     }
     freebufpart();
-    return 0; /* просто переходим к новому письму */
+    return 0; /* go to next message */
   }
   debug(6, "One_Message: checked OK");
   msghdr.orig_node=hisnode;
@@ -687,20 +690,20 @@ wasreject:
     strcpy(msghdr.from, fromaddr);
     debug(5, "One_Message: unknown from address, set from to uucp");
   }
-  /* первые буквы имени - в uupercase */
+  /* first letters to uupercase */
   for (p=msghdr.to-1; p++; p=strpbrk(p, " \t."))
   { if ((*p>='a') && (*p<='z'))
       *p&=~0x20;
   }
-  if (strcmp(msghdr.from,"uucp")==0)
-  { attrib &= ~msgRETRECREQ; /* все равно непонятно, кому посылать */
+  if (strcmp(msghdr.from, "uucp")==0)
+  { attrib &= ~msgRETRECREQ; /* unknown from addr */
 #ifndef UNIX
     if (uupcver==615)
       retcode &= ~48;
 #endif
   }
   if (area!=-1 && newsgr && strchr(newsgr, ',') == NULL)
-  { /* если message-id заканчивается на ":newsgroup" - убираем */
+  { /* if message-id ended with "|newsgroup" - remove */
     for (i=0; i<cheader; i++)
       if (strncmp(pheader[i], "\x01RFCID:", 7) == 0)
       { if (strlen(pheader[i])>strlen(newsgr)+2)
@@ -725,7 +728,7 @@ wasreject:
   if ((!wasmsgid) || (msgid==0))
     msgid=(curtime<<8)+(getpid()&0xff)+seqf++;
   if ((wasmsgid & 2)==0)
-  { /* не было X-FTN-MSGID */
+  { /* no X-FTN-MSGID */
     if (fmsgid[0])
     { if (getfidoaddr(&i, &j, &k, &n, fmsgid)==0)
       { if ((i==hiszone) && (j==hisnet) && (k==hisnode) && (n==hispoint))
@@ -748,41 +751,41 @@ wasreject:
         sprintf(str, "%u:%u/%u", hiszone, hisnet, hisnode);
     }
     else
-      /* не фидошный и просили домен */
+      /* not FTN and user ask to put domain */
       strcpy(str, quotemsgid(domainid));
     chkheader(str);
     sprintf(pheader[cheader], "\x01MSGID: %s %08lx\r", str, msgid);
     nline;
     if (conf && (!isftnaddr))
-      pheader[cheader]+=8; /* резерв для смены адреса */
+      pheader[cheader]+=8; /* reserved for addr change */
   }
   else
     fmsgid[0]=0;
   chkheader("");
-  sprintf(pheader[cheader],"\x01INTL %u:%u/%u %u:%u/%u\r",
-          zone,net,node,hiszone,hisnet,hisnode);
+  sprintf(pheader[cheader], "\x01INTL %u:%u/%u %u:%u/%u\r",
+          zone, net, node, hiszone, hisnet, hisnode);
   if (point)
-  { sprintf(s,"\x01TOPT %u\r",point);
+  { sprintf(s, "\x01TOPT %u\r", point);
     chkheader(s);
-    strcat(pheader[cheader],s);
+    strcat(pheader[cheader], s);
   }
   if (hispoint)
-  { sprintf(s,"\x01""FMPT %u\r",hispoint);
+  { sprintf(s, "\x01""FMPT %u\r", hispoint);
     chkheader(s);
-    strcat(pheader[cheader],s);
+    strcat(pheader[cheader], s);
   }
   if (attrib>0xFFFFl)
-  { strcat(pheader[cheader],"\x01""FLAGS");
+  { strcat(pheader[cheader], "\x01""FLAGS");
     if (attrib & msgDIRECT)
-      strcat(pheader[cheader]," DIR");
+      strcat(pheader[cheader], " DIR");
     if (attrib & msgCFM)
-      strcat(pheader[cheader]," CFM");
-    /* ну и остальные так же ;-) */
-    strcat(pheader[cheader],"\r");
+      strcat(pheader[cheader], " CFM");
+    /* and others... ;-) */
+    strcat(pheader[cheader], "\r");
   }
   nline;
   p=pheader[cheader-1];
-  for (i=cheader-1;i>0;i--)
+  for (i=cheader-1; i>0; i--)
     pheader[i]=pheader[i-1];
   pheader[0]=p;
   if (putchrs)
@@ -797,7 +800,7 @@ wasreject:
     for (fp=ftnchrs; fp; fp=fp->next)
     { char *rfc=fp->rfcchrs;
       rfc=canoncharset(rfc);
-      if (stricmp(rfc,canonintsetname)==0)
+      if (stricmp(rfc, canonintsetname)==0)
       { chkheader(fp->ftnchrs);
         sprintf(pheader[cheader], "\x01""CHRS: %s 2\r", fp->ftnchrs);
         nline;
@@ -820,7 +823,7 @@ wasreject:
   if (conf==0)
     null=0;
   if (null)
-  { /* проматываем письмо */
+  { /* skip message */
 todevnull:
     freebufpart();
     debug(5, "One_Message: moving message to /dev/null");
@@ -828,11 +831,11 @@ todevnull:
     return 0;
   }
 
-  /* если слишком большое мыло - холдим файл с rfc-шным письмом */
+  /* if too large netmail - hold file with rfc-style message */
   if ((((fsize>=holdsize*1024l) && (holdsize) && (!isftnaddr) &&
        (extret!=EXT_FREE)) || (extret==EXT_HOLD)) && (!conf))
-  { /* аплинка не трогаем */
-    for (i=0;i<nuplinks;i++)
+  { /* not for uplink */
+    for (i=0; i<nuplinks; i++)
       if ((zone==uplink[i].zone) &&
           (net==uplink[i].net) &&
           (node==uplink[i].node) &&
@@ -845,15 +848,15 @@ todevnull:
         reject(REJ_HUGE);
         goto wasreject;
       }
-      /* выясняем subj - там не дадут */
-      for (i=0;i<cheader;i++)
-        if (strnicmp(pheader[i],"Subject:",8)==0)
+      /* set subj */
+      for (i=0; i<cheader; i++)
+        if (strnicmp(pheader[i], "Subject:", 8)==0)
           break;
       debug(3, "One_Message: message too large (%ld bytes), hold it", fsize);
       if (i<cheader)
-        i=holdmsg(realname,fromaddr,pheader[i]+8);
+        i=holdmsg(realname, fromaddr, pheader[i]+8);
       else
-        i=holdmsg(realname,fromaddr,NULL);
+        i=holdmsg(realname, fromaddr, NULL);
       if (i)
       { retcode|=RET_ERR;
         debug(6, "One_Message: return %d", retcode);
@@ -869,16 +872,16 @@ todevnull:
     }
   }
   if (attname[0])
-  { /* аттач прислали - холдим */
-    /* выясняем subj - там не дадут */
+  { /* hold fileattach */
+    /* set subj */
     debug(3, "One_Message: file attach %s received - hold it", attname);
-    for (i=0;i<cheader;i++)
-      if (strnicmp(pheader[i],"Subject:",8)==0)
+    for (i=0; i<cheader; i++)
+      if (strnicmp(pheader[i], "Subject:", 8)==0)
         break;
     if (i<cheader)
-      i=holdatt(realname,fromaddr,pheader[i]+8);
+      i=holdatt(realname, fromaddr, pheader[i]+8);
     else
-      i=holdatt(realname,fromaddr,NULL);
+      i=holdatt(realname, fromaddr, NULL);
     if (i)
     { retcode|=RET_ERR;
       debug(6, "One_Message: return %d", retcode);
@@ -893,7 +896,7 @@ todevnull:
     return 0;
   }
 
-  /* считаем кол-во частей */
+  /* count number of parts */
   if (maxpart>0)
   { partsize=1024l*maxpart-sizeof(msghdr)-
              ((char _Huge *)(pheader[cheader])-(char _Huge *)header)-
@@ -914,7 +917,7 @@ todevnull:
   {
     /* make SPLIT kludge */
     chkheader("");
-    sprintf(s,"%u/%u", hisnet, hisnode);
+    sprintf(s, "%u/%u", hisnet, hisnode);
     sprintf(pheader[cheader], "\x01SPLIT %2u %s %02u %02u:%02u:%02u @%-12s %-5u %s/%02u +++++++++\r",
             curtm->tm_mday, montable[curtm->tm_mon], curtm->tm_year%100,
             curtm->tm_hour, curtm->tm_min, curtm->tm_sec, s,
@@ -922,7 +925,7 @@ todevnull:
     nline;
   }
 
-  /* разбираемся с полями header: subj, newsgroups, reply-to */
+  /* check/set header fields: subj, newsgroups, reply-to */
   area=-1;
   polynews=0;
   for (i=1; i<cheader; i++)
@@ -943,7 +946,7 @@ todevnull:
       }
       continue;
     }
-    if ((strncmp(pheader[i],"To: ", 4)==0) && cnews)
+    if ((strncmp(pheader[i], "To: ", 4)==0) && cnews)
     { if (isftnaddr)
       {
         debug(15, "One_Message: make 'To:' for cnews");
@@ -959,7 +962,7 @@ todevnull:
       continue;
     }
     if (((strnicmp(pheader[i], "\x01RFC-Comment-To: ", 17)==0) ||
-#if 0 /* оно и так нормально получается, а эта строка - не фидошное "To:" */
+#if 0 /* this line is not FTN "To:" */
          (strnicmp(pheader[i], "\x01RFC-X-To: ", 11)==0) ||
 #endif
          (strnicmp(pheader[i], "\x01RFC-X-Comment-To: ", 19)==0)) && conf)
@@ -997,7 +1000,7 @@ todevnull:
   if (newsgr)
   { p=newsgr;
     debug(15, "One_Message: make newsgroups list");
-    for (;*p;)
+    while (*p)
     { p1=strpbrk(p, " \t,\r\n");
       if (p1==NULL) p1=p+strlen(p);
       r=*p1;
@@ -1018,7 +1021,7 @@ todevnull:
       polynews=1;
       break;
     }
-    if ((!polynews) && (!errl) && (strchr(newsgr,',')==NULL) &&
+    if ((!polynews) && (!errl) && (strchr(newsgr, ',')==NULL) &&
         (area!=-1) && (savehdr!=2))
     { for (i=0; i<cheader; i++)
         if (strnicmp(pheader[i], "\x01RFC-Newsgroups:", 16)==0)
@@ -1069,7 +1072,7 @@ todevnull:
       }
     }
   if (isftnaddr)
-  { /* убираем REPLYADDR, REPLYTO, RFC-From и пр. */
+  { /* remove REPLYADDR, REPLYTO, RFC-From and others */
     debug(7, "One_Message: double gating, remove REPLYADDR, REPLYTO, RFC-From etc.");
     for (i=0; i<cheader; i++)
       if (strncmp(pheader[i], "\x01REPLYADDR:", 11)==0)
@@ -1110,7 +1113,7 @@ todevnull:
       }
   }
   if (area!=-1)
-  { /* дописываем path в seen-by */
+  { /* add path to seen-by */
     debug(7, "One_Message: add Path to Seen-By");
     for (i=0; i<npath; i++)
       if (nseenby<MAXSEENBY)
@@ -1124,7 +1127,7 @@ todevnull:
         seenby[k].node=path[i].node;
         nseenby++;
       }
-    /* проверяем seen-by */
+    /* seen-by check */
     if (checksb)
     {
       debug(7, "One_Message: check seen-by");
@@ -1136,7 +1139,7 @@ todevnull:
             break;
         if (j<nuplinks)
           break;
-        /* свое aka не проверяем - может быть еще у кого-то
+        /* don't check own aka - may be other station has the same aka
         for (j=0; j<naka; j++)
          if ((seenby[i].net==myaka[j].net) &&
              (seenby[i].node==myaka[j].node) &&
@@ -1157,10 +1160,10 @@ todevnull:
   }
   msghdr.attr=(uword)attrib;
   if (area!=-1)
-  { /* выкидываем intl, fmpt, topt, via */
+  { /* remove intl, fmpt, topt, via */
     pheader[0][0]=0;
     msghdr.attr=0;
-    /* переделываем RFC-X-MAILER в PID */
+    /* change RFC-X-MAILER to PID */
     for (i=0; i<cheader; i++)
     { if (strnicmp(pheader[i], "\x01RFC-X-Mailer: ", 14)==0)
       { strcpy(pheader[i]+1, "PID: ");
@@ -1175,7 +1178,7 @@ todevnull:
   }
   if (area==-1)
     polynews=0;
-  /* убираем все RFC-*, если мыло и chaddr */
+  /* remove all RFC-*, if netmail and chaddr */
   if (/*(area==-1) &&*/ (waschaddr))
     for (i=0; i<cheader; i++)
     { if (strnicmp(pheader[i], "\x01RFC-", 5)==0)
@@ -1185,10 +1188,10 @@ todevnull:
       else if (area==-1 && strnicmp(pheader[i], "\x01RFCID:", 7)==0)
         pheader[i][0]=0;
     }
-  /* упорядочиваем поля заголовка */
-  /* пустые убираем */
-  /* MSGID - в начало; */
-  /* все не скрытые - в конец */
+  /* sort header fields */
+  /* remove empty */
+  /* MSGID - to start; */
+  /* all unhidden to end */
   for (i=1; i<cheader; i++)
   { if (pheader[i][0]==0)
     { for (j=i; j<=cheader; j++)
@@ -1197,7 +1200,7 @@ todevnull:
       cheader--;
     }
   }
-  /* pheader[0] либо INTL & PID, либо пустое */
+  /* pheader[0] is INTL & PID or empty */
   for (i=1; i<cheader; i++)
     if (strncmp(pheader[i], "\x01MSGID: ", 8)==0)
       break;
@@ -1230,17 +1233,17 @@ todevnull:
       for (r=0; r<cheader; r++)
       { if (pheader[r][0]=='\x01')
           continue;
-#if 0 /* Убираем все (Resent-From, X-Real-Name и пр.), а не только Content-* */
-        if (strnicmp(pheader[r], "\x01Content-",9)==0)
+#if 0 /* Remove all (Resent-From, X-Real-Name etc.), not only Content-* */
+        if (strnicmp(pheader[r], "\x01Content-", 9)==0)
 #endif
           pheader[r][0]='\0';
       }
     }
     /* change part number */
     if ((parts>1) && ((!isftnaddr) || (area!=-1)))
-    { sprintf(s,"(%u/%u)", part+1, parts);
+    { sprintf(s, "(%u/%u)", part+1, parts);
       memcpy(msghdr.subj, s, strlen(s));
-      /* корректируем ^aSPLIT */
+      /* change ^aSPLIT */
       for (r=1; r<cheader; r++)
         if (strncmp(pheader[r], "\x01SPLIT ", 7)==0)
           break;
@@ -1290,7 +1293,7 @@ errlet:
           }
     }
     lastorigin[0]=0;
-    /* пишем само письмо в буфер */
+    /* put body to buffer */
     for (;;)
     { if (strchr(str, '\r')==NULL)
       { if (str[0])
@@ -1529,7 +1532,7 @@ errlet:
         for (i=0; i<cheader; i++)
           if (strncmp(pheader[i], "\x01SPLIT ", 7)==0)
           { sprintf(s, "%u/%u", hisnet, hisnode);
-            sprintf(strchr(pheader[i],'@')+1, "%-12s", s);
+            sprintf(strchr(pheader[i], '@')+1, "%-12s", s);
             pheader[i][strlen(pheader[i])]=' ';
           }
         writehdr();
@@ -1547,9 +1550,9 @@ errlet:
               strncmp(pheader[j], "\x01Recd", 5))
           { if (savehdr ||
                 (strnicmp(pheader[j], "\x01RFC-", 5)!=0) ||
-                (strnicmp(pheader[j], "\x01RFC-Newsgroups:",16)==0) ||
-                (strnicmp(pheader[j], "\x01RFC-From:",10)==0))
-            { fputs(pheader[j],fout);
+                (strnicmp(pheader[j], "\x01RFC-Newsgroups:", 16)==0) ||
+                (strnicmp(pheader[j], "\x01RFC-From:", 10)==0))
+            { fputs(pheader[j], fout);
               if ((pheader[j][0]!=1) && (pheader[j][0]!=0)) i=1;
             }
           }
@@ -1634,7 +1637,7 @@ errspace:
           if ((nseenby<MAXSEENBY) &&
               (uplink[myaka[curaka].uplink].point==0) &&
               (uplink[myaka[curaka].uplink].zone==myaka[curaka].zone))
-          { /* дописываем аплинка */
+          { /* add uplink */
             for (i=0; i<nseenby; i++)
               if ((seenby[i].net==uplink[myaka[curaka].uplink].net) &&
                   (seenby[i].node==uplink[myaka[curaka].uplink].node) &&
@@ -1681,7 +1684,7 @@ errspace:
           if (k==0)
           { fputs("SEEN-BY:", fout);
             k=8;
-            pp=-1; /* сетка */
+            pp=-1; /* network */
           }
           if (seenby[j].net!=pp)
           { pp=seenby[j].net;
