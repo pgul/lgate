@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/11/11 09:53:09  gul
+ * Improve diagnostics
+ *
  * Revision 2.4  2002/10/03 13:23:20  gul
  * Create pkt in tmpdir and then move to pktout
  *
@@ -70,7 +73,7 @@ static struct dirent *df;
 static unsigned r;
 static FILE *frej=NULL;
 static int i;
-static char tstr[80], msgname[FNAME_MAX], *p;
+static char tstr[80], rejmsgname[FNAME_MAX], *p;
 static uword mzone, mnet, mnode, mpoint;
 
 char *strreason(int reason, int whatfor)
@@ -158,9 +161,10 @@ void closepkt(void)
   if (tpktname==0)
     tpktname=time(NULL);
   sprintf(realname, "%s%08lx.pkt", pktout, tpktname++);
-  if (rmove(msgname, realname)==0)
+  if (rmove(rejmsgname, realname)==0)
     return;
-  logwrite('?', "Can't rename %s!\n", msgname);
+  logwrite('?', "Can't rename %s to %s: %s!\n",
+           rejmsgname, realname, strerror(errno));
 }
 
 int writemsghdr(struct message *msghdr, FILE *fout)
@@ -301,13 +305,13 @@ void genlett(int reason, char *toname,
       if (i>maxnum) maxnum=i;
     }
     if (d) closedir(d);
-    strcpy(msgname, netmaildir);
+    strcpy(rejmsgname, netmaildir);
     if (netmaildir[strlen(netmaildir)-1]!=PATHSEP)
-      strcat(msgname, PATHSTR);
+      strcat(rejmsgname, PATHSTR);
     for (i=maxnum+1; i<maxnum+1000; i++)
     {
-      sprintf(msgname+strlen(msgname), "%u.msg", maxnum+1);
-      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
+      sprintf(rejmsgname+strlen(rejmsgname), "%u.msg", maxnum+1);
+      h=open(rejmsgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
       if (h!=-1 || errno!=EEXIST)
         break;
     }
@@ -321,7 +325,7 @@ void genlett(int reason, char *toname,
     { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
                toname, tozone, tonet, tonode, topoint, strerror(errno));
       close(h);
-      unlink(msgname);
+      unlink(rejmsgname);
       return;
     }
     for (i=0; i<5; i++)
@@ -332,15 +336,15 @@ void genlett(int reason, char *toname,
     if (i==5)
     { fclose(frej);
       frej=NULL;
-      unlink(msgname);
+      unlink(rejmsgname);
     }
   }
   else if (frej==NULL)
   { unsigned long maxnum, initmax;
     initmax=time(0);
     for (maxnum=initmax+1; maxnum!=initmax; maxnum++)
-    { sprintf(msgname, "%s%lx.pkt", tmpdir, maxnum);
-      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
+    { sprintf(rejmsgname, "%s%lx.pkt", tmpdir, maxnum);
+      h=open(rejmsgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
       if (h!=-1 || errno!=EEXIST)
         break;
     }
@@ -354,7 +358,7 @@ void genlett(int reason, char *toname,
     { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
                toname, tozone, tonet, tonode, topoint, strerror(errno));
       close(h);
-      unlink(msgname);
+      unlink(rejmsgname);
       return;
     }
     if (frej!=NULL)
@@ -371,13 +375,13 @@ void genlett(int reason, char *toname,
         writepkthdr(frej);
     }
   }
-  debug(6, "GenLett: msgname is %s", msgname);
+  debug(6, "GenLett: msgname is %s", rejmsgname);
   if (frej==NULL)
   { logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
              toname, tozone, tonet, tonode, topoint);
     return;
   }
-  debug(9, "GenLett: %s created", msgname);
+  debug(9, "GenLett: %s created", rejmsgname);
   if (!packmail)
   {
     if (fwrite(&msg, sizeof(msg), 1, frej)!=1)
@@ -386,7 +390,7 @@ errwrite:
       flock(fileno(frej), LOCK_UN);
       fclose(frej);
       frej=NULL;
-      unlink(msgname);
+      unlink(rejmsgname);
       logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
                toname, tozone, tonet, tonode, topoint);
       return;
