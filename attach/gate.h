@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/07/20 14:55:22  gul
+ * Decode quoted-printable attaches
+ *
  * Revision 2.2  2001/01/26 14:33:38  gul
  * Version changed to 7.02 in *.h
  *
@@ -38,7 +41,7 @@
 
 #include <libgate.h>
 
-typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_PGP } enctype;
+typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_QP, ENC_PGP } enctype;
 typedef enum {NO_SEM, FD_SEM, BINK_SEM, LBSO_SEM} semtype;
 typedef enum {RESEND, SECURE, UNSECURE} pwdtype;
 
@@ -61,6 +64,7 @@ void getvalue(char *field, char *value, unsigned valsize);
 void getparam(char *field, char *param, char *value, unsigned valsize);
 int  do_uudecode(char *infile, char *outfile);
 int  do_unbase64(char *infile, char *outfile);
+int  do_unqp(char *infile, char *outfile);
 int  str_unbase64(char *in, char *out);
 void str_base64(char *in, char *out, int len);
 #ifdef _IOFBF  /* stdio.h included */

@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/07/20 14:55:22  gul
+ * Decode quoted-printable attaches
+ *
  * Revision 2.0  2001/01/10 20:42:16  gul
  * We are under CVS for now
  *
@@ -36,10 +39,20 @@
 /* single-character decode */
 #define DEC(c)		cunbase64[c]
 
-static int decode(FILE *in, FILE *out);
+static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *));
+static int decode_b64(FILE *in, FILE *out);
+static int decode_qp(FILE *in, FILE *out);
 static char buf[128];
 
 int do_unbase64(char *infile, char *outfile)
+{ return do_unmime(infile, outfile, decode_b64);
+}
+
+int do_unqp(char *infile, char *outfile)
+{ return do_unmime(infile, outfile, decode_qp);
+}
+
+static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
 {
   FILE *in, *out;
   int  i, r;
@@ -52,7 +65,7 @@ int do_unbase64(char *infile, char *outfile)
   }
 
   /* create output file */
-  r=open(outfile, O_BINARY|O_RDWR|O_CREAT|O_EXCL, S_IREAD|S_IWRITE);
+  r=open(outfile, O_BINARY|O_RDWR|O_CREAT|O_EXCL, 0666);
   if (r==-1)
   { logwrite('?', "Can't open %s: %s!\n", outfile, strerror(errno));
     if (in!=stdin) fclose(in);
@@ -74,7 +87,7 @@ int do_unbase64(char *infile, char *outfile)
   }
   out = fdopen(r, "wb");
   if (out == NULL)
-  { logwrite('?',"Can't open %s: %s!\n",outfile,strerror(errno));
+  { logwrite('?', "Can't open %s: %s!\n", outfile, strerror(errno));
     flock(r, LOCK_UN);
     close(r);
     unlink(outfile);
@@ -118,15 +131,15 @@ int do_unbase64(char *infile, char *outfile)
   else
     r=3;
 
-  fflush(out);
+  if (fflush(out)) r=3;
   flock(fileno(out), LOCK_UN);
-  fclose(out);
+  if (fclose(out)) r=3;
   if (in!=stdin) fclose(in);
   else if (!isfile(fileno(in))) while (fgets(buf, sizeof(buf), in));
   if (r)
   { unlink(outfile);
     if (r!=3) /* error write */
-      logwrite('?', "Incorrect base64-coding\n");
+      logwrite('?', "Incorrect %s-coding\n", (decode==decode_b64 ? "base64" : "qp"));
   }
   return r;
 }
@@ -134,11 +147,11 @@ int do_unbase64(char *infile, char *outfile)
 /*
  * copy from in to out, decoding as you go along.
  */
-static int decode(FILE *in, FILE *out)
+static int decode_b64(FILE *in, FILE *out)
 {
   char c[4];
   int  was_decode=0;
-  int  i,n,bound=0;
+  int  i, n, bound=0;
 
   for (;;)
   {
@@ -167,7 +180,7 @@ static int decode(FILE *in, FILE *out)
     was_decode=1;
     if ((c[0]==64) || (c[1]==64))
       return 2;
-    if (putc((c[0]<<2) | (c[1]>>4),out)==EOF)
+    if (putc((c[0]<<2) | (c[1]>>4), out)==EOF)
     {
 errwrite:
       logwrite('?', "Can't write to file: %s!\n", strerror(errno));
@@ -179,11 +192,11 @@ errwrite:
       else
         return 2;
     }
-    if (putc((c[1]<<4) | (c[2]>>2),out)==EOF)
+    if (putc((c[1]<<4) | (c[2]>>2), out)==EOF)
       goto errwrite;
     if (c[3]==64)
       break;
-    if (putc((c[2]<<6) | c[3],out)==EOF)
+    if (putc((c[2]<<6) | c[3], out)==EOF)
       goto errwrite;
   }
   /* pad occured */
@@ -248,5 +261,45 @@ int str_unbase64(char *in, char *out)
       return len;
     if (!isspace(i))
       return -2;
+  }
+}
+
+static int decode_qp(FILE *in, FILE *out)
+{
+  int c;
+  char s[3];
+
+  for (;;)
+  { c = fgetc(in);
+gotqpbyte:
+    if (c==EOF) return 0;
+    if (c=='\n')
+    { if (fputc('\r', out)==EOF) return 3;
+    } else if (c=='\r')
+    { if (fputc(c, out)==EOF) return 3;
+      c = fgetc(in);
+      if (c != '\n')
+        goto gotqpbyte;
+    }
+    if (c!='=')
+    { if (fputc(c, out)==EOF) return 3;
+      continue;
+    }
+    c=fgetc(in);
+    if (c==EOF) return 2;
+    if (c=='\r')
+    { c=fgetc(in);
+      if (c!='\n') return 2;
+      continue;
+    }
+    if (c=='\n') continue;
+    if (!isxdigit(c)) return 2;
+    s[0]=c;
+    c=fgetc(in);
+    if (c==EOF) return 2;
+    if (!isxdigit(c)) return 2;
+    s[1]=c;
+    s[2]='\0';
+    if (fputc(strtol(s, NULL, 16), out)==EOF) return 3;
   }
 }

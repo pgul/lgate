@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/07/20 14:55:22  gul
+ * Decode quoted-printable attaches
+ *
  * Revision 2.1  2001/01/26 14:29:14  gul
  * Added libgen.h for basename()
  *
@@ -167,6 +170,8 @@ gotline:
         debug(8, "CheckTmp: content-transfer-encoding is %s", p);
         if (strnicmp(p, "base64", 6)==0)
           enc=ENC_BASE64;
+        else if (strnicmp(p, "quoted-printable", 16)==0)
+          enc=ENC_QP;
         else if (strnicmp(p, "x-pgp", 5)==0)
           enc=ENC_PGP;
       }
@@ -532,6 +537,8 @@ errfputs:
             { for (p=str+26; isspace(*p); p++);
               if (strnicmp(p, "base64", 6)==0)
                 last->enc=ENC_BASE64;
+              else if (strnicmp(p, "quoted-printable", 16)==0)
+                last->enc=ENC_QP;
               else if (strnicmp(p, "x-pgp", 5)==0)
                 last->enc=ENC_PGP;
             }
@@ -632,6 +639,10 @@ errfputs:
       if (last->enc==ENC_BASE64)
       { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
         r=do_unbase64(tmpname, tmp_arc);
+      }
+      else if (last->enc==ENC_QP)
+      { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
+        r=do_unqp(tmpname, tmp_arc);
       }
       else
       { debug(5, "CheckTmp: run internal uudecode %s to %s", tmpname, tmp_arc);

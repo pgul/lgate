@@ -1,8 +1,8 @@
 # $Id$
 CC = bcc
 LINK = tlink
-LIBDIR = d:\bc\lib
-INCDIR = d:\bc\include
+LIBDIR = i:\bc\lib
+INCDIR = i:\bc\include
 CFLAGS = +bc.cfg
 LFLAGS = /v /x /l /d /c /L$(LIBDIR)
 OBJDIR = objbc

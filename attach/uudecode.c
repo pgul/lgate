@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/07/20 14:55:22  gul
+ * Decode quoted-printable attaches
+ *
  * Revision 2.0  2001/01/10 20:42:16  gul
  * We are under CVS for now
  *
@@ -267,6 +270,8 @@ newmess:
       { for (p=sstr+26; (*p==' ') || (*p=='\n'); p++);
         if (strnicmp(p, "base64", 6)==0)
           enc=ENC_BASE64;
+        if (strnicmp(p, "quoted-printable", 16)==0)
+          enc=ENC_QP;
         else if (strnicmp(p, "x-pgp", 5)==0)
           enc=ENC_PGP;
         else if ((strnicmp(p, "x-uue", 5)==0) ||
@@ -949,10 +954,17 @@ baduuderet:
       pgpsig=strdup(""); /* signature OK (only in batchmode!) */
     }
   }
-  else
-    /* internal */
-    if (enc==ENC_BASE64 ? do_unbase64(tmp_uue, tmp_arc) : do_uudecode(tmp_uue, tmp_arc))
+  else if (enc == ENC_BASE64)
+  { if (do_unbase64(tmp_uue, tmp_arc))
       goto baduuderet;
+  }
+  else if (enc == ENC_QP)
+  { if (do_unqp(tmp_uue, tmp_arc))
+      goto baduuderet;
+  } else
+  { if (do_uudecode(tmp_uue, tmp_arc))
+      goto baduuderet;
+  }
   if (access(tmp_arc, 0))
   { logwrite('?', "Error while decoding message from %s, resent to postmaster\n", from);
     if (pgpsig) free(pgpsig);
