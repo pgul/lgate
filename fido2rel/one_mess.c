@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2002/03/21 15:27:50  gul
+ * Possible buffer overflow fix, remove cmdline length limitation
+ *
  * Revision 2.7  2002/03/21 14:54:14  gul
  * Gw-To, Gw-Cc, Gw-Bcc works now
  *
@@ -87,11 +90,8 @@ static int  rejreason, currcv;
 static char msgid[256], errstr[128];
 static char bound[80];
 static char tmpout[FNAME_MAX];
-#ifdef __MSDOS__
-static char cmdline[128];
-#else
-static char cmdline[0x8000]; /* long arg list */
-#endif
+static char *cmdline;
+static int  sizecmdline;
 static char rfcid;
 static char pref[MAXPREFIX+1];
 static char klname[2048], klopt[2048]; /* not less then sizeof(str)! */
@@ -129,22 +129,31 @@ static void xstrcpy(char **dest, int *dsize, char *src)
   else strcpy(*dest, src);
 }
 
-static void xstrcat(char **dest, int *dsize, char *src)
+static int xexpand(char **dest, int *dsize, int lsrc)
 { char *new;
-  int ldest, lsrc, newsize;
-  lsrc=strlen(src);
-  ldest=(*dest && **dest) ? strlen(*dest)+1 : 0;
+  int ldest, newsize;
+
+  ldest=(*dest ? strlen(*dest) : 0);
   newsize=*dsize;
-  while (newsize<=lsrc+ldest) newsize+=128;
+  while (newsize<=lsrc+ldest+1) newsize+=128;
   if (newsize>*dsize)
   { new=*dest ? realloc(*dest, newsize) : malloc(newsize);
     if (new==NULL)
     { logwrite('!', "Not enough memory!\n"); 
-      return;
+      return -1;
     }
     *dest=new;
     *dsize=newsize;
   }
+  return 0;
+}
+
+static void xstrcat(char **dest, int *dsize, char *src)
+{
+  int ldest;
+  if (xexpand(dest, dsize, strlen(src)+2))
+    return;
+  ldest=(*dest && **dest) ? strlen(*dest)+1 : 0;
   if (ldest) (*dest)[ldest-1]=' ';
   strcpy(*dest+ldest, src);
 }
@@ -2206,14 +2215,15 @@ errwrite2:
     }
     else
     {
-      strcpy(cmdline, rmail);
+      if (cmdline) *cmdline = '\0';
+      xstrcat(&cmdline, &sizecmdline, rmail);
 #ifndef UNIX
       if ((uupcver!=SENDMAIL) && (uupcver!=KENDRA))
 #ifdef __MSDOS__
-        strcat(cmdline, " -l -u");
+        xstrcat(&cmdline, &sizecmdline, "-l -u");
       else
 #else
-        strcat(cmdline, " -u");
+        xstrcat(&cmdline, &sizecmdline, "-u");
 #endif
       {
         if (uupcver==SENDMAIL)
@@ -2221,7 +2231,7 @@ errwrite2:
       {
 #endif
         {
-          strcat(cmdline, " -f ");
+          xstrcat(&cmdline, &sizecmdline, "-f");
           if (area==-1 && achanged && env_chaddr)
           { strncpy(str, from, sizeof(str));
             getaddr(str);
@@ -2233,7 +2243,9 @@ errwrite2:
               str[sizeof(msghdr.from)]=0;
               mkusername(str);
               /* strcat(cmdline, str); */
+	      xexpand(&cmdline, &sizecmdline, strlen(str)*2+strlen(myaka[curaka].domain)+40);
               p2=cmdline+strlen(cmdline);
+	      *p2++=' ';
               p=str;
               while (*p)
               {
@@ -2254,15 +2266,16 @@ errwrite2:
               strcpy(str, myaka[curaka].domain);
               p=strpbrk(str, "@%");
               if (p) *p=0;
+              strcat(cmdline, str);
             }
             else
               strcpy(str, gatemaster);
           }
-          strcat(cmdline, str);
+          if (*str) xstrcat(&cmdline, &sizecmdline, str);
         }
-        strcat(cmdline, " -- ");
+        xstrcat(&cmdline, &sizecmdline, "--");
         if (area!=-1)
-          strcat(cmdline, group[echoes[area].group].newsserv);
+          xstrcat(&cmdline, &sizecmdline, group[echoes[area].group].newsserv);
         else
         { char *p2;
           p=to;
@@ -2279,7 +2292,9 @@ errwrite2:
               p = alias[i].to;
             }
             /* strcat(cmdline, p); */
+	    xexpand(&cmdline, &sizecmdline, strlen(p)*2+3);
             p2=cmdline+strlen(cmdline);
+	    *p2++=' ';
             while (*p)
             { if (strchr(METACHARS, *p))
 #ifdef UNIX
