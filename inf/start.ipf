@@ -5,8 +5,6 @@
 :elines.
 :p.
 :ol.
-:li. Прочитайте файл :link reftype=hd refid='register.doc'.register.doc:elink..
-Если Вы не согласны с изложенными там требованиями, не используйте гейт.
 :li. Запустите :hp1.install.exe:ehp1. - он задаст некоторые вопросы и скорректирует
 файлы :hp1.uupc\conf\hostpath:ehp1., :hp1.uupc\conf\systems:ehp1.,
 :hp1.uupc\conf\call:ehp1. (если есть), :hp1.uupc\conf\passwd:ehp1.,
