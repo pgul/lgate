@@ -10,6 +10,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/07/24 19:41:51  gul
+ * minor bugfix
+ *
  * Revision 2.1  2001/07/20 15:06:12  gul
  * error processing cleanup
  *
@@ -136,10 +139,10 @@ int do_uudecode(char *infile, char *outfile)
     }
   }
   if (fclose(out))
-  if (in!=stdin) fclose(in);
   { logwrite('?', "Can't write to file: %s!\n", strerror(errno));
     r = 8;
   }
+  if (in!=stdin) fclose(in);
   if (r) unlink(outfile);
   return r;
 }
