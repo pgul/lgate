@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/19 17:52:59  gul
+ * Translate comments and cosmetic changes
+ *
  * Revision 2.1  2001/01/15 03:37:08  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -67,7 +70,7 @@
 unsigned lines;
 char remote[80], local[80];
 char badmail[FNAME_MAX];
-char fidosystem[80]="fidonet"; /* только для поля "From " */
+char fidosystem[80]="fidonet"; /* only for "From " field */
 unsigned maxcnews;
 int  tz;
 char echolog, fscmsgid;
@@ -246,7 +249,7 @@ static void canonuucpdir(char *dir)
 static void *galloc(long bytes)
 {
   if (bytes==0)
-    return (void *)1; /* а пофиг, лишь бы не NULL */
+    return (void *)1; /* anything but not NULL */
 #ifdef __MSDOS__
   if (bytes>=0x8000)
     return NULL;
@@ -396,7 +399,7 @@ int config(void)
       continue;
     }
     if (strnicmp(str, "conference", 10)==0)
-    { /* формат: "conference <rfc-name> <ftn-name>" */
+    { /* format: "conference <rfc-name> <ftn-name>" */
       if (ngroups==0) continue;
       for (p=str+10; (*p==' ') || (*p=='\t'); p++);
       p1=strpbrk(p, " \t");
@@ -483,7 +486,7 @@ int config(void)
     { if (strpbrk(str+4, "\\:/"))
         strcpy(logname, str+4);
       else
-      { /* если путь не указан - в каталог запуска */
+      { /* if path not specified, to start dir */
 #ifdef UNIX
         strcpy(logname, "/var/log/");
 #else
@@ -525,12 +528,12 @@ int config(void)
     }
     close(fout);
   }
-  /* выделяем память */
+  /* allocate memory */
   uplink=galloc(nuplink*(long)sizeof(uplink[0]));
   if (uplink==NULL)
   {
 memory:
-    logwrite('?',"Not enough memory!\n");
+    logwrite('?', "Not enough memory!\n");
     return 7;
   }
   send_to=galloc(nsend*(long)sizeof(send_to[0]));
@@ -584,7 +587,7 @@ memory:
           npaddr=ntwit=nnotwit=naka=nalias=nmoder=nchecker=nattfrom=0;
   lechonames=0;
 
-  /***** второй проход - все остальное *****/
+  /***** second pass - all the rest *****/
   if (init_tpl(nconf))
     return 2;
   tplout=1;
@@ -966,11 +969,11 @@ notfull:
         }
         p+=4;
         if (strpbrk(p, "%@"))
-          strcpy(s, strpbrk(p,"%@")+1);
+          strcpy(s, strpbrk(p, "%@")+1);
         else
           s[0]=0;
         if (p1) *p1=' ';
-        /* ищем это aka */
+        /* find this aka */
         for (i=0; i<naka; i++)
         { if ((z!=myaka[i].zone) || (nt!=myaka[i].net) ||
              (nd!=myaka[i].node) || (pt!=myaka[i].point))
@@ -1025,13 +1028,13 @@ notfull:
       continue;
     }
     if (strnicmp(str, "conference", 10)==0)
-    { /* формат: "conference <rfc-name> <ftn-name>" */
+    { /* format: "conference <rfc-name> <ftn-name>" */
       if (ngroups==0)
       { logwrite(9, "Conference group not defined!\n");
         return 9;
       }
       for (p=str+10; (*p==' ') || (*p=='\t'); p++);
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL)
         goto invparam;
       *p1=0;
@@ -1045,7 +1048,7 @@ notfull:
       if (p1)
         goto invparam;
       echoes[nechoes].usenet=(char _Far *)((char _Huge *)echonames+lechonames);
-      strcpy(echoes[nechoes].usenet,p);
+      strcpy(echoes[nechoes].usenet, p);
       lechonames+=strlen(p)+1;
       echoes[nechoes].group=ngroups-1;
       nechoes++;
@@ -1076,7 +1079,7 @@ notfull:
       gates[ngates].pktfor.zone=gates[ngates].pktfor.net=
         gates[ngates].pktfor.node=gates[ngates].pktfor.point=0;
       gates[ngates].pktfor.ftndomain[0]=0;
-      for (p++;(*p!=' ')&&(*p!='\t')&&*p;p++); /* skip mask */
+      for (p++; (*p!=' ') && (*p!='\t') && *p; p++); /* skip mask */
       if (*p)
         for (p++; (*p==' ') || (*p=='\t'); p++);
       if (strnicmp(p, "/for=", 5)==0)
@@ -1096,7 +1099,7 @@ notfull:
       }
       else if (*p)
         goto invparam;
-/* Красиво, но могут быть разные /for=  :-(
+/* Fine, but there can be different /for=  :-(
       if (gates[ngates].zone==(unsigned)-1)
       { memcpy(gates, gates+ngates, sizeof(gates[0]));
         ngates=0;
@@ -1120,7 +1123,7 @@ notfull:
       for (p++; (*p!=' ') && (*p!='\t') && *p; p++); /* skip mask */
       if (*p)
         for (p++; (*p==' ') || (*p=='\t'); p++);
-      if (strnicmp(p, "/for=",5)==0)
+      if (strnicmp(p, "/for=", 5)==0)
       { if (getfidoaddr(&(gates[ngates].pktfor.zone), &(gates[ngates].pktfor.net),
                         &(gates[ngates].pktfor.node), &(gates[ngates].pktfor.point),
                         p+5))
@@ -1285,7 +1288,7 @@ notfull:
       { while (isspace(*p)) p++;
         strncpy(myaka[naka].ftndomain, myaka[naka].domain, sizeof(myaka->ftndomain));
         myaka[naka].ftndomain[sizeof(myaka->ftndomain)-1]='\0';
-        strncpy(myaka[naka].domain,p,sizeof(myaka[0].domain)-1);
+        strncpy(myaka[naka].domain, p, sizeof(myaka[0].domain)-1);
         myaka[naka].domain[sizeof(myaka[0].domain)-1]=0;
       }
       else
@@ -1357,7 +1360,7 @@ notfull:
       p=p1+1;
       while ((*p==' ') || (*p=='\t')) p++;
       if ((*p=='\n') || (*p==0)) goto invparam;
-      strcpy(caddr[ncaddr].to,p);
+      strcpy(caddr[ncaddr].to, p);
       p=caddr[ncaddr].to+strlen(caddr[ncaddr].to);
       while ((*p=='\n') || (*p==' ') || (*p=='\t'))
         p--;
@@ -1462,7 +1465,7 @@ notfull:
       if (p!=str+12)
         goto invparam;
       while ((*p==' ') || (*p=='\t')) p++;
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL)
         goto invparam;
       *p1=0;
@@ -1475,7 +1478,7 @@ notfull:
       if (*p1==0)
         checker[nchecker].cmdline[0]='\0';
       else
-        strncpy(checker[nchecker].cmdline,p1,sizeof(checker[0].cmdline));
+        strncpy(checker[nchecker].cmdline, p1, sizeof(checker[0].cmdline));
       nchecker++;
       continue;
     }
@@ -1647,10 +1650,10 @@ notfull:
         break;
     if (i<sizeof(ignore)/sizeof(ignore[0]))
       continue;
-    logwrite('!', "Unknown line in %s ignored: %s\n",curtplname, str);
+    logwrite('!', "Unknown line in %s ignored: %s\n", curtplname, str);
   }
   close_tpl();
-  /* разбираемся, чего не хватает */
+  /* check, what required params is not specified */
   if (netmaildir[0]==0)
   { logwrite('?', "Parameter NETMAIL not specified!\n");
     return 3;
@@ -1735,7 +1738,7 @@ notfull:
 #ifdef __MSDOS__
   if (uupcver!=SENDMAIL)
 #endif
-  { p=strpbrk(rmail," \t");
+  { p=strpbrk(rmail, " \t");
     if (p) *p='\0';
     if (access(rmail, 0))
     { logwrite('?', "Can't find %s!\n", rmail);
@@ -1775,7 +1778,7 @@ notfull:
         strcpy(compress, "nul");
     }
     if ((p=getenv("extcharset"))!=NULL && (extcharset[0]==0) && charsetsdir[0]=='\0')
-      strcpy(extcharset,p);
+      strcpy(extcharset, p);
     if ((p=getenv("ExtSetName"))!=NULL && extsetname[0]==0) 
       strcpy(extsetname, p);
     if ((p=getenv("IntSetName"))!=NULL && intsetname[0]==0) 
@@ -1872,16 +1875,16 @@ incorrcharset:
       if ((strnicmp(str, "tz=", 3)==0) && (tz==0))
       { if (getmytz(str+3, &tz))
           goto invparam;
-        debug(6,"Config: GetTZ('%s') is %d", str+9, tz);
+        debug(6, "Config: GetTZ('%s') is %d", str+9, tz);
         continue;
       }
-      if (strnicmp(str, "domain=",7)==0)
+      if (strnicmp(str, "domain=", 7)==0)
       { for (p=str+7; (*p==' ') || (*p=='\t'); p++);
         strcpy(localdom, p);
         p=strchr(localdom, '\n');
         if (p) *p='\0';
       }
-      if (strnicmp(str, "bangfrom=",9)==0)
+      if (strnicmp(str, "bangfrom=", 9)==0)
       { if (tolower(str[9])=='y' || tolower(str[9])=='t')
           bangfrom=1;
         else if (tolower(str[9])=='n' || tolower(str[9])=='f')
@@ -1891,7 +1894,7 @@ incorrcharset:
         continue;
       }
       if (uupcver==KENDRA)
-      { if (strnicmp(str, "postmaster=",11)==0)
+      { if (strnicmp(str, "postmaster=", 11)==0)
         { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
           strcpy(postmast, p);
           p=strchr(postmast, '\n');
@@ -1899,7 +1902,7 @@ incorrcharset:
           stripspc(postmast);
         }
       }
-      if (strnicmp(str, "confdir=",8)==0)
+      if (strnicmp(str, "confdir=", 8)==0)
       { for (p=str+8; (*p==' ') || (*p=='\t'); p++);
         strcpy(conf_dir, p);
         p=strchr(conf_dir, '\n');
@@ -1997,7 +2000,7 @@ in1corrcharset:
   debug(6, "Config: local node is %s", local);
 #ifndef UNIX
   if ((remote[0]==0) && uupcdir[0])
-  { logwrite('?',"Can't find string \"MailServ=\" in your UUPC.RC!\n");
+  { logwrite('?', "Can't find string \"MailServ=\" in your UUPC.RC!\n");
     return 3;
   }
 #endif
@@ -2005,9 +2008,9 @@ in1corrcharset:
     debug(6, "Config: remote node is %s", remote);
 
   if (extsetname[0]==0)
-    strcpy(extsetname,EXTSETNAME);
+    strcpy(extsetname, EXTSETNAME);
   if (intsetname[0]==0)
-    strcpy(intsetname,INTSETNAME);
+    strcpy(intsetname, INTSETNAME);
   if (charsetsdir[0])
   {
     if (charsetalias[0]=='\0')
@@ -2073,7 +2076,7 @@ in1corrcharset:
   }
 
   if (pktin[0]==0)
-    strcpy(pktin, tmpdir); /* для tossbad */
+    strcpy(pktin, tmpdir); /* for tossbad */
 #ifndef UNIX
   if ((uux[0]==0) && uupcdir)
   { strcpy(uux, uupcdir);
@@ -2087,7 +2090,7 @@ in1corrcharset:
 #ifndef UNIX
   p=strpbrk(rnews, " \t");
   if (p) *p='\0';
-  if ((rnews[0]==0) || access(rnews,0))
+  if ((rnews[0]==0) || access(rnews, 0))
   { if (uupcver!=SENDMAIL)
     { if (byuux)
         logwrite('!', "Can't find %s, by-uux changed to No.\n", rnews);
@@ -2130,7 +2133,7 @@ in1corrcharset:
              getenv("UUPCSYSRC"));
       return 1;
     }
-    strcpy(str,"UUPCUSRRC=");
+    strcpy(str, "UUPCUSRRC=");
     p=str+strlen(str);
     strcpy(p, conf_dir);
     strcat(p, postmast);

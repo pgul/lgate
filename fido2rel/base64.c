@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/19 17:54:28  gul
+ * Translate comments and cosmetic changes
+ *
  * Revision 2.1  2001/01/15 03:37:08  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -49,7 +52,7 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
     for (p1=p; *p1 && !isspace(*p1); p1++);
     c=*p1;
     *p1='\0';
-    /* убираем путь */
+    /* remove path */
     for (p2=p1-1; p2>p; p2--)
       if ((*p2=='/') || (*p2=='\\') || (*p2==':'))
       { p2++;
@@ -78,7 +81,7 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
     }
     f=fopen(sfile, "rb");
     if (f==NULL)
-    { logwrite('!', "Can't open attached file %s: %s\n",sfile,strerror(errno));
+    { logwrite('!', "Can't open attached file %s: %s\n", sfile, strerror(errno));
       int2ext(p2);
       virt_fprintf(fout, "Content-Type: text/plain; charset=%s\n\n",
                    name8bit ? myextsetname : "us-ascii");
@@ -97,7 +100,7 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
       sprintf(stype, "video/mpeg");
     /* and some others ;-) */
     else
-      sprintf(stype,"application/octet-stream");
+      sprintf(stype, "application/octet-stream");
     codedname=NULL;
     if (name8bit)
     { if (!hdr8bit)
@@ -185,7 +188,7 @@ void delsentfiles(unsigned long attr, char *subj)
   {
     while (isspace(*p)) p++;
     if (*p=='\0') break;
-    for (p1=p;*p1 && !isspace(*p1);p1++);
+    for (p1=p; *p1 && !isspace(*p1); p1++);
     c=*p1;
     *p1='\0';
     if (packed)
@@ -196,7 +199,7 @@ void delsentfiles(unsigned long attr, char *subj)
           break;
         }
       sprintf(sfile, "%s%s", tmpdir, p2);
-      if (access(sfile,0) && pktin[0])
+      if (access(sfile, 0) && pktin[0])
         sprintf(sfile, "%s%s", pktin, p2);
       else
       { /* delete later - file can be attached to another recipient */
@@ -236,9 +239,9 @@ void delsentfiles(unsigned long attr, char *subj)
         killattfiles[nkillattfiles++].attr=msgTFS|msgSENT;
       }
       else
-      { h=open(sfile,O_BINARY|O_RDWR|O_EXCL);
+      { h=open(sfile, O_BINARY|O_RDWR|O_EXCL);
         if (h!=-1)
-        { chsize(h,0);
+        { chsize(h, 0);
           close(h);
           debug(4, "DelSentFiles: file %s truncated", sfile);
         }
