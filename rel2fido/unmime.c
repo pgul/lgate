@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/29 17:45:33  gul
+ * Bugfix: corrupt memory when size=0 and --with-perl on large messages
+ *
  * Revision 2.1  2001/01/25 16:35:46  gul
  * Translate comments and cosmetic changes
  *
@@ -532,9 +535,9 @@ static int fputbyte(char c)
   { /* not enough memory - create file */
 #ifdef DO_PERL
     char *newmsgbuf;
-    if ((newmsgbuf=bufrealloc(msgbuf, mbufsize+maxpart*1024l)) != NULL)
+    if ((newmsgbuf=bufrealloc(msgbuf, mbufsize+(maxpart ? maxpart*1024l : MSGBUFSIZE))) != NULL)
     { msgbuf = newmsgbuf;
-      mbufsize += maxpart*1024l;
+      mbufsize += (maxpart ? maxpart*1024l : MSGBUFSIZE);
       return 0;
     }
 #endif
