@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/24 14:34:05  gul
+ * bugfix: mode 750 -> 0750
+ *
  * Revision 2.0  2001/01/10 20:42:19  gul
  * We are under CVS for now
  *
@@ -30,7 +33,7 @@
 #include <dir.h>
 #endif
 #if defined(__EMX__) || defined(UNIX)
-#define mkdir(name) mkdir(name, 750)
+#define mkdir(name) mkdir(name, 0750)
 #endif
 #include "fidolib.h"
 
