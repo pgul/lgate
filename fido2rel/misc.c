@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.13  2003/03/25 19:57:41  gul
+ * Clear message attributes for retoss
+ *
  * Revision 2.12  2003/03/25 19:46:39  gul
  * Bugfix in retoss first message in badmail
  *
@@ -526,6 +529,7 @@ void retoss(void)
       close(h);
       continue;
     }
+    msghdr.attr &= msgPRIVATE|msgFILEATT|msgFREQ|msgRETRECREQ|msgRETREC|msgAUDITTR|msgUPREQ;
     /* put msg to pkt */
     writemsghdr(&msghdr, fbad);
     firstbuf=1;
