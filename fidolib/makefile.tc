@@ -48,7 +48,7 @@ $?
 	$(LIB) $@ +- @objlist.tmp
 	del objlist.tmp
 
-turboc.cfg:
+turboc.cfg:	makefile.tc
 	copy &&|
 -w
 -K

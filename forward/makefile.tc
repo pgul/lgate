@@ -24,7 +24,7 @@ $(OBJDIR)\forward.obj:   forward.c ..\lib\libgate.h ..\fidolib\fidolib.h turboc.
 forward.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\lgate.lib ..\fidolib\flib_l.lib
   $(CC) -e$@ $(OBJS) lgate.lib flib_l.lib
 
-turboc.cfg:
+turboc.cfg:	makefile.tc
   copy &&|
 -ml
 -w
