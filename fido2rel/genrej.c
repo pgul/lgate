@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2002/09/22 09:32:41  gul
+ * syntax error fix
+ *
  * Revision 2.2  2002/09/22 09:14:28  gul
  * create reject msg/pkt more clear
  *
@@ -14,6 +17,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #ifdef HAVE_DOS_H
 #include <dos.h>
 #endif
@@ -49,6 +53,10 @@
 #include <arpa/inet.h>
 #endif
 #include "gate.h"
+
+#ifndef O_DENYNONE
+#define O_DENYNONE 0
+#endif
 
 int  packmail=0;
 int  seqf=0;
@@ -224,7 +232,7 @@ void genlett(int reason, char *toname,
 {
   time_t curtime;
   struct tm *curtm;
-  int h;
+  int h=-1;
 
   /* create bounce .msg */
   /* init vars */
@@ -288,7 +296,7 @@ void genlett(int reason, char *toname,
     for (i=maxnum+1; i<maxnum+1000; i++)
     {
       sprintf(msgname+strlen(msgname), "%u.msg", maxnum+1);
-      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL, SH_DENYALL);
+      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
       if (h!=-1 || errno!=EEXIST)
         break;
     }
@@ -321,7 +329,7 @@ void genlett(int reason, char *toname,
     initmax=time(0);
     for (maxnum=initmax+1; maxnum!=initmax; maxnum++)
     { sprintf(msgname, "%s%lx.pkt", pktout, maxnum);
-      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL, SH_DENYALL);
+      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
       if (h!=-1 || errno!=EEXIST)
         break;
     }
@@ -350,6 +358,7 @@ void genlett(int reason, char *toname,
       }
       else
         writepkthdr(frej);
+    }
   }
   debug(6, "GenLett: msgname is %s", msgname);
   if (frej==NULL)
