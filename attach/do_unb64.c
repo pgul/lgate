@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/07/20 16:13:26  gul
+ * q-p decode bugfix
+ *
  * Revision 2.2  2001/07/20 15:06:11  gul
  * error processing cleanup
  *
@@ -42,7 +45,7 @@
 /* single-character decode */
 #define DEC(c)		cunbase64[c]
 
-static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *));
+int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *));
 static int decode_b64(FILE *in, FILE *out);
 static int decode_qp(FILE *in, FILE *out);
 static char buf[128];
@@ -55,7 +58,7 @@ int do_unqp(char *infile, char *outfile)
 { return do_unmime(infile, outfile, decode_qp);
 }
 
-static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
+int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
 {
   FILE *in, *out;
   int  i, r;
@@ -121,7 +124,7 @@ static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
       if (strncmp(str, "Content-Transfer-Encoding:", 26))
         continue;
       for (p=str+26; isspace(*p); p++);
-      if (strnicmp(p, "base64", 6))
+      if (strnicmp(p, "base64", 6) && strnicmp(p, "quoted-printable", 16))
         continue;
       inparthdr=2;
     }
