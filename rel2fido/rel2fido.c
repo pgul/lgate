@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.17  2004/07/20 18:38:06  gul
+ * \r\n -> \n
+ *
  * Revision 2.16  2004/07/07 08:24:32  gul
  * Improved logging
  *

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2004/07/20 18:38:05  gul
+ * \r\n -> \n
+ *
  * Revision 2.5  2002/01/07 09:57:24  gul
  * Added init_textline() for hrewind()
  *

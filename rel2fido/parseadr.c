@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 18:38:06  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2004/07/07 09:14:54  gul
  * Fixed chaddr
  *

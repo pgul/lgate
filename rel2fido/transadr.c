@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/07/20 18:38:06  gul
+ * \r\n -> \n
+ *
  * Revision 2.1  2004/07/20 18:37:11  gul
  * Reformat source, translate comments
  *

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2004/07/20 18:38:06  gul
+ * \r\n -> \n
+ *
  * Revision 2.5  2004/07/04 09:01:05  gul
  * Fixes for gcc 3.3.3
  *

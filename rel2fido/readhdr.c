@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 18:38:06  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2002/10/29 19:40:13  gul
  * MSGID generation minor fix
  *
