@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2001/04/20 16:23:21  gul
+ * minor bugfix
+ *
  * Revision 2.7  2001/04/20 06:07:25  gul
  * minor bugfix
  *
@@ -1346,7 +1349,7 @@ errlet:
         break;
       }
       if (ibufpart+strlen(str)+sizeof(tearline)+sizeof(origin)+1>
-          (maxpart ? 1024l*maxpart : fsize)+RESPART)
+          (maxpart ? 1024l*maxpart : partsize)+RESPART)
       { if (cont)
         { bufcopy(bufpart, ibufpart, "\r", 2);
           ibufpart++;
