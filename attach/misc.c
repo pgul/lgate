@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0.2.2  2002/10/02 09:55:37  gul
+ * Fix syntax error
+ *
  * Revision 2.0.2.1  2002/10/02 09:53:45  gul
  * Fix syntax error
  *
@@ -190,8 +193,8 @@ int params(int argc, char * argv[])
     return 1;
   }
 #if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
-  if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid())
-  { puts("You do not allowed to use -c switch\n";
+  if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
+  { puts("You do not allowed to use -c switch\n");
     return RET_ERR;
   }
 #endif
