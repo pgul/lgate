@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/04/22 16:03:03  gul
+ * create script executable (mode 0755)
+ *
  * Revision 2.2  2001/04/18 21:59:21  gul
  * Bugfix
  *
@@ -94,6 +97,10 @@ int saveargs(int argc, char *argv[])
   if ((!isatty(fileno(stdin))) && (!isfile(fileno(stdin))))
     /* pipe */
     fprintf(f, "type %s|", nametxt);
+#elif UNIX
+  fchmod(fileno(f), 0755);
+  if ((!isatty(fileno(stdin))) && (!isfile(fileno(stdin))))
+    fprintf(f, "cat %s|", nametxt);
 #endif
   for (c=0; c<argc; c++)
   { if ((argv[c][0]=='-') || (argv[c][0]=='/'))
@@ -103,9 +110,17 @@ int saveargs(int argc, char *argv[])
     n=0;
     if (strchr(argv[c], ' ')) str[n++]='\"';
     for (p=argv[c]; *p; p++)
-    { if (*p=='\"') str[n++]='\\';
+    {
+#ifdef UNIX
+      if (strchr("\"\'!~$<>|;[]*?()&`#\\", *p))
+#else
+      if (*p=='\"')
+#endif
+        str[n++]='\\';
       str[n++] = *p;
+#ifndef UNIX
       if (*p=='%') str[n++] = *p;
+#endif
     }
     if (strchr(argv[c], ' ')) str[n++]='\"';
     str[n]='\0';
@@ -116,7 +131,9 @@ int saveargs(int argc, char *argv[])
   { fclose(f);
     return 0;
   }
+#if defined(UNIX) || defined(__OS2__)
   if (isfile(fileno(stdin)))
+#endif
     fprintf(f, "<%s\n", nametxt);
   fclose(f);
   f=fopen(nametxt, "wb");
