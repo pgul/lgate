@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2004/07/04 09:01:05  gul
+ * Fixes for gcc 3.3.3
+ *
  * Revision 2.4  2002/01/07 09:57:24  gul
  * Added init_textline() for hrewind()
  *
@@ -249,7 +252,7 @@ static int unbase64(int (*getbyte)(void), int (*putbyte)(char))
       s[i]=(char)c;
       if (isspace(s[i])) continue;
       s[i]=cunbase64[(int)s[i]];
-      if (s[i]==0xff)
+      if (s[i]==(char)0xff)
       { ret=1;
         break;
       }
@@ -284,7 +287,7 @@ static int unbase64(int (*getbyte)(void), int (*putbyte)(char))
   return ret;
 }
 
-static int getline(char *str, unsigned size, int (*getbyte)(void))
+static int get_line(char *str, unsigned size, int (*getbyte)(void))
 {
   int i, c;
 
@@ -315,7 +318,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
   unsigned short sum=0, fsum;
   long len=0, flen;
 
-  while ((n=getline(uustr, sizeof(uustr), getbyte))!=0)
+  while ((n=get_line(uustr, sizeof(uustr), getbyte))!=0)
     if (strncmp(uustr, "begin ", 6)==0)
       break;
   if (n==0)
@@ -346,7 +349,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
     }
   }
   n=1; /* EOF is error */
-  while (getline(uustr, sizeof(uustr), getbyte))
+  while (get_line(uustr, sizeof(uustr), getbyte))
   {
     if (uustr[0]=='\n') continue;
     n=DEC(uustr[0]);
@@ -399,7 +402,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
     while (getbyte()!=-1);
     return 1;
   }
-  while (getline(uustr, sizeof(uustr), getbyte))
+  while (get_line(uustr, sizeof(uustr), getbyte))
   { if (uustr[0]=='\n') continue;
     if (strcmp(uustr, "end\n"))
     { while (getbyte()!=-1);
@@ -407,7 +410,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
       return 0;
     }
     /* good uucode */
-    while (getline(uustr, sizeof(uustr), getbyte))
+    while (get_line(uustr, sizeof(uustr), getbyte))
     { if (strncmp(uustr, "sum -r/size ", 12)) continue;
       if (strstr(uustr, " entire input file")==NULL) continue;
       if (sscanf(uustr+12, "%hu/%lu", &fsum, &flen)!=2) continue;
@@ -834,7 +837,7 @@ void altkoi8(char *s)
 { int i;
   xtable=set_table(extsetname, extsetname);
   for(; *s; s=(char *)((char _Huge *)s+1))
-    if (*s>=128)
+    if (*s & 0x80)
     { for(i=0; i<128; i++)
         if (xtable[i]==*s)
           break;
@@ -1040,7 +1043,8 @@ static char *decode2231(char *str, char *charset)
     dest[0]=src[0];
     dest[1]=src[1];
     dest[2]='\0';
-    *dest++=(unsigned char)strtol(dest, NULL, 16);
+    *dest=(unsigned char)strtol(dest, NULL, 16);
+    dest++;
   }
   *dest='\0';
   if (charset)
