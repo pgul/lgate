@@ -2,23 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.6  2001/07/26 12:48:55  gul
- * 7bit- and 8bit-encoded attaches bugfix
- *
- * Revision 2.5  2001/07/20 21:43:26  gul
- * Decode attaches with 8bit encoding
- *
- * Revision 2.4  2001/07/20 21:22:52  gul
- * multipart/mixed decode cleanup
- *
- * Revision 2.3  2001/07/20 16:35:35  gul
- * folded Content-Disposition header held
- *
- * Revision 2.2  2001/07/20 14:55:22  gul
- * Decode quoted-printable attaches
- *
- * Revision 2.1  2001/01/26 14:29:14  gul
- * Added libgen.h for basename()
+ * Revision 2.0.2.1  2002/10/02 09:52:38  gul
+ * Fix compiler warning
  *
  * Revision 2.0  2001/01/10 20:42:15  gul
  * We are under CVS for now
@@ -124,12 +109,12 @@ static void alltopostmast(struct listtype *last)
 
 void checktmp(void)
 { int r;
-  int curpart, parts, inparthdr, npart=0, decodepart=0;
+  int curpart, parts, inparthdr;
   int day, mon, year, hour, min, sec;
   char *p, *p1;
   struct stat statbuf;
 
-  /* 1. Build list */
+  /* 1. Строим list */
 
   flist=NULL;
   d=opendir(incomplete);
@@ -154,13 +139,13 @@ void checktmp(void)
     /* read header */
     subj[0]=from[0]=0;
     partial=0;
-    enc=ENC_UUCP;
+    enc=ENC_UUE;
     cont_type[0]='\0';
     part_id[0]='\0';
     inname[0]='\0';
     password[0]='\0';
     boundary[0]='\0';
-    curpart=parts=npart=decodepart=0;
+    curpart=parts=0;
     while (fgets(str, sizeof(str), fin))
     {
 gotline:
@@ -180,19 +165,10 @@ gotline:
       if (strnicmp(str, "Content-Transfer-Encoding:", 26)==0)
       { for (p=str+26; (*p==' ') || (*p=='\t'); p++);
         debug(8, "CheckTmp: content-transfer-encoding is %s", p);
-        if (decodepart==0 || decodepart==npart)
-        {
-          if (strnicmp(p, "base64", 6)==0)
-            enc=ENC_BASE64;
-          else if (strnicmp(p, "quoted-printable", 16)==0)
-            enc=ENC_QP;
-          else if (strnicmp(p, "8bit", 16)==0)
-            enc=ENC_8BIT;
-          else if (strnicmp(p, "7bit", 16)==0)
-            enc=ENC_7BIT;
-          else if (strnicmp(p, "x-pgp", 5)==0)
-            enc=ENC_PGP;
-        }
+        if (strnicmp(p, "base64", 6)==0)
+          enc=ENC_BASE64;
+        else if (strnicmp(p, "x-pgp", 5)==0)
+          enc=ENC_PGP;
       }
       if (strnicmp(str, "Content-Type:", 13)==0)
       { strcpy(cont_type, str);
@@ -225,18 +201,9 @@ gotline:
         break;
       }
       if (strnicmp(str, "Content-Disposition:", 20)==0)
-      { strcpy(sstr, str);
-        while (fgets(str, sizeof(str), fin))
-        { if ((str[0]==' ') || (str[0]=='\t'))
-            strncat(sstr, str, sizeof(sstr));
-          else
-          { getparam(sstr, "filename", inname, sizeof(inname));
-            if (inname[0]=='\0')
-              getvalue(sstr, inname, sizeof(inname));
-            goto gotline;
-          }
-        }
-        break;
+      { getparam(str, "filename", inname, sizeof(inname));
+        if (inname[0]=='\0')
+          getvalue(str, inname, sizeof(inname));
       }
     }
     fclose(fin);
@@ -544,7 +511,6 @@ errfputs:
             if (strncmp(str+2, boundary, strlen(boundary))==0 &&
                 str[strlen(boundary)+2]=='\n')
             { inparthdr=1;
-              npart++;
               continue;
             }
           if (inparthdr)
@@ -554,14 +520,9 @@ errfputs:
               { if ((str[0]==' ') || (str[0]=='\t'))
                   strncat(cont_type, str, sizeof(cont_type));
                 else
-                { if (decodepart==0 || decodepart==npart || inname[0]==0)
-                  { getparam(cont_type, "name", inname, sizeof(inname));
-                    if (inname[0])
-                    { strncpy(last->arcname, inname, sizeof(last->arcname));
-                      decodepart=npart;
-                      if (enc == ENC_UUCP) enc = ENC_7BIT;
-                    }
-                  }
+                { getparam(cont_type, "name", inname, sizeof(inname));
+                  if (inname[0])
+                    strncpy(last->arcname, inname, sizeof(last->arcname));
                   goto gotline1;
                 }
               }
@@ -569,41 +530,19 @@ errfputs:
             }
             else if (strnicmp(str, "Content-Transfer-Encoding:", 26)==0)
             { for (p=str+26; isspace(*p); p++);
-              if (decodepart==0 || decodepart==npart)
-              { if (strnicmp(p, "base64", 6)==0)
-                  last->enc=ENC_BASE64;
-                else if (strnicmp(p, "quoted-printable", 16)==0)
-                  last->enc=ENC_QP;
-                else if (strnicmp(p, "8bit", 16)==0)
-                  last->enc=ENC_8BIT;
-                else if (strnicmp(p, "7bit", 16)==0)
-                  last->enc=ENC_7BIT;
-                else if (strnicmp(p, "x-pgp", 5)==0)
-                  last->enc=ENC_PGP;
-              }
+              if (strnicmp(p, "base64", 6)==0)
+                last->enc=ENC_BASE64;
+              else if (strnicmp(p, "x-pgp", 5)==0)
+                last->enc=ENC_PGP;
             }
             else if (strnicmp(str, "Content-Disposition:", 20)==0)
-            { strcpy(sstr, str);
-              while (fgets(str, sizeof(str), fin))
-              { if ((str[0]==' ') || (str[0]=='\t'))
-                  strncat(sstr, str, sizeof(sstr));
-                else
-                { if (decodepart==0 || decodepart==npart || inname[0]==0)
-                  { getparam(sstr, "filename", inname, sizeof(inname));
-                    if (inname[0])
-                    { strncpy(last->arcname, inname, sizeof(last->arcname));
-                      decodepart=npart;
-                      if (enc == ENC_UUCP) enc = ENC_7BIT;
-                    }
-                  }
-                  goto gotline1;
-                }
-              }
-              break;
+            { getparam(str, "filename", inname, sizeof(inname));
+              if (inname[0])
+                strncpy(last->arcname, inname, sizeof(last->arcname));
             }
           }
           else
-          { if ((enc==ENC_UUE || enc==ENC_UUCP || enc==ENC_8BIT || enc==ENC_7BIT) && strnicmp(str, "begin ", 6)==0 &&
+          { if (enc==ENC_UUE && strnicmp(str, "begin ", 6)==0 &&
                 isdigit(str[6]) && isdigit(str[7]) && isdigit(str[8]) &&
                 ((str[9]==' ' && str[10] && !isspace(str[10])) ||
                 (isdigit(str[9]) && str[10]==' ' && str[11] && !isspace(str[11]))))
@@ -613,7 +552,6 @@ errfputs:
               last->arcname[sizeof(last->arcname)-1]='\0';
               for (p=last->arcname; *p && !isspace(*p); p++);
               *p='\0';
-              enc=ENC_UUE;
             }
           }
         }
@@ -661,7 +599,6 @@ errfputs:
     /* run uudecode */
     mkarcname(last->arcname, inname, last->passwd);
     mktempname(TMPARCNAME, tmp_arc);
-    if (last->enc==ENC_UUCP) last->enc=ENC_UUE;
     if (uudecode_fmt[0] && (last->enc==ENC_UUE))
     { strcpy(str, uudecode_fmt);
 #ifndef UNIX
@@ -694,19 +631,7 @@ errfputs:
     { /* internal */
       if (last->enc==ENC_BASE64)
       { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
-        r=do_unbase64(tmpname, tmp_arc, decodepart);
-      }
-      else if (last->enc==ENC_QP)
-      { debug(5, "CheckTmp: run internal q-p decoder %s to %s", tmpname, tmp_arc);
-        r=do_unqp(tmpname, tmp_arc, decodepart);
-      }
-      else if (last->enc==ENC_8BIT)
-      { debug(5, "CheckTmp: run internal 8bit decoder %s to %s", tmpname, tmp_arc);
-        r=do_un8bit(tmpname, tmp_arc, decodepart);
-      }
-      else if (last->enc==ENC_7BIT)
-      { debug(5, "CheckTmp: run internal 7bit decoder %s to %s", tmpname, tmp_arc);
-        r=do_un7bit(tmpname, tmp_arc, decodepart);
+        r=do_unbase64(tmpname, tmp_arc);
       }
       else
       { debug(5, "CheckTmp: run internal uudecode %s to %s", tmpname, tmp_arc);

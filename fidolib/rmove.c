@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0.2.2  2002/10/02 09:49:22  gul
+ * Fix compiler warning
+ *
  * Revision 2.0.2.1  2002/10/02 09:42:57  gul
  * fix compiler errors
  *
@@ -36,7 +39,7 @@ int strnicmp(char *s1, char *s2, int n);
 int rmove(char *oldname, char *newname)
 {
   int  i, arcmail;
-  char *p, *p1;
+  char *p, *p1=NULL;
 
   if (move(oldname, newname)==0)
     return 0;
