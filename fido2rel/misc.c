@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/19 17:43:06  gul
+ * Cosmetic changes
+ *
  * Revision 2.2  2001/01/16 19:10:14  gul
  * cosmetic changes (translate comments etc.)
  *
@@ -451,7 +454,7 @@ void retoss(void)
   pkthdr.ProdCodeH=MAJVER;
   pkthdr.ProdCodeL=MINVER;
 #endif
-  strncpy(pkthdr.password,pktpwd,8);
+  strncpy(pkthdr.password, pktpwd, 8);
   pkthdr.OrigZone=uplink[0].zone;
   pkthdr.DestZone=myaka[0].zone;
   pkthdr.AuxNet=0;
@@ -698,7 +701,7 @@ static void one_pkt(char * msgname)
   debug(15, "One_Pkt: pkt passwd='%s'", str);
   debug(17, "One_Pkt: AuxNet=%d, OrigZone_=%d, DestZone_=%d",
         pkthdr.AuxNet, pkthdr.OrigZone_, pkthdr.DestZone_);
-  for (i=0;i<naka;i++)
+  for (i=0; i<naka; i++)
     if ((pkthdr.DestNode==myaka[i].node) &&
         (pkthdr.DestNet==myaka[i].net) &&
         (pkthdr.DestZone==myaka[i].zone) &&
@@ -706,7 +709,7 @@ static void one_pkt(char * msgname)
       break;
   if (i==naka)
   {
-    for (i=0;i<ngates;i++)
+    for (i=0; i<ngates; i++)
       if ((pkthdr.DestNode==gates[i].pktfor.node) &&
           (pkthdr.DestNet==gates[i].pktfor.net) &&
           (pkthdr.DestZone==gates[i].pktfor.zone) &&
@@ -758,7 +761,7 @@ static void one_pkt(char * msgname)
   }
   strncpy(str, pkthdr.password, 8);
   str[8]=0;
-  if (stricmp(str,pktpwd) && pktpwd[0])
+  if (stricmp(str, pktpwd) && pktpwd[0])
   { logwrite('!', "Incorrect password \"%s\" in %s: expected \"%s\"\n",
              str, msgname, pktpwd);
     badpkt();
@@ -1492,7 +1495,7 @@ lboxes:
       { sprintf(loname, "%s%c%c%c%c%c%c%c%c.%c%c", tboxes,
                 dhex(fpktaddr.zone/32),  dhex(fpktaddr.zone%32),
                 dhex(fpktaddr.net/1024), dhex((fpktaddr.net/32)%32), dhex(fpktaddr.net%32),
-                dhex(fpktaddr.node/1024),dhex((fpktaddr.node/32)%32),dhex(fpktaddr.node%32),
+                dhex(fpktaddr.node/1024), dhex((fpktaddr.node/32)%32), dhex(fpktaddr.node%32),
                 dhex(fpktaddr.point/32), dhex(fpktaddr.point%32));
         checkbox(loname);
         if (killed) break;
@@ -1690,7 +1693,7 @@ int extcheck(char *addr, int *area)
   */
   int  i;
   char *p, *p1;
-  static char tmpaddr[80],conflist[1024];
+  static char tmpaddr[80], conflist[1024];
   int  newarea;
   static char extstr[256];
 #if defined(__OS2__)
@@ -1714,9 +1717,9 @@ int extcheck(char *addr, int *area)
 
   /* external check */
   for (i=0; i<nchecker; i++)
-  { if (stricmp(checker[i].mask,"any")==0) break;
-    if ((*area!=-1) && (stricmp(checker[i].mask,"echo")==0)) break;
-    if ((*area==-1) && (cmpaddr(addr,checker[i].mask)==0)) break;
+  { if (stricmp(checker[i].mask, "any")==0) break;
+    if ((*area!=-1) && (stricmp(checker[i].mask, "echo")==0)) break;
+    if ((*area==-1) && (cmpaddr(addr, checker[i].mask)==0)) break;
   }
   if ((i==nchecker) || (checker[i].cmdline[0]=='\0'))
     return 3;
