@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/01/28 03:56:41  gul
+ * fixed compilation error
+ *
  * Revision 2.4  2001/01/28 03:51:10  gul
  * convert msgid to FTN-form for reply-linking even if there is another address
  * (correct return address always is in the origin).
@@ -736,7 +739,9 @@ wasreject:
     if (fmsgid[0])
     { if (getfidoaddr(&i, &j, &k, &n, fmsgid)==0)
       { /* put original msgid, addr is at origin
-        if ((i==hiszone) && (j==hisnet) && (k==hisnode) && (n==hispoint))
+        if (i!=hiszone || j!=hisnet || k!=hisnode || n!=hispoint)
+          fmsgid[0]=0;
+        else
         */
         { p=strchr(fmsgid, ' ');
           if (p)
@@ -746,7 +751,6 @@ wasreject:
           }
           else fmsgid[0]=0;
         }
-        else fmsgid[0]=0;
       }
       else fmsgid[0]=0;
     }
