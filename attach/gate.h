@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2001/07/26 12:48:55  gul
+ * 7bit- and 8bit-encoded attaches bugfix
+ *
  * Revision 2.5  2001/07/20 21:43:26  gul
  * Decode attaches with 8bit encoding
  *
@@ -47,7 +50,7 @@
 
 #include <libgate.h>
 
-typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_QP, ENC_8BIT, ENC_PGP } enctype;
+typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_QP, ENC_8BIT, ENC_7BIT, ENC_PGP } enctype;
 typedef enum {NO_SEM, FD_SEM, BINK_SEM, LBSO_SEM} semtype;
 typedef enum {RESEND, SECURE, UNSECURE} pwdtype;
 
@@ -72,6 +75,7 @@ int  do_uudecode(char *infile, char *outfile);
 int  do_unbase64(char *infile, char *outfile, int decodepart);
 int  do_unqp(char *infile, char *outfile, int decodepart);
 int  do_un8bit(char *infile, char *outfile, int decodepart);
+int  do_un7bit(char *infile, char *outfile, int decodepart);
 int  str_unbase64(char *in, char *out);
 void str_base64(char *in, char *out, int len);
 #ifdef _IOFBF  /* stdio.h included */

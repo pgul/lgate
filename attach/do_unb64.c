@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2001/07/26 12:48:55  gul
+ * 7bit- and 8bit-encoded attaches bugfix
+ *
  * Revision 2.5  2001/07/20 21:43:26  gul
  * Decode attaches with 8bit encoding
  *
@@ -69,6 +72,9 @@ int do_un8bit(char *infile, char *outfile, int decodepart)
 { return do_unmime(infile, outfile, decodepart, "8bit", decode_8bit);
 }
 
+int do_un7bit(char *infile, char *outfile, int decodepart)
+{ return do_unmime(infile, outfile, decodepart, "7bit", decode_8bit);
+}
 
 int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int decode(FILE *, FILE *))
 {
@@ -118,12 +124,15 @@ int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int d
   for (r=0; (i=fgetc(in))!=EOF; r=i)
     if (i=='\n' && r=='\n') break;
   if (i!=EOF && boundary[0])
-  { int inparthdr=0;
+  { int inparthdr=0, wasenc=0;
     char *p;
 
     while (fgets(str, sizeof(str), in))
     { if (strcmp(str, "\n")==0)
-      { if (inparthdr==2) break;
+      { if (inparthdr==2 && !wasenc && encoding[0]!='7')
+        /* matched part number but unmatched (missing) encoding */
+          inparthdr=1;
+        if (inparthdr==2) break;
         inparthdr=0;
         continue;
       }
@@ -131,6 +140,7 @@ int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int d
           strncmp(str+2, boundary, strlen(boundary))==0 &&
           str[strlen(boundary)+2]=='\n')
       { inparthdr=1;
+        wasenc=0;
         npart++;
         if (npart==decodepart)
           inparthdr=2;
@@ -139,10 +149,14 @@ int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int d
       if (!inparthdr) continue;
       if (strncmp(str, "Content-Transfer-Encoding:", 26))
         continue;
+      wasenc=1;
       for (p=str+26; isspace(*p); p++);
       if (strnicmp(p, encoding, strlen(encoding)))
+      { inparthdr=1;
         continue;
-      inparthdr=2;
+      }
+      if (decodepart==0)
+        inparthdr=2;
     }
     if (inparthdr!=2) i=EOF;
   }
@@ -391,9 +405,75 @@ static int decode_qp(FILE *in, FILE *out)
 }
 
 static int decode_8bit(FILE *in, FILE *out)
-{ int i;
-  while ((i=fread(buf, 1, sizeof(buf), in))>0)
-    if (fwrite(buf, 1, i, out) != i)
-      return 3;
+{
+  /* find boundary, convert LF->CRLF */
+  int c, lastc=0;
+  int bmatch=0;
+  char *pbound=NULL;
+
+  for (;;)
+  { if (pbound)
+    { 
+      if (pbound+4-boundary==bmatch)
+      { bmatch=0;
+        pbound=NULL;
+        c=lastc;
+      }
+      else if (pbound==boundary-4)
+        c='\r';
+      else if (pbound==boundary-3)
+        c='\n';
+      else if (pbound==boundary-2)
+        c='-';
+      else if (pbound==boundary-1)
+        c='-';
+      else
+        c=*pbound;
+      if (pbound) pbound++;
+    } else
+    { c = fgetc(in);
+      if (c=='\r' && bmatch==0)
+      { bmatch=1;
+        continue;
+      }
+      if (c=='\n' && bmatch<=1)
+      { bmatch=2;
+        continue;
+      }
+      if (c=='-' && (bmatch==2 || bmatch==3))
+      { bmatch++;
+        continue;
+      }
+      if (bmatch && boundary[0]=='\0')
+      { lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
+      if (bmatch==strlen(boundary)+4)
+      { if (c=='\r' || c=='-') continue;
+        if (c=='\n') /* boundary matched! */
+          return 0;
+        lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
+      if (bmatch>=4)
+      { if (c==boundary[bmatch-4])
+        { bmatch++;
+        } else
+        { lastc=c;
+          pbound=boundary-4;
+        }
+        continue;
+      }
+      if (bmatch)
+      { lastc=c;
+        pbound=boundary-4;
+        continue;
+      }
+    }
+    if (c==EOF) return 0;
+    if (fputc(c, out)==EOF) return 3;
+  }
   return 0;
 }

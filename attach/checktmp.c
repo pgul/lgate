@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2001/07/26 12:48:55  gul
+ * 7bit- and 8bit-encoded attaches bugfix
+ *
  * Revision 2.5  2001/07/20 21:43:26  gul
  * Decode attaches with 8bit encoding
  *
@@ -151,7 +154,7 @@ void checktmp(void)
     /* read header */
     subj[0]=from[0]=0;
     partial=0;
-    enc=ENC_UUE;
+    enc=ENC_UUCP;
     cont_type[0]='\0';
     part_id[0]='\0';
     inname[0]='\0';
@@ -185,6 +188,8 @@ gotline:
             enc=ENC_QP;
           else if (strnicmp(p, "8bit", 16)==0)
             enc=ENC_8BIT;
+          else if (strnicmp(p, "7bit", 16)==0)
+            enc=ENC_7BIT;
           else if (strnicmp(p, "x-pgp", 5)==0)
             enc=ENC_PGP;
         }
@@ -554,6 +559,7 @@ errfputs:
                     if (inname[0])
                     { strncpy(last->arcname, inname, sizeof(last->arcname));
                       decodepart=npart;
+                      if (enc == ENC_UUCP) enc = ENC_7BIT;
                     }
                   }
                   goto gotline1;
@@ -570,6 +576,8 @@ errfputs:
                   last->enc=ENC_QP;
                 else if (strnicmp(p, "8bit", 16)==0)
                   last->enc=ENC_8BIT;
+                else if (strnicmp(p, "7bit", 16)==0)
+                  last->enc=ENC_7BIT;
                 else if (strnicmp(p, "x-pgp", 5)==0)
                   last->enc=ENC_PGP;
               }
@@ -585,6 +593,7 @@ errfputs:
                     if (inname[0])
                     { strncpy(last->arcname, inname, sizeof(last->arcname));
                       decodepart=npart;
+                      if (enc == ENC_UUCP) enc = ENC_7BIT;
                     }
                   }
                   goto gotline1;
@@ -594,7 +603,7 @@ errfputs:
             }
           }
           else
-          { if ((enc==ENC_UUE || enc==ENC_8BIT) && strnicmp(str, "begin ", 6)==0 &&
+          { if ((enc==ENC_UUE || enc==ENC_UUCP || enc==ENC_8BIT || enc==ENC_7BIT) && strnicmp(str, "begin ", 6)==0 &&
                 isdigit(str[6]) && isdigit(str[7]) && isdigit(str[8]) &&
                 ((str[9]==' ' && str[10] && !isspace(str[10])) ||
                 (isdigit(str[9]) && str[10]==' ' && str[11] && !isspace(str[11]))))
@@ -652,6 +661,7 @@ errfputs:
     /* run uudecode */
     mkarcname(last->arcname, inname, last->passwd);
     mktempname(TMPARCNAME, tmp_arc);
+    if (last->enc==ENC_UUCP) last->enc=ENC_UUE;
     if (uudecode_fmt[0] && (last->enc==ENC_UUE))
     { strcpy(str, uudecode_fmt);
 #ifndef UNIX
@@ -693,6 +703,10 @@ errfputs:
       else if (last->enc==ENC_8BIT)
       { debug(5, "CheckTmp: run internal 8bit decoder %s to %s", tmpname, tmp_arc);
         r=do_un8bit(tmpname, tmp_arc, decodepart);
+      }
+      else if (last->enc==ENC_7BIT)
+      { debug(5, "CheckTmp: run internal 7bit decoder %s to %s", tmpname, tmp_arc);
+        r=do_un7bit(tmpname, tmp_arc, decodepart);
       }
       else
       { debug(5, "CheckTmp: run internal uudecode %s to %s", tmpname, tmp_arc);

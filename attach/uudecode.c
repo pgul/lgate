@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/07/26 12:48:55  gul
+ * 7bit- and 8bit-encoded attaches bugfix
+ *
  * Revision 2.4  2001/07/20 21:43:26  gul
  * Decode attaches with 8bit encoding
  *
@@ -286,6 +289,8 @@ newmess:
             enc=ENC_QP;
           if (strnicmp(p, "8bit", 16)==0)
             enc=ENC_8BIT;
+          if (strnicmp(p, "7bit", 16)==0)
+            enc=ENC_7BIT;
           else if (strnicmp(p, "x-pgp", 5)==0)
             enc=ENC_PGP;
           else if ((strnicmp(p, "x-uue", 5)==0) ||
@@ -319,13 +324,17 @@ newmess:
         else if (strnicmp(p, "message/", 8) &&
                  strnicmp(p, "multipart/", 10) &&
                  strnicmp(p, "text", 4))
-          if (decodepart==0)
-            decodepart=npart;
+        { if (decodepart == 0)
+            decodepart = npart;
+          if (enc == ENC_UUCP) enc = ENC_7BIT;
+        }
 #endif
         if (tmp_arc[0]=='\0')
         { getparam(sstr, "name", tmp_arc, sizeof(tmp_arc));
           if (tmp_arc[0])
-            decodepart=npart;
+          { decodepart=npart;
+            if (enc == ENC_UUCP) enc = ENC_7BIT;
+          }
         }
         if (decodepart==npart || decodepart==0)
         { getparam(sstr, "crc32", scrc32, sizeof(scrc32));
@@ -354,11 +363,16 @@ newmess:
         }
         getvalue(sstr, s2, sizeof(s2));
         if (decodepart==0 && stricmp(s2, "attachment")==0)
-          decodepart=npart;
+        { decodepart=npart;
+          if (enc == ENC_UUCP) enc = ENC_7BIT;
+        }
         if (decodepart==npart || decodepart==0)
         { if (tmp_arc[0]=='\0')
             getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
-          if (tmp_arc) decodepart=npart;
+          if (tmp_arc)
+          { decodepart=npart;
+            if (enc == ENC_UUCP) enc = ENC_7BIT;
+          }
         }
         if (gotnextline)
         { strcpy(sstr, sstr+strlen(sstr)+1);
@@ -443,7 +457,7 @@ newmess:
       }
     }
     else if ((!inhdr) && (!inparthdr) &&
-             (enc==ENC_UUE || enc==ENC_UUCP || enc==ENC_8BIT))
+             (enc==ENC_UUE || enc==ENC_UUCP || enc==ENC_8BIT || enc==ENC_7BIT))
     { if ((strnicmp(sstr, "begin ", 6)==0) && isdigit(sstr[6]))
       { enc=ENC_UUE;
         decodepart=npart;
@@ -991,8 +1005,7 @@ baduuderet:
       topostmast(tmp_uue);
       return;
     }
-  }
-  else if (enc==ENC_PGP)
+  } else if (enc==ENC_PGP)
   { if (pgpdec_fmt[0]==0)
     { logwrite('?', "Can't decode pgp message: pgp-decode not specified!\n");
       if (pgpsig) free(pgpsig);
@@ -1011,17 +1024,17 @@ baduuderet:
     { debug(1, "PGP signature inside the encoded file");
       pgpsig=strdup(""); /* signature OK (only in batchmode!) */
     }
-  }
-  else if (enc == ENC_BASE64)
+  } else if (enc == ENC_BASE64)
   { if (do_unbase64(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
-  }
-  else if (enc == ENC_QP)
+  } else if (enc == ENC_QP)
   { if (do_unqp(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
-  }
-  else if (enc == ENC_8BIT)
+  } else if (enc == ENC_8BIT)
   { if (do_un8bit(tmp_uue, tmp_arc, decodepart))
+      goto baduuderet;
+  } else if (enc == ENC_7BIT)
+  { if (do_un7bit(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
   } else
   { if (do_uudecode(tmp_uue, tmp_arc))
