@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/04/23 09:02:47  gul
+ * create savefiles in homedir
+ *
  * Revision 2.3  2001/04/22 16:03:03  gul
  * create script executable (mode 0755)
  *
@@ -74,13 +77,29 @@ int saveargs(int argc, char *argv[])
   str=malloc(CMDLINELEN);
   if (str==NULL) return 1;
 #ifndef UNIX
-  strcpy(calldir, argv[0]);
+  strncpy(calldir, argv[0], sizeof(calldir));
   p=strrchr(calldir, PATHSEP);
   if (p==NULL) p=strrchr(calldir, ':');
   if (p==NULL) p=calldir;
   else p++;
   *p='\0';
 #else
+#if defined(GETPWUID) && defined(GETEUID)
+  { struct stat st;
+    struct password *pw;
+    calldir[0] = '\0';
+    pw = getpwuid(geteuid());
+    if (pw)
+    { strncpy(calldir, pw->pw_dir, sizeof(calldir));
+      calldir[sizeof(calldir)-2] = '\0';
+      if (access(calldir, W_OK))
+        calldir[0] == '\0';
+      else
+        addslash(calldir);
+    }
+  }
+  if (calldir[0] == '\0')
+#endif
   strcpy(calldir, "/tmp/");
 #endif
   /* find free *.bat */
