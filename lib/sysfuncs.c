@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2002/09/22 09:28:33  gul
+ * define O_DENYNONE
+ *
  * Revision 2.1  2002/03/21 11:29:15  gul
  * Cosmetic changes
  *
@@ -35,6 +38,10 @@
 #include <os2.h>
 #endif
 #include "libgate.h"
+
+#ifndef O_DENYNONE
+#define O_DENYNONE	0
+#endif
 
 #ifndef HAVE_STRUPR
 char *strupr(char *s)
