@@ -1,3 +1,10 @@
+- fido2rel: разобраться с Gw-To, Gw-Cc, Gw-Bcc. Что в каком случае попадает
+  в поле "To:" заголовка? Если нет ни To, ни Gw-To, а есть только Gw-Bcc?
+  Если при этом есть клудж RFC-To:?
+  Gw-* удаляются из тела письма при пересылке по route-to и to-ifmail
+- fido2rel: REPLYTO/REPLYADDR -> Reply-To
+- Message-Id: <MSGID_2=3A463=2F68_3ca46ee9@fidonet.org> ->
+  "MSGID: 2:463/68 3ca46ee9" (fidogate)
 - cygwin check:
   - close-on-exec (no inherit);
   - libperl
@@ -6,6 +13,8 @@
 - rel2fido: don't recode msgs with incorrect charset (unexistant chars, '?').
 - extcharset=us-ascii:koi8-r:koi8-u
 - ftrans "U:\\FILES.OUT\\OUTBOUND\\" "/fido/files.out/outbound/"
+- писать MIME-отлупы с частью Content-Type: message/delivery-status
+  (rfc1891-1894, 2034).
 - attuucp: transx compatibility
 - external checker: возможность сделать echomail из netmail и наоборот.
 - External filter.
