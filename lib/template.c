@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/08/08 08:01:22  gul
+ * "\r\n" -> "\n" conversion under unix
+ *
  * Revision 2.2  2001/01/25 12:40:07  gul
  * Minor changes for fix compile warnings
  *
@@ -188,6 +191,9 @@ static int _templateline(char *str, unsigned size)
     }
     if (pvar==NULL && fpipe==NULL)
       c=getc(htpl);
+#ifdef UNIX
+    if (c=='\r') continue; /* should be backslash-r if needed */
+#endif
     if ((c==';') && (pvar==NULL) && (fpipe==NULL) && inconfig)
     { /* comment */
       incomment=1;
