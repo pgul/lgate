@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/26 14:33:38  gul
+ * Version changed to 7.02 in *.h
+ *
  * Revision 2.1  2001/01/25 18:41:38  gul
  * myname moved to debug.c
  *
@@ -9,7 +12,7 @@
  * We are under CVS for now
  *
  */
-#define VER		"7.01"
+#define VER		"7.02"
 #define FORMATVER	"1.0"
 #define NAZVA		"LuckyGate" HALF " " VER
 #define COPYRIGHT	NAZVA "   " __DATE__

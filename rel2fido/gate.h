@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/26 14:33:39  gul
+ * Version changed to 7.02 in *.h
+ *
  * Revision 2.2  2001/01/25 18:41:39  gul
  * myname moved to debug.c
  *
@@ -12,9 +15,9 @@
  * We are under CVS for now
  *
  */
-#define VER         "7.01"
+#define VER         "7.02"
 #define MAJVER      7u
-#define MINVER      1u
+#define MINVER      2u
 #define NAZVA       "LuckyGate" HALF " " VER
 #define VERSION     NAZVA "    "__DATE__
 #define MYNAME      "Internet->FTN Gate"
