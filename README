@@ -612,8 +612,9 @@ mailbox-а, cnews-пакета или d- и x-файлов, которые gate отрабатывает
    Максимальная длина списка адресов при гейтовании из fido - 128.
 
    Гейт работает только с UUPC by Andrey Chernov ver 5.x, 6.x, 7.x,
-с UUPC/Ext by Kendra, и с sendmail/2 ver 2.02; Тестировался с версиями
-UUPC/Ache от 5.09gamma до 7.02, UUPC/Ext 1.12l и 1.12r и sendmail.
+с UUPC/Ext by Kendra, sendmail/2 ver 2.02, sendmail 8.x; Тестировался
+с версиями UUPC/Ache от 5.09gamma до 7.02, UUPC/Ext 1.12l и 1.12r и
+sendmail.
    Из-за ошибки в rmail.exe гейт не работает с UUPC/Ext 1.12p - ее нужно
 заапгрейдить до 1.12r или более поздней.
    Из-за ошибки в rnews.exe гейт не работает с Changi старше 0.5.
@@ -625,10 +626,11 @@ gul@gul.kiev.ua, а также в эхе LUCKY.GATE.
    Конференция lucky.gate доступна по nntp на сервере news.lucky.net.
    Сам LuckyGate распространяется по файлэхе LUCKY.GATE и по списку
 рассылки в internet. Кроме того, последняя версия всегда доступна на
-ftp://happy.kiev.ua/pub/fidosoft/gate/lgate/*.
+ftp://happy.kiev.ua/pub/fidosoft/gate/lgate/*. Текущую версию исходников
+можно получить командой "cvs -d :pserver:lgate@happy.kiev.ua:/cvs co lgate".
    Пожалуйста, если кто-нибудь выкладывает LuckyGate на свой ftp, сообщите
 об этом, чтобы сделать официальный mirror. Тогда я смогу давать на него
-ссылки, и сообщать об изменении URL, если такое случится.
+ссылки и сообщать об изменении URL, если такое случится.
 
    				Lucky carrier,
    						Павел Гульчук.
