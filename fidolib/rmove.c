@@ -2,8 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.1  2001/01/25 12:50:31  gul
- * HAVE_STRICMP added
+ * Revision 2.0.2.1  2002/10/02 09:42:57  gul
+ * fix compiler errors
  *
  * Revision 2.0  2001/01/10 20:42:20  gul
  * We are under CVS for now
@@ -36,7 +36,7 @@ int strnicmp(char *s1, char *s2, int n);
 int rmove(char *oldname, char *newname)
 {
   int  i, arcmail;
-  char *p, *p1=NULL;
+  char *p, *p1;
 
   if (move(oldname, newname)==0)
     return 0;
