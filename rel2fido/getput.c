@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/24 01:59:18  gul
+ * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
+ *
  * Revision 2.1  2001/01/23 11:19:48  gul
  * translate comments adn cosmetic changes
  *
@@ -203,7 +206,7 @@ void reject(int reason)
 #endif
   static char bound[80];
   int  r;
-  FILE * fout;
+  FILE *fout;
   time_t curtime;
   struct tm *curtm;
 
@@ -684,6 +687,7 @@ int rnews(void)
   funix=1;
   ibufsrc=BUFSIZE;
   msgsize=-1;
+  packnews=0;
   for (i=0; i<sizeof(gotstr)-1; i++)
   { if (read(fileno(stdin), gotstr+i, 1)!=1)
       break;
@@ -902,6 +906,26 @@ char *renamepkt(char *tempname)
     return realname;
   logwrite('?', "Can't rename %s!\n", tempname);
   return NULL;
+}
+
+int closeout(void)
+{
+  if (fout)
+  { int i=0;
+    fwrite(&i, 1, 1, fout);
+    if (packmail || conf)
+      fwrite(&i, 2, 1, fout);
+    fflush(fout);
+    flock(fileno(fout), LOCK_UN);
+    fclose(fout);
+    fout=NULL;
+    if (packmail || conf)
+    { renamepkt(msgname);
+      if (newechoflag[0])
+        touch(newechoflag);
+    }
+  }
+  return 0;
 }
 
 int nextmsg(void)

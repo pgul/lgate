@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/24 01:59:18  gul
+ * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
+ *
  * Revision 2.0  2001/01/10 20:42:24  gul
  * We are under CVS for now
  *
@@ -312,3 +315,4 @@ int  akamatch(uword zone, uword net, uword node);
 int  myfgets(char *str, int len);
 char *quotemsgid(char *msgid);
 char *renamepkt(char *tempname);
+int  closeout(void);

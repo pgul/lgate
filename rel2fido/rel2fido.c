@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/24 01:59:18  gul
+ * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
+ *
  * Revision 2.0  2001/01/10 20:42:25  gul
  * We are under CVS for now
  *
@@ -166,19 +169,7 @@ int main(int argc, char *argv[])
   debug(1, "Main: call GetLetter");
   getletter();
   freebufpart();
-  if (fout)
-  { i=0;
-    fwrite(&i, 1, 1, fout);
-    if (packmail || conf)
-      fwrite(&i, 2, 1, fout);
-    fflush(fout);
-    flock(fileno(fout), LOCK_UN);
-    fclose(fout);
-    if (packmail || conf)
-      renamepkt(msgname);
-    if (newechoflag[0])
-      touch(newechoflag);
-  }
+  closeout();
 #ifndef __MSDOS__
   if (bypipe)
     while (fgets(str, sizeof(str), stdin)); /* to avoid SIGPIPE */

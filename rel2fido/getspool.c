@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/24 01:59:18  gul
+ * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
+ *
  * Revision 2.0  2001/01/10 20:42:24  gul
  * We are under CVS for now
  *
@@ -365,9 +368,7 @@ badc1:strcpy(str, spool_dir);
     { if (packmail)
         begdel=ftell(fout);
       else
-      { fwrite("",1,1,fout);
-        fclose(fout);
-        fout=NULL;
+      { closeout();
         begdel=0;
       }
     }
@@ -408,19 +409,36 @@ badc1:strcpy(str, spool_dir);
         r=-1;
       }
       else
+      { if (conf)
+        { closeout();
+          packnews=begdel=0;
+        }
         r=rmailfunc(addrlist);
+      }
     }
     else if (strcmp(str+2, "rbmail")==0)
     { if (nonet) continue;
+      if (conf) 
+      { closeout();
+        packnews=begdel=0;
+      }
       r=rbmail();
     }
     else if (strcmp(str+2, "rcbmail")==0 ||
              strcmp(str+2, "rzbmail")==0)
     { if (nonet) continue;
+      if (conf) 
+      { closeout();
+        packnews=begdel=0;
+      }
       r=rcbmail();
     }
     else if (strcmp(str+2, "rnews")==0)
     { if (noecho) continue;
+      if (!conf)
+      { closeout();
+        packnews=begdel=0;
+      }
       r=rnews();
     }
     else
@@ -448,5 +466,6 @@ badc1:strcpy(str, spool_dir);
   { close(lck);
     unlink(lckname);
   }
+  if (!conf) closeout();
   return 0;
 }
