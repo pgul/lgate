@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/01/07 09:39:32  gul
+ * Public textline()
+ *
  * Revision 2.3  2001/01/26 14:33:39  gul
  * Version changed to 7.02 in *.h
  *
@@ -321,3 +324,4 @@ int  myfgets(char *str, int len);
 char *quotemsgid(char *msgid);
 char *renamepkt(char *tempname);
 int  closeout(void);
+int  textline(char *s, unsigned size);

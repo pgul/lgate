@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/01/07 09:39:32  gul
+ * Public textline()
+ *
  * Revision 2.3  2001/09/05 13:44:25  gul
  * Set envelope-from to '<>' in reject msgs under unix
  *
@@ -95,7 +98,7 @@ static void reset_badaddr(void)
   while (r && (strpbrk(str, "\n\r")==NULL));
 }
 
-static int textline(char *s, unsigned size)
+int textline(char *s, unsigned size)
 { char *p;
   int  r;
 
