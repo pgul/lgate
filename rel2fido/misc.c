@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/04/22 15:42:44  gul
+ * Buffer overflow in date parser fixed
+ *
  * Revision 2.3  2001/01/25 18:41:39  gul
  * myname moved to debug.c
  *
@@ -2154,41 +2157,53 @@ void copybad(void)
   unlink(badmail);
 }
 
-static char smon[16];
+static char smon[8];
 
 int parsedate(char *p)
-{ int i, k;
+{ int k;
   int day, year, hour, min, sec;
 
   debug(14, "ParseDate('%s')", p);
   while (*p && (!isdigit(*p))) p++;
-  i=sscanf(p, "%u %s %u %u:%u:%u", &day, smon, &year,
-             &hour, &min, &sec);
-  if (i<5)
-    return 1;
-  if (i==5)
-    sec=0;
-  if (strlen(smon)!=3)
-    smon[3]=0;
-  if (year>1900) year-=1900;
-  else if (year<50) year+=100; /* >1999 */
-  /* look TZ */
-  p=strchr(p, ':');
-  if ((i==6) && p)
-    p=strchr (p+1, ':');
+  day = atoi(p);
+  if (day<1 || day>31) return 1;
+  while (*p && (isdigit(*p) || isspace(*p))) p++;
+  if (strlen(p)<4) return 1;
+  strncpy(smon, p, 4);
+  smon[3]='\0';
+  p+=3;
+  if (!isspace(*p)) return 1;
+  while (*p && isspace(*p)) p++;
+  if (!isdigit(*p)) return 1;
+  year = atoi(p);
+  while (*p && isdigit(*p)) p++;
+  if (!isspace(*p)) return 1;
+  while (isspace(*p)) p++;
+  if (!isdigit(*p)) return 1;
+  hour=atoi(p);
+  while (*p && isdigit(*p)) p++;
+  if (*p!=':' || !isdigit(p[1])) return 1;
+  min=atoi(++p);
+  while (*p && isdigit(*p)) p++;
+  if (*p==':' && isdigit(p[1]))
+  { sec = atoi(++p);
+    while (*p && isdigit(*p)) p++;
+  } else
+    sec = 0;
   for (k=0; k<12; k++)
     if (stricmp(smon, montable[k])==0)
       break;
-  if (p) p=strpbrk(p, " \t");
+  if (k==12) return 1;
+  /* look TZ */
+  p=strpbrk(p, " \t");
   msgtz=0; /* his TZ */
   if (p)
-  { while ((*p==' ') || (*p=='\t'))
-      p++;
+  { while (*p && isspace(*p)) p++;
     msgtz=gettz(p);
   }
   /* make shift */
   /* my tz=-2, i=+2 */
-  if (msgtz==0)
+  if (msgtz==0) /* else put TZUTC kludge */
   {
     hour-=(msgtz+tz);
     if (hour<0)
