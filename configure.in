@@ -184,26 +184,6 @@ case $ac_cv_header_alloca_h in
 esac
 
 dnl -------------------------------------------------------------------------
-dnl Check for buggy optimizer
-AC_MSG_CHECKING(for buggy redhat gcc optimizer)
-SAVED_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -O2"
-AC_TRY_RUN([
-#include <ctype.h>
-main()
-{
-  char *p, s[]="abc";
-  for (p=s; *p; *p++=toupper(*p));
-  return (*s == 'A') ? 0 : 1;
-}
-], AC_MSG_RESULT(works correctly),
-buggy_gcc=yes; AC_MSG_RESULT(fuck! optimization turned off),
-AC_MSG_RESULT(cross-compiling. No assumptions made)
-)
-CFLAGS="$SAVED_CFLAGS"
-
-
-dnl -------------------------------------------------------------------------
 dnl Check for libperl
 
 AC_ARG_WITH(perl,
@@ -316,14 +296,8 @@ case x$debug in
   xyes)	CFLAGS="$CFLAGS -g"
 	LDFLAGS="$LDFLAGS -g"
 	;;
-  *)	case x$buggy_gcc in
-	  xyes) CFLAGS="$CFLAGS -s"
-		LDFLAGS="$LDFLAGS -s"
-		;;
-	  *)	CFLAGS="$CFLAGS -O2 -s"
-		LDFLAGS="$LDFLAGS -O2 -s"
-		;;
-	esac
+  *)	CFLAGS="$CFLAGS -O2 -s"
+	LDFLAGS="$LDFLAGS -O2 -s"
 	;;
 esac
 

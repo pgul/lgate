@@ -4882,58 +4882,6 @@ _ACEOF
  ;;
 esac
 
-echo "$as_me:$LINENO: checking for buggy redhat gcc optimizer" >&5
-echo $ECHO_N "checking for buggy redhat gcc optimizer... $ECHO_C" >&6
-SAVED_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -O2"
-if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: cross-compiling. No assumptions made" >&5
-echo "${ECHO_T}cross-compiling. No assumptions made" >&6
-
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <ctype.h>
-main()
-{
-  char *p, s[]="abc";
-  for (p=s; *p; *p++=toupper(*p));
-  return (*s == 'A') ? 0 : 1;
-}
-
-_ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: works correctly" >&5
-echo "${ECHO_T}works correctly" >&6
-else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-( exit $ac_status )
-buggy_gcc=yes; echo "$as_me:$LINENO: result: fuck! optimization turned off" >&5
-echo "${ECHO_T}fuck! optimization turned off" >&6
-fi
-rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
-CFLAGS="$SAVED_CFLAGS"
-
-
 
 
 # Check whether --with-perl or --without-perl was given.
@@ -5340,14 +5288,8 @@ case x$debug in
   xyes)	CFLAGS="$CFLAGS -g"
 	LDFLAGS="$LDFLAGS -g"
 	;;
-  *)	case x$buggy_gcc in
-	  xyes) CFLAGS="$CFLAGS -s"
-		LDFLAGS="$LDFLAGS -s"
-		;;
-	  *)	CFLAGS="$CFLAGS -O2 -s"
-		LDFLAGS="$LDFLAGS -O2 -s"
-		;;
-	esac
+  *)	CFLAGS="$CFLAGS -O2 -s"
+	LDFLAGS="$LDFLAGS -O2 -s"
 	;;
 esac
 
