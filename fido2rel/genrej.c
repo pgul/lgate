@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2002/09/22 09:14:28  gul
+ * create reject msg/pkt more clear
+ *
  * Revision 2.1  2002/09/22 08:02:09  gul
  * translate comments
  *
@@ -54,7 +57,7 @@ static struct message msg;
 static DIR *d;
 static struct dirent *df;
 static unsigned r;
-static FILE *f=NULL;
+static FILE *frej=NULL;
 static int i;
 static char tstr[80], msgname[FNAME_MAX], *p;
 static uword mzone, mnet, mnode, mpoint;
@@ -134,10 +137,11 @@ void setvars(int reason)
 void closepkt(void)
 { unsigned i;
 
-  if (f==NULL) return;
+  if (frej==NULL) return;
   i=0;
-  fwrite(&i, 2, 1, f);
-  fclose(f);
+  fwrite(&i, 2, 1, frej);
+  fclose(frej);
+  frej=NULL;
 }
 
 int writemsghdr(struct message *msghdr, FILE *fout)
@@ -164,7 +168,7 @@ int writemsghdr(struct message *msghdr, FILE *fout)
     return 1;
 }
 
-static void writepkthdr(FILE *f)
+static void writepkthdr(FILE *fout)
 {
   time_t curtime;
   struct tm *curtm;
@@ -211,7 +215,7 @@ static void writepkthdr(FILE *f)
   pkthdr.ProductData[0]=0x7567;
   pkthdr.ProductData[1]=0x6C;
   pkthdr_byteorder(&pkthdr);
-  fwrite(&pkthdr, sizeof(pkthdr), 1, f);
+  fwrite(&pkthdr, sizeof(pkthdr), 1, fout);
 }
 
 void genlett(int reason, char *toname,
@@ -220,6 +224,7 @@ void genlett(int reason, char *toname,
 {
   time_t curtime;
   struct tm *curtm;
+  int h;
 
   /* create bounce .msg */
   /* init vars */
@@ -280,44 +285,74 @@ void genlett(int reason, char *toname,
     strcpy(msgname, netmaildir);
     if (netmaildir[strlen(netmaildir)-1]!=PATHSEP)
       strcat(msgname, PATHSTR);
-    sprintf(msgname+strlen(msgname), "%u.msg", maxnum+1);
-    f=fopen(msgname, "wb");
+    for (i=maxnum+1; i<maxnum+1000; i++)
+    {
+      sprintf(msgname+strlen(msgname), "%u.msg", maxnum+1);
+      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL, SH_DENYALL);
+      if (h!=-1 || errno!=EEXIST)
+        break;
+    }
+    if (h==-1)
+    { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
+               toname, tozone, tonet, tonode, topoint, strerror(errno));
+      return;
+    }
+    frej=fdopen(h, "wb");
+    if (frej==NULL)
+    { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
+               toname, tozone, tonet, tonode, topoint, strerror(errno));
+      close(h);
+      unlink(msgname);
+      return;
+    }
     for (i=0; i<5; i++)
-      if (flock(fileno(f), LOCK_EX|LOCK_NB))
+      if (flock(h, LOCK_EX|LOCK_NB))
         sleep(1);
       else
         break;
     if (i==5)
-    { fclose(f);
-      f=NULL;
+    { fclose(frej);
+      frej=NULL;
+      unlink(msgname);
     }
   }
-  else if (f==NULL)
+  else if (frej==NULL)
   { unsigned long maxnum, initmax;
     initmax=time(0);
     for (maxnum=initmax+1; maxnum!=initmax; maxnum++)
     { sprintf(msgname, "%s%lx.pkt", pktout, maxnum);
-      if (access(msgname, 0)==0) continue;
-      f=fopen(msgname, "wb");
-      if (f!=NULL)
+      h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL, SH_DENYALL);
+      if (h!=-1 || errno!=EEXIST)
         break;
     }
-    if (f!=NULL)
+    if (h==-1)
+    { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
+               toname, tozone, tonet, tonode, topoint, strerror(errno));
+      return;
+    }
+    frej=fdopen(h, "wb");
+    if (frej==NULL)
+    { logwrite('?',"Error: can't create reject message to %s %u:%u/%u.%u: %s\n",
+               toname, tozone, tonet, tonode, topoint, strerror(errno));
+      close(h);
+      unlink(msgname);
+      return;
+    }
+    if (frej!=NULL)
     { for (i=0; i<5; i++)
-        if (flock(fileno(f), LOCK_EX|LOCK_NB))
+        if (flock(h, LOCK_EX|LOCK_NB))
           sleep(1);
         else
           break;
       if (i==5)
-      { fclose(f);
-        f=NULL;
+      { fclose(frej);
+        frej=NULL;
       }
-    }
-    if (f!=NULL)
-      writepkthdr(f);
+      else
+        writepkthdr(frej);
   }
   debug(6, "GenLett: msgname is %s", msgname);
-  if (f==NULL)
+  if (frej==NULL)
   { logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
              toname, tozone, tonet, tonode, topoint);
     return;
@@ -325,30 +360,30 @@ void genlett(int reason, char *toname,
   debug(9, "GenLett: %s created", msgname);
   if (!packmail)
   {
-    if (fwrite(&msg, sizeof(msg), 1, f)!=1)
+    if (fwrite(&msg, sizeof(msg), 1, frej)!=1)
     {
 errwrite:
-      flock(fileno(f), LOCK_UN);
-      fclose(f);
-      f=NULL;
+      flock(fileno(frej), LOCK_UN);
+      fclose(frej);
+      frej=NULL;
       unlink(msgname);
       logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
                toname, tozone, tonet, tonode, topoint);
       return;
     }
   }
-  else if (writemsghdr(&msg, f)!=0)
+  else if (writemsghdr(&msg, frej)!=0)
     goto errwrite;
-  fprintf(f, "\x01INTL %u:%u/%u %u:%u/%u\r", tozone, tonet, tonode,
+  fprintf(frej, "\x01INTL %u:%u/%u %u:%u/%u\r", tozone, tonet, tonode,
               mzone, mnet, mnode);
   if (mpoint)
-    fprintf(f, "\x01""FMPT %u\r", mpoint);
+    fprintf(frej, "\x01""FMPT %u\r", mpoint);
   if (topoint)
-    fprintf(f, "\x01TOPT %u\r", topoint);
-  fprintf(f, "\x01MSGID: %u:%u/%u", mzone, mnet, mnode);
+    fprintf(frej, "\x01TOPT %u\r", topoint);
+  fprintf(frej, "\x01MSGID: %u:%u/%u", mzone, mnet, mnode);
   if (mpoint)
-    fprintf(f, ".%u", mpoint);
-  fprintf(f, " %08lx\r", curtime*100+getpid()%100+seqf++);
+    fprintf(frej, ".%u", mpoint);
+  fprintf(frej, " %08lx\r", curtime*100+getpid()%100+seqf++);
   tplout=1;
   r=init_tpl(tpl_name);
   setvars(reason);
@@ -357,15 +392,15 @@ errwrite:
   if (r==0)
   { while (templateline(tstr, sizeof(tstr)))
     { for (p=tstr; *p; p++) if (*p=='\n') *p='\r';
-      fputs(tstr, f);
+      fputs(tstr, frej);
     }
   }
   else
-  { fprintf(f, "   Hello %s!\r", getvar("fromname"));
-    fprintf(f, "   Your message was rejected because ");
-    fprintf(f, strreason(reason, 1), to);
-    fprintf(f, ".\r");
-    fprintf(f, "Original message was:\r"
+  { fprintf(frej, "   Hello %s!\r", getvar("fromname"));
+    fprintf(frej, "   Your message was rejected because ");
+    fprintf(frej, strreason(reason, 1), to);
+    fprintf(frej, ".\r");
+    fprintf(frej, "Original message was:\r"
               "==============\r"
               "From: %s %s\r"
               "To:   %s %s\r"
@@ -378,24 +413,24 @@ errwrite:
     if (!tomaster)
     { reset_text_();
       while (gettextline_(tstr, sizeof(tstr)))
-        fputs(tstr, f);
-      fputs("==============\r", f);
+        fputs(tstr, frej);
+      fputs("==============\r", frej);
     }
-    fprintf(f, "  Send your proposes and bug reports to %s %s.\r",
+    fprintf(frej, "  Send your proposes and bug reports to %s %s.\r",
             getvar("mastname"), getvar("mastaddr"));
-    fprintf(f, "                   Lucky Carrier,\r");
-    fprintf(f, "                             Gate Daemon.\r");
+    fprintf(frej, "                   Lucky Carrier,\r");
+    fprintf(frej, "                             Gate Daemon.\r");
   }
   close_tpl();
-  fprintf(f, "--- "COPYRIGHT"\r");
-  if (fputc(0, f)==EOF)
+  fprintf(frej, "--- "COPYRIGHT"\r");
+  if (fputc(0, frej)==EOF)
     goto errwrite;
-  if (fflush(f))
+  if (fflush(frej))
     goto errwrite;
   if (!packmail)
-  { flock(fileno(f), LOCK_UN);
-    fclose(f);
-    f=NULL;
+  { flock(fileno(frej), LOCK_UN);
+    fclose(frej);
+    frej=NULL;
   }
   debug(9, "GenLett: done");
 }
