@@ -11,17 +11,19 @@ TTT          equ 1236
 
 .DATA
 
-dv      db   ?
+dv      db   0ff
+win	db   0ff
+os2	db   0ff
 
 .CODE
 
-nakop:  dw   ?
+cnt:	dw   ?
 
 old_timer:dd ?
 new_timer proc far
-        cmp  cs:word ptr nakop,0
+        cmp  cs:word ptr cnt, 0
         jz   rett
-        dec  cs:word ptr nakop
+        dec  cs:word ptr cnt
 rett:   jmp  cs:dword ptr [old_timer]
 new_timer endp
 
@@ -34,13 +36,29 @@ dvdelay proc
 	int  21
 	inc  al
 	mov  ds:byte ptr dv,al
-; сохраняем прерывание таймера
-	mov  ax,3508
+	cmp  al,0
+	jnz  nocheck
+; win installation check
+	mov  ax,1600
+	int  2f
+	and  al,7f
+	mov  ds:byte ptr win,al
+	cmp  al,0
+	jnz  nocheck
+; OS/2 installaton check
+	mov  ax,4010
+	int  2f
+	mov  ds:byte ptr os2,al
+	cmp  ax,4010
+	jz   nocheck
+	mov  ds:byte ptr os2,1
+; save timer interrupt
+nocheck:mov  ax,3508
 	int  21
         mov  cs:word ptr old_timer,bx
         mov  bx,es
         mov  cs:word ptr old_timer+2,bx
-; считаем накопитель nakop=(TIME_CHAS/100h)*[bp+4]/(10*100h)
+; calculate counter cnt=(TIME_CHAS/100h)*[bp+4]/(10*100h)
         mov  ax,delay
         cmp  ax,MAXDELAY
         jc   notover
@@ -49,8 +67,8 @@ notover:mov  cx,TTT ; TIME_CHAS/100h
         mul  cx
         mov  cx,10d*100h
         div  cx
-        mov  cs:word ptr nakop,ax
-; устанавливаем свое прерывание таймера
+        mov  cs:word ptr cnt,ax
+; set our timer interrupt
         mov  dx,offset new_timer
         push ds
         push cs
@@ -58,24 +76,32 @@ notover:mov  cx,TTT ; TIME_CHAS/100h
         mov  ax,2508
         int  21
         pop  ds
-; ждем
+; wait
         sti
 lp:
-; отдаем процессор
+; giveup cpu
 	int  28
 	cmp  ds:byte ptr dv,0
 	jz   nodv
 	mov  ax,1000
 	int  15 ; give up cpu
-nodv:   cmp  cs:word ptr nakop,0
+nodv:   cmp  ds:byte ptr win,0
+	jz   nowin
+	mov  ax,1680
+	int  2f
+nowin:	cmp  ds:byte ptr os2,0
+	jz   noos2
+	mov  ax,1680
+	int  2f
+noos2:	cmp  cs:word ptr cnt,0
         jnz  lp
-; восстанавливаем прерывание таймера
+; restore timer interrupt
         push ds
         lds  dx,cs:dword ptr old_timer
         mov  ax,2508
         int  21
         pop  ds
-; завершаемся
+; return
         pop  bp
         ret  2
 dvdelay endp
