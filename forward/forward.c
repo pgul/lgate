@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/26 17:24:35  gul
+ * translate comments
+ *
  * Revision 2.2  2001/01/25 18:41:39  gul
  * myname moved to debug.c
  *
@@ -44,7 +47,7 @@
 #define W_OK 2
 #endif
 #ifndef O_DENYALL
-#define O_DENYALL 0
+#define O_DENYALL  0
 #define O_DENYNONE 0
 #endif
 
@@ -159,7 +162,7 @@ int config(char *argv[])
   netdir[0]=rescan[0]=0;
   nforw=0;
   attror=attrand=attrxor=0;
-  while (fgets(str,sizeof(str), fout))
+  while (fgets(str, sizeof(str), fout))
   { if (str[0]=='#') continue;
     p=strchr(str, ';');
     if (p) *p=0;
@@ -174,7 +177,7 @@ int config(char *argv[])
     { for(p=str+7; (*p==' ') || (*p=='\t'); p++);
       strncpy(netdir, p, sizeof(netdir)-2);
       netdir[sizeof(netdir)-2]=0;
-      if (netdir[strlen(netdir)-1]=='\\' && strlen(netdir)>3)
+      if (netdir[strlen(netdir)-1]==PATHSEP && strlen(netdir)>DISKPATH+1)
         netdir[strlen(netdir)-1]='\0';
       continue;
     }
@@ -198,7 +201,7 @@ int config(char *argv[])
                     return 8;
         }
         p++;
-        switch(p[0]|0x20)
+        switch(tolower(p[0]))
         {
           case 'l': a[0]|=msgLOCAL;
                     break;
@@ -244,7 +247,7 @@ errforw:puts("Incorrect forward string ignored:");
         puts(str);
         continue;
       }
-      p=strpbrk(p," \t");
+      p=strpbrk(p, " \t");
       if (p==NULL) goto errforw;
       for(p++; (*p==' ') || (*p=='\t'); p++);
       if (getfidoaddr(p, &forw[nforw].destzone, &forw[nforw].destnet,
@@ -261,9 +264,9 @@ errforw:puts("Incorrect forward string ignored:");
       { nforw++;
         continue;
       }
-      if (*p=='"')
+      if (*p=='\"')
       { p++;
-        p1=strchr(p, '"');
+        p1=strchr(p, '\"');
         if (p1==NULL)
           goto errforw;
       }
@@ -283,9 +286,9 @@ errforw:puts("Incorrect forward string ignored:");
       { nforw++;
         continue;
       }
-      if (*p=='"')
+      if (*p=='\"')
       { p++;
-        p1=strchr(p, '"');
+        p1=strchr(p, '\"');
         if (p1==NULL)
           goto errforw;
       }
@@ -392,7 +395,7 @@ int main(int argc, char *argv[])
       close(f);
       continue;
     }
-    for (i=0;i<nforw;i++)
+    for (i=0; i<nforw; i++)
       if ((msghdr.dest_net==forw[i].fromnet) &&
           (msghdr.dest_node==forw[i].fromnode))
       { if (forw[i].fromname[0])
@@ -417,7 +420,7 @@ int main(int argc, char *argv[])
       close(f);
       continue;
     }
-    /* читаем мессагу, смотрим номер поинта */
+    /* read the message, check point number */
     ibuf=BUFSIZE;
     attrib=msghdr.attr;
     zz=0;
@@ -426,7 +429,7 @@ int main(int argc, char *argv[])
     while (hgets())
     { if (str[0]!=1) continue;
       if (strncmp(str+1, "INTL ", 5)==0)
-      { /* Проверяем зону назначения */
+      { /* Check dest zone */
         zz=atoi(str+5);
         continue;
       }
@@ -436,34 +439,34 @@ int main(int argc, char *argv[])
       }
       if (strncmp(str+1, "FLAGS ", 6)==0)
       {
-        for (p=str+6;(*p!='\r') && (*p!=0);p+=3)
+        for (p=str+6; (*p!='\r') && (*p!=0); p+=3)
         { while (*p==' ') p++;
-          if (strncmp(p,"DIR",3)==0)
+          if (strncmp(p, "DIR", 3)==0)
           { attrib|=msgDIRECT;
             continue;
           }
           /*
-          if (strncmp(p,"LOK")
+          if (strncmp(p, "LOK")
           { attrib|=msgLOCK;
             continue;
           }
           */
-          strcat(flags," ");
-          strncpy(flags+strlen(flags),p,3);
+          strcat(flags, " ");
+          strncpy(flags+strlen(flags), p, 3);
         }
       }
 
     }
     if ((forw[i].frompoint!=pp) || ((forw[i].fromzone!=zz) && (zz!=0)))
-    { for (i++;i<nforw;i++)
+    { for (i++; i<nforw; i++)
       { if (((forw[i].fromzone==zz) || (zz==0)) &&
              (forw[i].fromnet==msghdr.dest_net) &&
              (forw[i].fromnode==msghdr.dest_node) &&
              (forw[i].frompoint==pp))
         { if (forw[i].fromname[0])
           {
-            if (stristr(msghdr.to,forw[i].fromname))
-/*          if (strnicmp(forw[i].fromname,msghdr.to,sizeof(msghdr.to))==0)
+            if (stristr(msghdr.to, forw[i].fromname))
+/*          if (strnicmp(forw[i].fromname, msghdr.to, sizeof(msghdr.to))==0)
 */
               break;
           }
@@ -480,23 +483,23 @@ int main(int argc, char *argv[])
         continue;
       }
     }
-    /* надо форвардить */
-    strcpy(fromname,msghdr.to);
+    /* need to forward */
+    strcpy(fromname, msghdr.to);
     attrib&=attrand;
     attrib|=attror;
     attrib^=attrxor;
     if (forw[i].destname[0])
     { if (strlen(forw[i].destname)>=sizeof(msghdr.to))
-      { if (strchr(forw[i].destname,'@'))
-          strcpy(msghdr.to,"uucp");
+      { if (strchr(forw[i].destname, '@'))
+          strcpy(msghdr.to, "uucp");
         else
         { forw[i].destname[sizeof(msghdr.to)-1]=0;
-          strcpy(msghdr.to,forw[i].destname);
+          strcpy(msghdr.to, forw[i].destname);
         }
       }
       else
       { forw[i].destname[sizeof(msghdr.to)-1]=0;
-        strcpy(msghdr.to,forw[i].destname);
+        strcpy(msghdr.to, forw[i].destname);
       }
     }
     msghdr.attr=(unsigned)attrib;
@@ -504,64 +507,64 @@ int main(int argc, char *argv[])
     msghdr.dest_net=forw[i].destnet;
     msghdr.dest_node=forw[i].destnode;
     msghdr.dest_point=forw[i].destpoint;
-    lseek(f,sizeof(msghdr),SEEK_SET);
+    lseek(f, sizeof(msghdr), SEEK_SET);
     ibuf=BUFSIZE;
-    strcpy(s,netdir);
+    strcpy(s, netdir);
     addslash(s);
-    strcat(s,"TMP_FORW.MSG");
-    if (!access(s,0))
+    strcat(s, "TMP_FORW.MSG");
+    if (!access(s, 0))
       unlink(s);
-    fout=myfopen(s,"wb");
+    fout=myfopen(s, "wb");
     if (fout==NULL)
-    { printf("ERROR! Can't open %s!\n",s);
+    { printf("ERROR! Can't open %s!\n", s);
       close(f);
       continue;
     }
     msghdr_byteorder(&msghdr);
-    fwrite(&msghdr,sizeof(msghdr),1,fout);
+    fwrite(&msghdr, sizeof(msghdr), 1, fout);
     firstline=1;
     while (hgets())
     { if (str[0]==1)
-      { if (strncmp(str+1,"INTL ",5)==0)
+      { if (strncmp(str+1, "INTL ", 5)==0)
         { p=str+5;
           while (*p==' ') p++;
-          p=strchr(p,' ');
+          p=strchr(p, ' ');
           if ((p==NULL) || (*p=='\r'))
             continue;
           while (*p==' ') p++;
-          fprintf(fout,"\x01INTL %u:%u/%u %s",
-                  forw[i].destzone,forw[i].destnet,forw[i].destnode,p);
+          fprintf(fout, "\x01INTL %u:%u/%u %s",
+                  forw[i].destzone, forw[i].destnet, forw[i].destnode, p);
           continue;
         }
-        if (strncmp(str+1,"TOPT ",5)==0)
+        if (strncmp(str+1, "TOPT ", 5)==0)
           continue;
-        if (strncmp(str+1,"FLAGS ",6)==0)
+        if (strncmp(str+1, "FLAGS ", 6)==0)
           continue;
       }
       if (firstline && (str[0]!=1))
       {
 fstln:  if (forw[i].destpoint)
-          fprintf(fout,"\1TOPT %u\r",forw[i].destpoint);
+          fprintf(fout, "\1TOPT %u\r", forw[i].destpoint);
         if (flags[0] || (attrib >> 16))
-        { fputs("\x01""FLAGS",fout);
-          fputs(flags,fout);
+        { fputs("\x01""FLAGS", fout);
+          fputs(flags, fout);
           if (attrib & msgDIRECT)
-            fputs(" DIR",fout);
-          fputs("\r",fout);
+            fputs(" DIR", fout);
+          fputs("\r", fout);
         }
-        fprintf(fout,"\x01Resd addressed to ");
+        fprintf(fout, "\x01Resd addressed to ");
         if (forw[i].destname[0])
-          fprintf(fout,"%s ",fromname);
-        fprintf(fout,"%u:%u/%u",
-                forw[i].fromzone,forw[i].fromnet,forw[i].fromnode);
+          fprintf(fout, "%s ", fromname);
+        fprintf(fout, "%u:%u/%u",
+                forw[i].fromzone, forw[i].fromnet, forw[i].fromnode);
         if (forw[i].frompoint)
-          fprintf(fout,".%u",forw[i].frompoint);
-        fputs("\r",fout);
+          fprintf(fout, ".%u", forw[i].frompoint);
+        fputs("\r", fout);
         if (strlen(forw[i].destname)>=sizeof(msghdr.to))
-          fprintf(fout,"To: %s\r",forw[i].destname);
+          fprintf(fout, "To: %s\r", forw[i].destname);
         firstline=0;
       }
-      if ((fputs(str,fout)==EOF) && str[0])
+      if ((fputs(str, fout)==EOF) && str[0])
       {
 errspace:
         fclose(fout);
@@ -574,7 +577,7 @@ errspace:
         puts("ERROR! Disk full!");
         if (resc && rescan[0])
         {
-          fout=fopen(rescan,"w");
+          fout=fopen(rescan, "w");
           if (fout) fclose(fout);
         }
         return 7;
@@ -583,7 +586,7 @@ errspace:
     }
     if (firstline) goto fstln;
     if (str[0])
-      if (fputs(str,fout)==EOF)
+      if (fputs(str, fout)==EOF)
         goto errspace;
     if (fclose(fout)==EOF)
       goto errspace;
@@ -591,32 +594,32 @@ errspace:
     flock(f, LOCK_UN);
 #endif
     close(f);
-    strcpy(str,netdir);
+    strcpy(str, netdir);
     addslash(str);
-    strcat(str,df->d_name);
+    strcat(str, df->d_name);
     unlink(str);
-    rename(s,str);
-    printf("Forwarded %u:%u/%u",forw[i].fromzone,
-           forw[i].fromnet,forw[i].fromnode);
+    rename(s, str);
+    printf("Forwarded %u:%u/%u", forw[i].fromzone,
+           forw[i].fromnet, forw[i].fromnode);
     if (forw[i].frompoint)
-      printf(".%u",forw[i].frompoint);
+      printf(".%u", forw[i].frompoint);
     if (forw[i].destname[0])
-      printf(" %s",fromname);
+      printf(" %s", fromname);
     else
-      printf(" %s",msghdr.to);
+      printf(" %s", msghdr.to);
     printf(" to %u:%u/%u",
-           forw[i].destzone,forw[i].destnet,forw[i].destnode);
+           forw[i].destzone, forw[i].destnet, forw[i].destnode);
     if (forw[i].destpoint)
-      printf(".%u",forw[i].destpoint);
+      printf(".%u", forw[i].destpoint);
     if (forw[i].destname[0])
-      printf(" %s",forw[i].destname);
+      printf(" %s", forw[i].destname);
     puts("");
     resc=1;
   }
   closedir(d);
   if (resc && rescan[0])
   {
-    fout=fopen(rescan,"w");
+    fout=fopen(rescan, "w");
     if (fout) fclose(fout);
   }
   return 0;
