@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2002/01/09 09:40:57  gul
+ * Added $hdr{"From "}
+ *
  * Revision 2.7  2002/01/07 09:57:24  gul
  * Added init_textline() for hrewind()
  *
@@ -2558,10 +2561,11 @@ chk_fork:
       { *p++='\0';
         plen=p-p1;
         while (isspace(*p)) p++;
-      } else
-        p=p1+plen;
-      strlwr(p1);
-      hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
+        strlwr(p1);
+        *p1=toupper(*p1);
+        hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
+      } else if (strnicmp(p1, "From ", 5)==0)
+        hv_store(hdr, p1, 5, newSVpv(p1+5, 0), 0);
     }
     if (hstr) free(hstr);
 
