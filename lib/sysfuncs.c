@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2002/03/21 11:29:15  gul
+ * Cosmetic changes
+ *
  * Revision 2.0  2001/01/10 20:42:23  gul
  * We are under CVS for now
  *
@@ -83,7 +86,7 @@ int waitpid(pid_t pid, int *status, int options)
 #ifndef HAVE_FILELENGTH
 unsigned long filelength(int h)
 {
-  unsigned long curseek=lseek(h,0,SEEK_CUR), filelen;
+  unsigned long curseek=lseek(h, 0, SEEK_CUR), filelen;
   filelen=lseek(h, 0, SEEK_END);
   lseek(h, curseek, SEEK_SET);
   return filelen;
@@ -139,11 +142,11 @@ char *basename(char *fname)
 #endif
 
 #ifndef HAVE_MKTIME
-time_t mktime(struct tm * ft)
+time_t mktime(struct tm *ft)
 {
    struct date sdate;
    struct time stime;
-   struct tm * etm;
+   struct tm *etm;
    time_t t;
 
 #if 1
@@ -178,14 +181,14 @@ time_t mktime(struct tm * ft)
 #if !defined(HAVE_UTIME_H) && !defined(HAVE_SYS_UTIME_H)
 #include "utime.h"
 
-int utime(char * path, struct utimbuf * times)
+int utime(char *path, struct utimbuf *times)
 {
   struct ftime ft;
-  struct tm * ftm;
+  struct tm *ftm;
   int h, r;
 
   ftm=localtime(&times->modtime);
-  h=open(path,O_RDWR|O_DENYNONE);
+  h=open(path, O_RDWR|O_DENYNONE);
   if (h==-1) return -1;
   ft.ft_tsec=ftm->tm_sec/2;
   ft.ft_min=ftm->tm_min;
@@ -193,7 +196,7 @@ int utime(char * path, struct utimbuf * times)
   ft.ft_day=ftm->tm_mday;
   ft.ft_month=ftm->tm_mon;
   ft.ft_year=ftm->tm_year-80;
-  r=setftime(h,&ft);
+  r=setftime(h, &ft);
   close(h);
   return r;
 }
