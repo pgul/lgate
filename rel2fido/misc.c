@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.11  2002/01/28 22:47:37  gul
+ * %hdr hash fix
+ *
  * Revision 2.10  2002/01/28 22:35:12  gul
  * Bugfix in %hdr hash with folded header lines
  *
@@ -2536,21 +2539,21 @@ chk_fork:
         p1=hstr;
         strcpy(p1+plen, str);
         plen+=slen;
-        if (slen && str[slen-1]!='\r')
+        if (slen && str[slen-1]!='\n')
         { if (textline(str, sizeof(str))) continue;
           str[0]='\0';
           break;
         }
         if (!textline(str, sizeof(str))) str[0]='\0';
         if (str[0]!=' ' && str[0]!='\t') break;
-	/* unfolding */
+        /* unfolding */
         hstr[plen-1]=' ';
-	for (p=str; *p==' ' || *p=='\t'; p++);
-	if (*p=='\0') p--;
-	strcpy(str, p);
+        for (p=str; *p==' ' || *p=='\t'; p++);
+        if (*p=='\0') p--;
+        strcpy(str, p);
       }
       if (p1==NULL) break;
-      if (plen) p1[--plen]='\0'; /* remove last '\r' */
+      if (plen) p1[--plen]='\0'; /* remove last '\n' */
       if (strnicmp(p1, "From ", 5)==0)
         hv_store(hdr, p1, 5, newSVpv(p1+5, 0), 0);
       else if ((p=strchr(p1, ':')) != NULL)
