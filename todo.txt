@@ -17,14 +17,14 @@
 - rel2fido: преобразовывать адрес обратно в ftn только при совпадении
   зоны с текущим aka
 - review all sources for possible buffer overflow (getvalue, chsubstr, ...)
-- прием по pop/imap/nnrp/smtp/nntp, отправка по smtp/nntp.
+- работа через pop/imap/nnrp/smtp/nntp
 - soup
 - rel2fido: сделать 'split-subject="(%d/%d) %s"'
 - attuucp: freq
 - xms/dpmi support.
 - lgate/win32
 - fido2rel: разбивать аттачи на части.
-? fido2rel глючит под msdos без share
+? сначала проверять itwit*, а потом уже валидность "To:"
 
    Не уверен, надо ли и если надо, то как именно, поэтому далеко
    не в первую очередь:

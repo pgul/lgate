@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/16 19:10:14  gul
+ * cosmetic changes (translate comments etc.)
+ *
  * Revision 2.1  2001/01/15 09:37:53  gul
  * rename pkt to *.bad changed to rmove()
  *
@@ -177,7 +180,7 @@ int params(int argc, char *argv[])
     }
   }
 #endif
-  for (i=1;i<argc;i++)
+  for (i=1; i<argc; i++)
   {
     if ((argv[i][0]!='-') && (argv[i][0]!='/'))
     { fprintf(stderr, "Incorrect parameter \"%s\" ignored!\n", argv[i]);
@@ -288,12 +291,12 @@ int params(int argc, char *argv[])
   }
   if (help && (!tossbad) && (!nonet) && (!noecho) && (nconf[0]==0) &&
      (lrd==LRD_CREATE))
-  { /* только /? */
+  { /* "/?" only */
     return 1;
   }
 #if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
   if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
-  { puts("You do not allowed to use -c switch\n";
+  { puts("You do not allow to use -c switch\n";
     return RET_ERR;
   }
 #endif
@@ -384,7 +387,7 @@ void retoss(void)
   time_t curtime;
   struct tm *curtm;
 
-  /* все *.msg из badmail запаковать в pkt-шник в pktin */
+  /* pack all *.msg from badmail to pkt-file in pktin */
   if (badmail[0]==0)
     return;
   d=opendir(badmail);
@@ -418,7 +421,7 @@ void retoss(void)
     closedir(d);
     return;
   }
-  /* пишем заголовок pkt-шника */
+  /* put pkt header */
   curtime=time(NULL);
   curtm=localtime(&curtime);
 
@@ -494,7 +497,7 @@ void retoss(void)
       close(h);
       continue;
     }
-    /* пишем msg в pkt */
+    /* put msg to pkt */
     writemsghdr(&msghdr, fbad);
     firstbuf=1;
     lastch='\r';
@@ -532,7 +535,7 @@ retosserr:
       }
     }
     if (lastch!=0)
-      /* msg не заканчивается на \0 */
+      /* msg not ended by \0 */
       if (fwrite("", 1, 1, fbad)!=1)
         goto retosserr;
     if (fflush(fbad))
@@ -586,7 +589,7 @@ void findlet(void)
         }
         stat(msgname, &statbuf);
         if (lrd==LRD_CHECK)
-        { /* проверяем lastreads */
+        { /* check lastreads */
           if ((lastread.num>=atoi(df->d_name)) &&
               (lastread.time>=statbuf.st_mtime))
           { debug(11, "FindLet: LastRead check, message skipped");
@@ -596,7 +599,7 @@ void findlet(void)
         if (lrd)
         { if (new_lrd.num<atoi(df->d_name))
             new_lrd.num=atoi(df->d_name);
-          /* проверяем корректность даты */
+          /* check if the date is correct */
           if (statbuf.st_mtime<=time(NULL))
             new_lrd.time=statbuf.st_mtime;
           else
@@ -633,7 +636,7 @@ void findlet(void)
         if (killed) break;
       }
       closedir(d);
-      /* пишем ластриды */
+      /* write lastreads */
       if (lrd)
       { debug(12, "FindLet: update LastRead");
         strcpy(msgname, netmaildir);
@@ -767,12 +770,12 @@ static void one_pkt(char * msgname)
   pktdest.node=pkthdr.DestNode;
   pktdest.point=pkthdr.DestPoint;
 #ifdef __OS2__
-  DosSetFHState(h, OPEN_FLAGS_NOINHERIT); /* а то uux удалить не даст */
+  DosSetFHState(h, OPEN_FLAGS_NOINHERIT); /* else we cannot delete because of uux running */
 #endif
 
   for (; h!=-1;)
-  { /* есть ли еще письма */
-    /* и читаем header */
+  { /* is there another messages? */
+    /* and read header */
     i=0;
     if (hread(h, &i, 2)!=2)
     { logwrite('?', "Incorrect packet structure, %s renamed to *.bad!\n",
@@ -822,7 +825,7 @@ gobadpkt:
       goto gobadpkt;
     if (hread(h, &msghdr.cost, 2)!=2)
       goto gobadpkt;
-    /* читаем date */
+    /* read date */
     for (i=0; i<sizeof(msghdr.date); i++)
     { r=hgetc(h);
       if (r==EOF)
@@ -835,7 +838,7 @@ gobadpkt:
       badpkt();
       return;
     }
-    /* читаем to */
+    /* read to */
     for (i=0; i<sizeof(msghdr.to); i++)
     { r=hgetc(h);
       if (r==EOF)
@@ -848,7 +851,7 @@ gobadpkt:
       badpkt();
       return;
     }
-    /* читаем from */
+    /* read from */
     for (i=0; i<sizeof(msghdr.from); i++)
     { r=hgetc(h);
       if (r==EOF)
@@ -861,7 +864,7 @@ gobadpkt:
       badpkt();
       return;
     }
-    /* читаем subj */
+    /* read subj */
     for (i=0; i<sizeof(msghdr.subj); i++)
     { r=hgetc(h);
       if (r==EOF)
@@ -916,7 +919,7 @@ void badmsg(char *reason)
              msghdr.from, zone, net, node, point, to[0] ? to : msghdr.to,
              reason);
   if (!packed)
-  { /* копируем в badmail */
+  { /* copy to badmail */
     if (badmail[0]==0)
     { badpkt(); /* rename to *.bad */
       return;
@@ -1052,7 +1055,7 @@ int hread(int h, void *buf, unsigned n)
 }
 
 int hgets(char *s, unsigned ssize, int h)
-{ int i,j;
+{ int i, j;
 
   for (i=0; i<ssize-1; i++)
   { j=hgetc(h);
@@ -1351,7 +1354,7 @@ static void findpkt(void)
         }
         if (hbsy!=-1)
         { close(hbsy);
-          if (DelBinkSem((ftnaddr *)&fpktaddr,binkout,myaka[0].zone))
+          if (DelBinkSem((ftnaddr *)&fpktaddr, binkout, myaka[0].zone))
             logwrite('!', "Can't unlink %s: %s!\n", bsyname, strerror(errno));
           else
             debug(8, "FindPkt: %s deleted", bsyname);
@@ -1363,7 +1366,7 @@ boxes:
 #ifndef __MSDOS__
       if (lbso[0])
       {
-        bsyname=GetLBSOBsyName((ftnaddr *)&fpktaddr,fpktaddr.ftndomain,lbso);
+        bsyname=GetLBSOBsyName((ftnaddr *)&fpktaddr, fpktaddr.ftndomain, lbso);
         hbsy=-1;
         for (i=0; i<sizeof(lbsoflavours)/sizeof(lbsoflavours[0]); i++)
         { char *p;
@@ -1393,7 +1396,7 @@ boxes:
             continue;
           }
 #ifdef __OS2__
-          DosSetFHState(fileno(hlo),OPEN_FLAGS_NOINHERIT);
+          DosSetFHState(fileno(hlo), OPEN_FLAGS_NOINHERIT);
 #endif
           while (fgets(msgname, sizeof(msgname), hlo))
           {
@@ -1455,7 +1458,7 @@ boxes:
         }
         if (hbsy!=-1)
         { close(hbsy);
-          if (DelLBSOSem((ftnaddr *)&fpktaddr,fpktaddr.ftndomain,lbso))
+          if (DelLBSOSem((ftnaddr *)&fpktaddr, fpktaddr.ftndomain, lbso))
             logwrite('!', "Can't unlink %s: %s!\n", bsyname, strerror(errno));
           else
             debug(8, "FindPkt: %s deleted", bsyname);
@@ -1522,11 +1525,11 @@ lboxes:
 }
 
 
-static int nextpktaka(int * curaka)
-{ /* берет следующее aka гейта или следующий /for= */
-  /* 0 в случае успеха */
+static int nextpktaka(int *curaka)
+{ /* get next gate aka or next /for= */
+  /* 0 in success */
   int i;
-  uword zone,net,node,point;
+  uword zone, net, node, point;
   char *ftndomain;
 
   for (;;)
@@ -1565,7 +1568,7 @@ static int nextpktaka(int * curaka)
           (net==myaka[i].net) &&
           (node==myaka[i].node) &&
           (point==myaka[i].point) &&
-          (stricmp(ftndomain,myaka[i].ftndomain)==0))
+          (stricmp(ftndomain, myaka[i].ftndomain)==0))
         break;
     if ((i<naka) && (i<curaka[0]))
       continue;
@@ -1590,17 +1593,17 @@ void putaddr(char *str, uword zone, uword net, uword node, uword point)
 }
 
 int checkaddr(char *addr)
-{ /* 0 - вообще не адрес,
+{ /* 0 - not address,
      1 - reject,
      2 - free,
      3 - normal
   */
-  int  i;
+  int i;
 
   debug(11, "CheckAddr(%s)", addr);
   if (strchr(addr, '@')==0)
     return 0;
-  /* не должно подходить ни под одно из rej */
+  /* should not match any rej */
   for (i=0; i<nrej; i++)
     if (cmpaddr(addr, rej[i])==0)
       break;
@@ -1680,7 +1683,7 @@ static void exitperl(void)
 #endif
 
 int extcheck(char *addr, int *area)
-{ /* 0 - вообще не адрес,
+{ /* 0 - not address,
      1 - reject,
      2 - free,
      3 - normal
@@ -1710,7 +1713,7 @@ int extcheck(char *addr, int *area)
   static char cmdline[CMDLINELEN+128];
 
   /* external check */
-  for (i=0;i<nchecker;i++)
+  for (i=0; i<nchecker; i++)
   { if (stricmp(checker[i].mask,"any")==0) break;
     if ((*area!=-1) && (stricmp(checker[i].mask,"echo")==0)) break;
     if ((*area==-1) && (cmpaddr(addr,checker[i].mask)==0)) break;
@@ -1792,14 +1795,14 @@ chk_fork:
     svsubj=perl_get_sv("subject", TRUE);
     svintsetname=perl_get_sv("intsetname", TRUE);
     svextsetname=perl_get_sv("extsetname", TRUE);
-    p=strchr(from,' ');
+    p=strchr(from, ' ');
     if (p==NULL) p=from+strlen(from);
-    memcpy(tmpaddr,from,sizeof(tmpaddr));
+    memcpy(tmpaddr, from, sizeof(tmpaddr));
     tmpaddr[(unsigned)p-(unsigned)from]='\0';
     sv_setpv(svfrom, tmpaddr);
     sv_setpv(svto,   addr);
     sv_setiv(svsize, txtsize);
-    sv_setpv(svarea, (*area==-1)?"NetMail":echoes[*area].usenet);
+    sv_setpv(svarea, (*area==-1) ? "NetMail" : echoes[*area].usenet);
     sv_setpvn(svbody, memtxt, (int)imemtxt);
     sv_setiv(svattr, msghdr.attr);
     memcpy(tmpaddr, msghdr.subj, sizeof(msghdr.subj));
@@ -1835,11 +1838,11 @@ chk_fork:
 ext_noperl:
 #endif  /* DO_PERL */
 
-  /* формируем command line */
+  /* form command line */
   strcpy(cmdline, checker[i].cmdline);
-  p=strchr(from,' ');
+  p=strchr(from, ' ');
   if (p==NULL) p=from+strlen(from);
-  memcpy(tmpaddr,from,sizeof(tmpaddr));
+  memcpy(tmpaddr, from, sizeof(tmpaddr));
   tmpaddr[(unsigned)p-(unsigned)from]='\0';
   chsubstr(cmdline, "%from", tmpaddr);
   chsubstr(cmdline, "%to", addr);
@@ -2340,7 +2343,7 @@ void dateftn2rfc(char *ftndate, char *rfcdate, int tz)
     hh:mm:ss\                     D'bridge for some unkown
     01 Jan 80 02:34\
     12/31/80 02:34:11\
-    12/31/1980 02:34:11\  - такого не поймет, но как классно бы.. ;)
+    12/31/1980 02:34:11\  - gate cannot parse this, but it will be good if yes.. ;)
     01234567890123456789
 */
   curtime=time(NULL);
@@ -2504,7 +2507,7 @@ void getaddr(char *str)
   int  i;
 
   /* remove spaces */
-  debug(6,"GetAddr('%s')", str);
+  debug(6, "GetAddr('%s')", str);
   for(p=str; *p && isspace(*p); p++);
   if (p!=str) strcpy(str, p);
   if (*p=='\0') return;
