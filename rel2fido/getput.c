@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/09/05 13:44:25  gul
+ * Set envelope-from to '<>' in reject msgs under unix
+ *
  * Revision 2.2  2001/01/24 01:59:18  gul
  * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
  *
@@ -245,14 +248,17 @@ void reject(int reason)
         break;
       }
 #else /* UNIX, OS/2 */
-#ifndef UNIX
+#ifdef UNIX
+      sprintf(str, "%s -f \'<>\' %s", rmail,
+           tomaster ? postmast : (envelope_from[0] ? envelope_from : fromaddr));
+#else
       if (uupcver!=SENDMAIL)
         sprintf(str, "%s%s -- %s", rmail, (uupcver==KENDRA) ? "" : " -u",
-                tomaster ? postmast : (envelope_from[0] ? envelope_from : fromaddr));
+           tomaster ? postmast : (envelope_from[0] ? envelope_from : fromaddr));
       else
-#endif
         sprintf(str, "%s -f %s@%s %s", rmail, "MAILER-DAEMON", localdom,
-                tomaster ? postmast : (envelope_from[0] ? envelope_from : fromaddr));
+           tomaster ? postmast : (envelope_from[0] ? envelope_from : fromaddr));
+#endif
       debug(3, "Reject: running '%s'", str);
       pid=pipe_system(&r, NULL, str);
       if (pid==-1)
