@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 13:14:09  gul
+ * quiet var moved to logwrite.c
+ *
  * Revision 2.1  2001/01/24 02:16:06  gul
  * translate comments and cosmetic changes
  *
@@ -125,7 +128,7 @@ struct message msghdr;
 ftnaddr *uplink;
 int  nuplinks;
 int  tossbad, nonet, noecho, bypipe, tabsize;
-int  quiet, myorigin, notfile, fake, holdhuge;
+int  myorigin, notfile, fake, holdhuge;
 unsigned long pipetype;
 char *msgbuf;
 char *myname;
@@ -2013,7 +2016,7 @@ int params(int argc, char *argv[])
   }
 #if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
   if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
-  { puts("You do not allowed to use -c switch\n";
+  { puts("You do not allowed to use -c switch");
     return RET_ERR;
   }
 #endif

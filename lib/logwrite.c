@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 13:14:09  gul
+ * quiet var moved to logwrite.c
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -39,6 +42,7 @@ char logname[256]="";
 char copyright[256]="";
 char loglevel[32]="-$~`&^@=>%#!?*";
 logtype logstyle = FD_LOG;
+int quiet=0;
 
 void logwrite(char level, char *format,...)
 { va_list arg;
