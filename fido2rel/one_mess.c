@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.11  2002/09/22 12:43:24  gul
+ * extmsgid bugfix
+ *
  * Revision 2.10  2002/09/22 11:42:23  gul
  * bugfix
  *
@@ -1976,13 +1979,13 @@ plaintext:
       }
     }
     if (area!=-1 && group[echoes[area].group].extmsgid)
-    { char *p1=strstr(msgid+1, echoes[area].usenet);
+    { char *p1=strstr(msgid, echoes[area].usenet);
       if (p1) p=p1+strlen(echoes[area].usenet);
       if ((p1==NULL || (*(p1-1)!='|' && *(p1-1)!='<') || *p!='|') &&
           strlen(msgid)+strlen(echoes[area].usenet)+1<sizeof(msgid))
-      { memmove(msgid+strlen(echoes[area].usenet)+2, msgid+1, strlen(msgid));
-        strcpy(msgid+1, echoes[area].usenet);
-        msgid[strlen(echoes[area].usenet)+1]='|';
+      { memmove(msgid+strlen(echoes[area].usenet)+1, msgid, strlen(msgid));
+        strcpy(msgid, echoes[area].usenet);
+        msgid[strlen(echoes[area].usenet)]='|';
       }
     }
     if (!isfield("Message-Id:"))
