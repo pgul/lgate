@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:19  gul
+ * We are under CVS for now
+ *
+ */
 #ifndef __DIRENT_DEF_
 #define __DIRENT_DEF_
 #include <io.h> /* struct ftime */

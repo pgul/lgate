@@ -1,12 +1,21 @@
-/* Просматривает NetMail */
-/* находит непосланные письма на myaddr с именами с '@' и "uucp" */
-/* посылает их, убивает, пишет в log */
-/* попутно разбивает длинные строки с обработкой цитирования (2nd pass) */
-/* вставляет '>' перед "From " в начале строки (2nd pass) */
-/* отсекает бинарную информацию (optional) */
-/* письма на заданные адреса (кроме privel users) */
-/* перекодирует некоторые адреса (напр, мой ;) */
-/* гейтует аттачи в base64 (optional) */
+/* Scan NetMail */
+/* find unsend msgs to myaddr with names contains '@' and "uucp" */
+/* send its, remove and write to log */
+/* split long lines with smart process quoting (2nd pass) */
+/* insert '>' before "From " in beginnig of lines (2nd pass) */
+/* deny binary data (optional), */
+/* msgs to specified addresses (except from privel users) */
+/* change some addresses (for example, my ;) */
+/* encoding fileattaches to MIME (base64) (optional) */
+
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:17  gul
+ * We are under CVS for now
+ *
+ */
 
 #include <stdio.h>
 #include <signal.h>

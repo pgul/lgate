@@ -4,6 +4,9 @@
 # Gate address, 5d
 # address contained '%' is senseble only for sending messages, it
 # must be followed by usual address for receiving messages.
+
+# $Id$
+
 address=2:46/128@fidonet.org
 address=2:463/68.128%fidonet.org@lucky.carrier.kiev.ua
 aka=2:463/68.128@fidonet.org

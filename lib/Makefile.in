@@ -1,3 +1,4 @@
+# $Id$
 CC   = gcc
 prefix=@prefix@
 DEFINES=@DEFS@ -DUNIX -DHAVE_FORK -DSYSCONFDIR=\"@sysconfdir@\"

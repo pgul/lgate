@@ -1,3 +1,4 @@
+# $Id$
 CC = gcc
 LINK = gcc
 PERL = D:/PERL5/LIB/5.00553/os2

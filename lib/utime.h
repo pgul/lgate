@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:24  gul
+ * We are under CVS for now
+ *
+ */
 #ifndef _UTIME_H
 #define _UTIME_H
 

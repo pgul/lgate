@@ -1,7 +1,15 @@
-/* Определяет, является ли строка началом нового письма */
-/* Возвращает: 0 - является,
-               1 - "From ", но не является,
-               2 - левая строка */
+/* Check, if the line is start of new message */
+/* Returns: 0 - is,
+            1 - "From ", but is not,
+            2 - left string */
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:24  gul
+ * We are under CVS for now
+ *
+ */
 
 #include <string.h>
 #include <stdio.h>

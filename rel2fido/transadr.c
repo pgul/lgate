@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:26  gul
+ * We are under CVS for now
+ *
+ */
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -12,10 +20,9 @@ static char c;
 
 /* anything@domain -> domain!anything;
    anything!user%domain -> anything!domain!user
-   Потом ищем последний из fF.nN.zZ - это адрес,
-   после последнего '!' - user
-   ? Письма на другой гейт ?
-
+   Then find last of fF.nN.zZ - it's address,
+   after last '!' - user
+   ? Messages to another gate ?
 */
 
 int transaddr(char * user,uword * zone,uword * net,uword * node,
@@ -23,7 +30,7 @@ int transaddr(char * user,uword * zone,uword * net,uword * node,
 {
   debug(5, "transaddr(%s)", addr);
   strcpy(s,addr);
-  /* все, что после '@' - в начало перед '!' */
+  /* all after '@' - to start before '!' */
   s1[0]=0;
   while ((p=strrchr(s,'@'))!=NULL)
   { strcat(s1,p+1);
@@ -32,7 +39,7 @@ int transaddr(char * user,uword * zone,uword * net,uword * node,
   }
   strcat(s1,s);
   strcpy(s,s1);
-  /* все, что после второго '%' между '!' - сразу после этого '!' */
+  /* all after second '%' between '!' - excact after this '!' */
   s1[0]=0;
   do
   {

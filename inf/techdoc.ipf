@@ -1,3 +1,4 @@
+.* $Id$
 :lines align=center.
 :hp2.Как это все работает на техническом уровне:ehp2.
 :elines.

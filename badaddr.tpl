@@ -1,3 +1,4 @@
+@ $Id$
 @if not "[ToMaster]"=="yes"
 @set Multipart=Yes
 This is a Mime-encapsulated message

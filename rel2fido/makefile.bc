@@ -1,3 +1,4 @@
+# $Id$
 CC = bcc
 LINK = tlink
 LIBDIR = d:\bc\lib

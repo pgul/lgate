@@ -1,3 +1,4 @@
+@ $Id$
 @ Send carbon copy to gatemaster?
 @Set CcMaster=Yes
 @Set GateName=FTN->uucp gate

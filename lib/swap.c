@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:23  gul
+ * We are under CVS for now
+ *
+ */
 #include <string.h>
 #include <stdlib.h>
 #include "exec.h"

@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:21  gul
+ * We are under CVS for now
+ *
+ */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

@@ -1,3 +1,4 @@
+# $Id$
 sub setcharset
 {
   if (index($extsetname, "koi8") >= 0)

@@ -1,3 +1,4 @@
+.* $Id$
 :p.
 :lines align=center.
 :hp2.Frequency Asked Questions:ehp2.

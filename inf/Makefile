@@ -1,3 +1,4 @@
+# $Id$
 
 All:	lgate.inf gate.doc techdoc.txt todo.txt history.txt confer.lst route.cfg badaddr.tpl reject.tpl held.tpl lgate.faq forward.cfg
 

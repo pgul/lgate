@@ -1,5 +1,9 @@
 /* rexx */
 
+/*
+ * $Id$
+*/
+
 file='d:\tc\work\gate\postavka\todo.txt'
 
 inlist=0;

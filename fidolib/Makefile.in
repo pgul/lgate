@@ -1,3 +1,4 @@
+# $Id$
 CC   = gcc
 DEFINES=@DEFS@ -DUNIX -DHAVE_FORK
 CFLAGS=$(DEFINES) -Wall -Wno-char-subscripts -O2 -funsigned-char -s

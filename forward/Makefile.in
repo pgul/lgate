@@ -1,3 +1,4 @@
+# $Id$
 APPL=forward
 
 CC=@CC@

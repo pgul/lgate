@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:16  gul
+ * We are under CVS for now
+ *
+ */
 #define VER		"7.01"
 #define FORMATVER	"1.0"
 #define NAZVA		"LuckyGate" HALF " " VER

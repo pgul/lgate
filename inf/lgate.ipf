@@ -1,3 +1,4 @@
+.* $Id$
 :userdoc.
 :title.LuckyGate Manual
 :docprof.

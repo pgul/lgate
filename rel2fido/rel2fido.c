@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:25  gul
+ * We are under CVS for now
+ *
+ */
 #include <stdio.h>
 #ifdef HAVE_DOS_H
 #include <dos.h>

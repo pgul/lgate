@@ -1,3 +1,4 @@
+# $Id$
 APPL=fido2rel
 
 CC=@CC@

@@ -1,3 +1,4 @@
+# $Id$
 CC = tcc
 LINK = tlink20
 LIBDIR = d:\tc\lib

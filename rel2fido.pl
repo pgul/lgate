@@ -1,3 +1,4 @@
+# $Id$
 sub checkecho
 {
   if (index($area, "kiev.fido.") >= 0 || index($area, "ukr.fido.") >= 0)

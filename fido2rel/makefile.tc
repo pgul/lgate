@@ -1,3 +1,4 @@
+# $Id$
 CC = tcc
 LINK = tlink20
 TASM = d:\bc\bin\tasm.exe /ml

@@ -1,3 +1,4 @@
+@ $Id$
 @if [reason]==attach
 @set Subject="File attach held"
 @else

@@ -6,6 +6,14 @@
 /* modified by boris@innonyc.com
    modefied by gul@lucky.net
 */
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:16  gul
+ * We are under CVS for now
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

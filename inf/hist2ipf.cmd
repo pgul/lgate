@@ -1,5 +1,9 @@
 /* rexx */
 
+/*
+ * $Id$
+*/
+
 file='d:\tc\work\gate\postavka\history.txt';
 tempfile='c:\tmp\history.tmp';
 

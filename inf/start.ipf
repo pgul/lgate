@@ -1,3 +1,4 @@
+.* $Id$
 :p.
 :lines align=center.
 :hp2.Как быстро заставить LuckyGate работать.:ehp2.

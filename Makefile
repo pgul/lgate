@@ -1,3 +1,4 @@
+# $Id$
 USER = root
 GROUP = mail
 INSTALL = install

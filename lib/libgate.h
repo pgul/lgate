@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:22  gul
+ * We are under CVS for now
+ *
+ */
 #if defined(__MSDOS__)
 #define FNAME_MAX   81
 #elif defined(__OS2__)

@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ * $Log$
+ * Revision 2.0  2001/01/10 20:42:15  gul
+ * We are under CVS for now
+ *
+ */
 /* base64 encoding
    modified by boris@innonyc.com
    modified by gul@lucky.net
