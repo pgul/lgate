@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/03/27 12:20:38  gul
+ * Unquote realname
+ *
  * Revision 2.1  2004/03/27 11:57:40  gul
  * Translate comments
  *
@@ -20,7 +23,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
   int  i, j;
   int  r1, r2, curmatch, curchaddr;
 
-  debug(6,"ParseAddr('%s')", str);
+  debug(6, "ParseAddr('%s')", str);
   if (maxaddr<1)
     return;
   realname[SSIZE-1]=0;
@@ -58,6 +61,15 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
   { /* first format of address */
     *p=0;
     for (i=0; (str[i]==' ') || (str[i]=='\t'); i++);
+    if (str[i])
+    {
+      for (p1=str+strlen(str)-1; (*p1==' ') || (*p=='\t'); *p1--='\0');
+      /* "Vasya Pupkin"  ->  Vasya Pupkin */
+      if (str[i] == '\"' && *p1 == '\"' && p1>str+i)
+      { i++;
+        *p1--='\0';
+      }
+    }
     strncpy(realname, str+i, SSIZE-1);
     for (i=1; (p[i]==' ') || (p[i]=='\t'); i++);
     strncpy(addr, p+i, maxaddr-1);
