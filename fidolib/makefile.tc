@@ -1,7 +1,7 @@
 # $Id$
 
 CC   = tcc
-ASM  = tasm
+ASM  = tasm /mx
 LIB  = tlib
 
 !ifndef DEST

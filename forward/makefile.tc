@@ -2,7 +2,7 @@
 CC = tcc
 LINK = tlink20
 CFLAGS = 
-LFLAGS = /v /x /l /d
+LFLAGS = /v /x /l /d /c
 OBJDIR = obj
 
 .c.obj:
@@ -22,7 +22,7 @@ $(OBJDIR)\forward.obj:   forward.c ..\lib\libgate.h ..\fidolib\fidolib.h turboc.
   $(CC) -c $(CFLAGS) -o$@ $&
 
 forward.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\lgate.lib ..\fidolib\flib_l.lib
-  $(CC) -e$@ $(OBJS) lgate.lib flib_l.lib
+  $(CC) -e$@ $(OBJS) ..\lib\lgate.lib ..\fidolib\flib_l.lib
 
 turboc.cfg:	makefile.tc
   copy &&|

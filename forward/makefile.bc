@@ -4,7 +4,7 @@ LINK = tlink
 INCDIR = d:\bc\include
 LIBDIR = d:\bc\lib
 CFLAGS = +bc.cfg
-LFLAGS = /v /x /l /d /L$(LIBDIR)
+LFLAGS = /v /x /l /d /c /L$(LIBDIR)
 OBJDIR = objbc
 
 .c.obj:

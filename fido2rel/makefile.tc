@@ -5,7 +5,7 @@ TASM = d:\bc\bin\tasm.exe /ml
 LIBDIR = d:\tc\lib
 INCDIR = d:\tc\include
 CFLAGS = 
-LFLAGS = /v /x /d /l
+LFLAGS = /v /x /d /l /c
 OBJDIR = obj
 
 .c.obj:
