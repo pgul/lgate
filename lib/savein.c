@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/04/18 21:59:21  gul
+ * Bugfix
+ *
  * Revision 2.1  2001/04/18 21:46:38  gul
  * Translate comments
  *
@@ -106,8 +109,9 @@ int saveargs(int argc, char *argv[])
     }
     if (strchr(argv[c], ' ')) str[n++]='\"';
     str[n]='\0';
-    fprintf(f, "%s\n", str);
+    fputs(str, f);
   }
+  fputs("\n", f);
   if (isatty(fileno(stdin)))
   { fclose(f);
     return 0;
@@ -115,7 +119,7 @@ int saveargs(int argc, char *argv[])
   if (isfile(fileno(stdin)))
     fprintf(f, "<%s\n", nametxt);
   fclose(f);
-  f=fopen(nametxt,"wb");
+  f=fopen(nametxt, "wb");
   setmode(fileno(stdin), O_BINARY);
   while ((c=fgetc(stdin))!=EOF)
     fputc(c, f);
