@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/07/20 17:50:59  gul
+ * \r\n -> \n
+ *
  * Revision 2.1  2001/01/25 18:41:39  gul
  * myname moved to debug.c
  *

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 17:51:00  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2004/07/04 08:04:11  gul
  * Bugfix: gcc behavior changed in 3.3.3 for "*p++"
  *

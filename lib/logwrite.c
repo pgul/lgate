@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 17:50:59  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2001/11/15 12:28:28  gul
  * always put date/time if logstyle==FD_LOG
  *

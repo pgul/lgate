@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/07/20 17:51:00  gul
+ * \r\n -> \n
+ *
  * Revision 2.3  2001/08/08 08:01:22  gul
  * "\r\n" -> "\n" conversion under unix
  *

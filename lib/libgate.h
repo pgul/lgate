@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2004/07/20 17:51:01  gul
+ * \r\n -> \n
+ *
  * Revision 2.2  2002/03/21 11:28:24  gul
  * Cygwin support
  *
