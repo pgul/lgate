@@ -29,12 +29,6 @@ OBJS=${SRCS:.c=.o}
 
 all:	lgate.a
 
-regex.o:	regex.c regex.h
-	@echo Compiling regex.c...
-	@$(PERL) -p -n -e s/\\r\\n/\\n/ < $< > regexu.c
-	@$(CC) -c $(CFLAGS) -o $*.o regexu.c
-	@rm regexu.c
-
 clean:
 	rm -f $(OBJS)
 
