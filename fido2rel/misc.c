@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.14  2003/03/25 20:07:09  gul
+ * Clean attributes for unpack messages
+ *
  * Revision 2.13  2003/03/25 19:57:41  gul
  * Clear message attributes for retoss
  *
@@ -916,6 +919,8 @@ gobadpkt:
     offs_beg=lseek(h, 0, SEEK_CUR)-potolok+ibuf;
     debug(11, "FindLet: found message");
     msghdr_byteorder(&msghdr);
+    msghdr.attr &= msgPRIVATE|msgFILEATT|msgFREQ|msgRETRECREQ|msgRETREC|msgAUDITTR|msgUPREQ;
+    msghdr.attr |= msgFORWD;
     one_message(msgname);
   }
 }
