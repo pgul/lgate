@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2003/02/16 09:41:57  gul
+ * bugfix: sometimes extra NUL-bytes occured at the end of pkt
+ *
  * Revision 2.8  2002/11/17 20:55:26  gul
  * New option "tid" in gate.cfg
  *
@@ -314,6 +317,7 @@ extern char *myintsetname, *myextsetname;
 extern char extsetname[128], intsetname[128];
 extern char inb_dir[FNAME_MAX], charsetsdir[FNAME_MAX], charsetalias[FNAME_MAX];
 extern int  notid;
+extern unsigned long mypid;
 #ifdef _IOFBF  /* stdio.h included */
 void putfiles(VIRT_FILE *fout, char *subj, char *bound);
 int  writemsghdr(struct message * msghdr,FILE * fout);

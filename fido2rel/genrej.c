@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2003/02/16 09:41:57  gul
+ * bugfix: sometimes extra NUL-bytes occured at the end of pkt
+ *
  * Revision 2.8  2003/02/03 13:27:53  gul
  * Fix previous patch
  *
@@ -162,7 +165,7 @@ void closepkt(void)
   static long tpktname=0;
   static char realname[FNAME_MAX];
 
-  if (frej==NULL) return;
+  if (frej==NULL || mypid!=getpid()) return;
   i=0;
   fwrite(&i, 2, 1, frej);
   fclose(frej);

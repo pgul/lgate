@@ -12,6 +12,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2003/02/16 09:41:57  gul
+ * bugfix: sometimes extra NUL-bytes occured at the end of pkt
+ *
  * Revision 2.3  2002/01/15 18:48:37  gul
  * Remove nkillattfiles=32 limitation
  *
@@ -53,10 +56,12 @@ void term(int signo);
 extern int  retcode, frescan;
 struct attfiletype *killattfiles;
 int nkillattfiles=0;
+unsigned long mypid;
 
 static void killtmpatt(void)
 { int i;
 
+  if (getpid() != mypid) return;
   for (i=0; i<nkillattfiles; i++)
   { if (killattfiles[i].attr & msgSENT)
     { if (strchr(killattfiles[i].name, PATHSEP))
@@ -116,6 +121,7 @@ int main(int argc, char * argv[])
   if (tossbad)
     retoss();
   h=-1;
+  mypid=getpid();
   atexit(closepkt);
   atexit(killtmpatt);
 #ifdef SIGPIPE
