@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/05/28 13:27:08  gul
+ * Put Subject, From and Message-Id to header of first part of splitted message
+ *
  * Revision 2.0  2001/01/10 20:42:17  gul
  * We are under CVS for now
  *
@@ -230,15 +233,17 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
     fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
               time(NULL), (unsigned)getpid(), seqf++, local);
   fname=basename(nearfname);
-  if ((parts>1) && (enc!=ENC_BASE64))
+  if (parts>1)
     fprintf(h, "Subject: %s, %u/%u; %02u.%02u.%02u %02u:%02u:%02u\n",
-            fname,curpart, parts,
+            fname, curpart, parts,
             ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
             ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
   else
     fprintf(h, "Subject: %s; %02u.%02u.%02u %02u:%02u:%02u\n",
-            fname, ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
+            fname,
+            ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
             ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
+
   fputs("To: ", h);
   for (p=addrlist; *p;)
   { if (isspace(*p) || (*p==','))
@@ -274,7 +279,15 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
       fprintf(h, "Content-Type: message/partial; id=\"%s\";\n"
                  "              number=%d; total=%d\n", part_id, curpart, parts);
     if ((parts>1) && (curpart==1))
-      fprintf(h, "\n");
+    { fprintf(h, "\n");
+      fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
+              time(NULL), (unsigned)getpid(), seqf++, local);
+      fprintf(h, "Subject: %s; %02u.%02u.%02u %02u:%02u:%02u\n",
+              fname, ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
+              ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
+      fprintf(h, "From: %s@%s\n", user, local); /* TheBat workaround */
+      fprintf(h, "Mime-Version: 1.0\n");
+    }
     if ((parts<=1) || (curpart==1))
     { fprintf(h, "Content-Type: application/octet-stream; name=\"%s\"; crc32=%08lX\n",
               fname, fcrc32);
