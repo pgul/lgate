@@ -10,7 +10,7 @@ update: attach/attuucp fido2rel/fido2rel rel2fido/rel2fido
 install: attach/attuucp fido2rel/fido2rel rel2fido/rel2fido
 	$(INSTALL) -g $(GROUP) -o $(USER) attach/attuucp rel2fido/rel2fido fido2rel/fido2rel forward/forward @bindir@
 	$(INSTALL) -g $(GROUP) -o $(USER) gate.conf confer.lst route.cfg forward/forward.cfg @sysconfdir@
-	$(INSTALL) -g $(GROUP) -o $(USER) badaddr.tpl reject.tpl help.tpl @sysconfdir@
+	$(INSTALL) -g $(GROUP) -o $(USER) badaddr.tpl reject.tpl held.tpl @sysconfdir@
 	@echo
 	@echo Installation complete.
 	@echo
