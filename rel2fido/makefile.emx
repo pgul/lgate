@@ -1,0 +1,83 @@
+CC = gcc
+LINK = gcc
+DEFINES = -DHAVE_FILELENGTH -DHAVE_UNISTD_H -DHAVE_MALLOC_H -DHAVE_SYS_TIME_H \
+          -DHAVE_STDARG_H -DHAVE_DOS_H -DHAVE_DIRENT_H -DHAVE_SYS_UTIME_H \
+          -DHAVE_IO_H -DHAVE_PROCESS_H -DHAVE_SNPRINTF -DHAVE_SHARE_H \
+          -DHAVE_PIPE -DHAVE_ENVIRON -DHAVE_STRICMP -DHAVE_STRNICMP \
+          -DHAVE_STRING_H -DHAVE_ALLOCA_H -DHAVE_SETMODE
+COPT = -c -Zomf -Zmt -Zcrtdll -idirafter ../fidolib -idirafter ../lib -Wall -Wno-char-subscripts -O2 -D__OS2__ -funsigned-char $(DEFINES) -o $@
+LOPT = -Zomf -Zmt -Zcrtdll -Wall -Zstack 512 -lwrap -Zlinker /PM:VIO -o $@
+
+ifdef DEBUG
+CFLAGS = $(COPT) -g
+LFLAGS = $(LOPT) -g
+OBJDIR = objemx/debug
+LXLITE = @rem
+else
+CFLAGS = $(COPT) -s
+LFLAGS = $(LOPT) -s
+OBJDIR = objemx
+LXLITE = lxlite
+endif
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+All:	$(OBJDIR) $(OBJDIR)/rel2fido.exe
+
+objemx/debug:	objemx
+	mkdir objemx/debug
+objemx:
+	mkdir objemx
+
+OBJS = \
+ $(OBJDIR)/arbmath.obj \
+ $(OBJDIR)/config.obj \
+ $(OBJDIR)/from.obj \
+ $(OBJDIR)/rel2fido.obj \
+ $(OBJDIR)/getput.obj \
+ $(OBJDIR)/getspool.obj \
+ $(OBJDIR)/import.obj \
+ $(OBJDIR)/transadr.obj \
+ $(OBJDIR)/misc.obj \
+ $(OBJDIR)/parseadr.obj \
+ $(OBJDIR)/readhdr.obj \
+ $(OBJDIR)/unmime.obj
+
+$(OBJDIR)/arbmath.obj:	arbmath.c lib.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/config.obj:	config.c lib.h import.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/from.obj:	from.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/getput.obj:	getput.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/getspool.obj:	getspool.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/import.obj:	import.c lib.h import.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/misc.obj:	misc.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/parseadr.obj:	parseadr.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/readhdr.obj:	readhdr.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/rel2fido.obj:	rel2fido.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/transadr.obj:	transadr.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/unmime.obj:	unmime.c
+	$(CC) $(CFLAGS) $<
+
+$(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h
+
+$(OBJDIR)/rel2fido.exe: $(OBJDIR)/rel2fido2.exe rel2fido.dos
+	cp $(OBJDIR)/rel2fido2.exe $@
+	$(LXLITE) /D+ /MLN /MRN /Trel2fido.dos $@
+
+$(OBJDIR)/rel2fido2.exe:	$(OBJS) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LINK) $(LFLAGS) $(OBJS) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LXLITE) /D+ /MLN /MRN $@
+
+clean:
+	rm -f $(OBJDIR)\*.obj $(OBJDIR)\debug\*.obj

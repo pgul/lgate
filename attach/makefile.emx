@@ -1,0 +1,81 @@
+CC = gcc
+LINK = gcc
+DEFINES = -DHAVE_IO_H -DHAVE_DIRENT_H -DHAVE_DOS_H -DHAVE_MALLOC_H \
+          -DHAVE_PROCESS_H -DHAVE_SHARE_H -DHAVE_UTIME_H -DHAVE_SNPRINTF \
+          -DHAVE_PIPE -DHAVE_FLOCK -DHAVE_SYS_PARAM_H -DHAVE_NETINET_IN_H \
+          -DHAVE_ARPA_INET_H -DHAVE_HTONS -DHAVE_ENVIRON \
+          -DHAVE_STRICMP -DHAVE_STRNICMP -DHAVE_FILELENGTH -DHAVE_SETMODE
+COPT = -c -Zomf -Zmt -Zcrtdll -idirafter ../lib -idirafter ../fidolib $(DEFINES) -Wall -Wno-char-subscripts -O2 -D__OS2__ -funsigned-char -o $@
+LOPT = -Zomf -Zcrtdll -Zmt -Wall -Zstack 512 -lwrap -Zlinker /PM:VIO -o $@
+
+ifdef DEBUG
+CFLAGS = $(COPT) -g
+LFLAGS = $(LOPT) -g
+OBJDIR = objemx/debug
+else
+CFLAGS = $(COPT) -s
+LFLAGS = $(LOPT) -s
+OBJDIR = objemx
+endif
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+OBJ = \
+ $(OBJDIR)/attach.obj \
+ $(OBJDIR)/checktmp.obj \
+ $(OBJDIR)/config.obj \
+ $(OBJDIR)/uuencode.obj \
+ $(OBJDIR)/uudecode.obj \
+ $(OBJDIR)/from.obj \
+ $(OBJDIR)/misc.obj \
+ $(OBJDIR)/do_uuen.obj \
+ $(OBJDIR)/do_uude.obj \
+ $(OBJDIR)/do_b64.obj \
+ $(OBJDIR)/do_unb64.obj \
+ $(OBJDIR)/hgets.obj
+
+all:	$(OBJDIR) $(OBJDIR)/attuucp2.exe $(OBJDIR)/attuucp.exe
+
+objemx/debug:	objemx
+	mkdir objemx\debug
+objemx:
+	mkdir objemx
+
+$(OBJDIR)/attuucp.exe:	attuucp.dos $(OBJDIR)/attuucp2.exe
+	cp $(OBJDIR)\attuucp2.exe $@
+	lxlite /D+ /MLN /MRN /Tattuucp.dos $@
+
+$(OBJDIR)/attuucp2.exe:	$(OBJ) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LINK) $(LFLAGS) $(OBJ) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	lxlite /D+ /MLN /MRN $@
+
+$(OBJDIR)/attach.obj:	attach.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/config.obj:	config.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/from.obj:	from.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/misc.obj:	misc.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/uuencode.obj:	uuencode.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/uudecode.obj:	uudecode.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/checktmp.obj:	checktmp.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/do_uuen.obj:	do_uuen.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/do_uude.obj:	do_uude.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/do_b64.obj:	do_b64.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/do_unb64.obj:	do_unb64.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/hgets.obj:	hgets.c
+	$(CC) $(CFLAGS) $<
+
+$(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h
+
+clean:
+	rm -f $(OBJDIR)/*.obj

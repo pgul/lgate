@@ -1,0 +1,101 @@
+
+CC   = tcc
+LIB  = tlib
+OBJDIR = obj
+
+OBJS = \
+ $(OBJDIR)\cmpaddr.obj \
+ $(OBJDIR)\debug.obj \
+ $(OBJDIR)\gettz.obj \
+ $(OBJDIR)\logwrite.obj \
+ $(OBJDIR)\memmgr.obj \
+ $(OBJDIR)\myfopen.obj \
+ $(OBJDIR)\regex.obj \
+ $(OBJDIR)\rwmsghdr.obj \
+ $(OBJDIR)\savein.obj \
+ $(OBJDIR)\swap.obj \
+ $(OBJDIR)\sysexit.obj \
+ $(OBJDIR)\sysfuncs.obj \
+ $(OBJDIR)\template.obj \
+ $(OBJDIR)\charsets.obj
+
+all:	$(OBJDIR)\nul lgate.lib
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+clean:
+	if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+	if exist turboc.cfg del turboc.cfg
+
+$(OBJDIR)\cmpaddr.obj:	cmpaddr.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\debug.obj:	debug.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\gettz.obj:	gettz.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\logwrite.obj:	logwrite.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\memmgr.obj:	memmgr.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\myfopen.obj:	myfopen.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\regex.obj:	regex.c regex.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rwmsghdr.obj:	rwmsghdr.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\savein.obj:	savein.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\swap.obj:	swap.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\sysexit.obj:	sysexit.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\sysfuncs.obj:	sysfuncs.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\template.obj:	template.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\charsets.obj:	charsets.c libgate.h ..\fidolib\fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+
+lgate.lib:	$(OBJS)
+	sed "s/ [a-z]/ +-&/g" >objlist.tmp < &&|
+$?
+|
+	$(LIB) $@ +- @objlist.tmp
+	del objlist.tmp
+
+turboc.cfg:
+	copy &&|
+-ml
+-w
+-K
+-C
+-lc
+-O
+-Z
+-k-
+-d
+-I..\fidolib;D:\TC\INCLUDE
+-c
+-k-
+-f-
+-DHAVE_DIR_H
+-DHAVE_IO_H
+-DHAVE_DOS_H
+-DHAVE_ALLOC_H
+-DHAVE_DIRENT_H
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRUPR
+-DHAVE_FILELENGTH
+-DHAVE_SHARE_H
+-DHAVE_STRING_H
+-DREGEX_MALLOC
+-DHAVE_SOPEN
+-DHAVE_ISASCII
+-DHAVE_SETMODE
+-DHAVE_ENVIRON
+| $@
+
+.c.obj:
+	$(CC) $(CFLAGS) -o$@ $<

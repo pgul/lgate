@@ -1,0 +1,119 @@
+CC = tcc
+LINK = tlink20
+TASM = d:\bc\bin\tasm.exe /ml
+LIBDIR = d:\tc\lib
+INCDIR = d:\tc\include
+CFLAGS = 
+LFLAGS = /v /x /d /l
+OBJDIR = obj
+
+.c.obj:
+  $(CC) $(CFLAGS) -o$@ $&
+
+.asm.obj:
+  $(TASM) $<,$@
+
+.c.asm:
+  $(CC) -S $(CFLAGS) -o$@ $&
+
+OBJS = \
+ $(OBJDIR)\arbmath.obj \
+ $(OBJDIR)\base64.obj \
+ $(OBJDIR)\config.obj \
+ $(OBJDIR)\fido2rel.obj \
+ $(OBJDIR)\one_mess.obj \
+ $(OBJDIR)\genrej.obj \
+ $(OBJDIR)\getfaddr.obj \
+ $(OBJDIR)\import.obj \
+ $(OBJDIR)\makeaddr.obj \
+ $(OBJDIR)\misc.obj \
+ $(OBJDIR)\rsend.obj \
+ $(OBJDIR)\virtfile.obj
+  
+All: fido2rel.com
+
+$(OBJDIR)\arbmath.obj: arbmath.c lib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\base64.obj:  base64.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.asm: config.c lib.h import.h gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) -S $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj: $(OBJDIR)\config.asm
+  $(TASM) $(OBJDIR)\config,$(OBJDIR)\config
+$(OBJDIR)\fido2rel.obj: fido2rel.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\one_mess.asm: one_mess.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) -S $(CFLAGS) -o$@ $&
+$(OBJDIR)\one_mess.obj: $(OBJDIR)\one_mess.asm
+  $(TASM) $(OBJDIR)\one_mess,$(OBJDIR)\one_mess
+$(OBJDIR)\genrej.obj: genrej.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getfaddr.obj: getfaddr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\import.obj: import.c lib.h import.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\makeaddr.obj: makeaddr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\misc.obj: misc.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rsend.obj: rsend.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\virtfile.obj: virtfile.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+
+fido2rel.exe: $(OBJDIR)\nul $(OBJS) ..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib
+  $(LINK) $(LFLAGS) @&&|
+$(LIBDIR)\c0l+
+$(OBJS)
+$@
+
+..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib $(LIBDIR)\cl
+|
+
+turboc.cfg:
+  copy &&|
+-ml
+-w
+-K
+-C
+-lc
+-O
+-Z
+-k-
+-I..\lib;..\fidolib;$(INCDIR)
+-c
+-k-
+-f-
+-v
+-y
+-DHAVE_FILELENGTH
+-DHAVE_ALLOC_H
+-DHAVE_STDARG_H
+-DHAVE_DOS_H
+-DHAVE_DIR_H
+-DHAVE_DIRENT_H
+-DHAVE_UTIME_H
+-DHAVE_IO_H
+-DHAVE_PROCESS_H
+-DHAVE_SHARE_H
+-DHAVE_ENVIRON
+-DHAVE_STRUPR
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRING_H
+-DREGEX_MALLOC
+-DHAVE_SETMODE
+| $@
+
+fido2rel.com: fido2rel.exe
+  copy fido2rel.exe fido2rel.com
+  tdstrip fido2rel.com
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist $(OBJDIR)\*.asm del $(OBJDIR)\*.asm
+  if exist turboc.cfg del turboc.cfg
+  if exist fido2rel.exe del fido2rel.exe

@@ -1,0 +1,38 @@
+APPL=fido2rel
+
+CC=@CC@
+AWK=@AWK@
+prefix=@prefix@
+
+SRCS= \
+ base64.c \
+ config.c \
+ fido2rel.c \
+ genrej.c \
+ getfaddr.c \
+ makeaddr.c \
+ misc.c \
+ one_mess.c \
+ rsend.c \
+ virtfile.c
+
+OBJS=${SRCS:.c=.o} 
+DEFINES=@DEFS@ -DUNIX -DHAVE_FORK
+CFLAGS=$(DEFINES) @CFLAGS@ -Wall -idirafter ../fidolib -idirafter ../lib -Wno-char-subscripts -O2 -funsigned-char -s
+LIBS=@LIBS@
+LIBRARY=../lib/lgate.a ../fidolib/libfido.a
+
+all: $(APPL)
+
+$(APPL): $(OBJS) $(LIBRARY)
+	@echo Linking $@...
+	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBRARY) $(LIBS)
+
+clean:
+	rm -f *.o core *.core *.o *.err
+
+.c.o:
+	@echo Compiling $*.c
+	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+
+$(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h

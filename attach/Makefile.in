@@ -1,0 +1,40 @@
+APPL=attuucp
+
+CC=@CC@
+AWK=@AWK@
+prefix=@prefix@
+
+SRCS= \
+ attach.c \
+ checktmp.c \
+ config.c \
+ uuencode.c \
+ uudecode.c \
+ from.c \
+ misc.c \
+ do_uuen.c \
+ do_uude.c \
+ do_b64.c \
+ do_unb64.c \
+ hgets.c
+
+OBJS=${SRCS:.c=.o} 
+DEFINES=@DEFS@ -DUNIX -DHAVE_FORK
+CFLAGS=$(DEFINES) -Wall -idirafter ../fidolib -idirafter ../lib -Wno-char-subscripts -O2 -funsigned-char -s
+LIBS=@LIBS@
+LIBRARY=../lib/lgate.a ../fidolib/libfido.a
+
+all: $(APPL)
+
+$(APPL): $(OBJS) $(LIBRARY)
+	@echo Linking $@...
+	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBRARY)
+
+clean:
+	rm -f *.o core *.core *.o *.err
+
+.c.o:
+	@echo Compiling $*.c...
+	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+
+$(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h

@@ -1,0 +1,47 @@
+CC = gcc
+LINK = gcc
+DEFINES = -DHAVE_IO_H -DHAVE_DIRENT_H -DHAVE_DOS_H -DHAVE_MALLOC_H \
+          -DHAVE_PROCESS_H -DHAVE_SHARE_H -DHAVE_UTIME_H -DHAVE_SNPRINTF \
+          -DHAVE_PIPE -DHAVE_FLOCK -DHAVE_SYS_PARAM_H -DHAVE_NETINET_IN_H \
+          -DHAVE_ARPA_INET_H -DHAVE_HTONS -DHAVE_ENVIRON \
+          -DHAVE_STRICMP -DHAVE_STRNICMP -DHAVE_FILELENGTH -DHAVE_SETMODE
+COPT = -c -Zomf -Zmt -Zcrtdll -idirafter ../lib -idirafter ../fidolib $(DEFINES) -Wall -Wno-char-subscripts -O2 -D__OS2__ -funsigned-char -o $@
+LOPT = -Zomf -Zcrtdll -Zmt -Wall -Zstack 512 -lwrap -Zlinker /PM:VIO -o $@
+
+ifdef DEBUG
+CFLAGS = $(COPT) -g
+LFLAGS = $(LOPT) -g
+OBJDIR = objemx/debug
+else
+CFLAGS = $(COPT) -s
+LFLAGS = $(LOPT) -s
+OBJDIR = objemx
+endif
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+OBJ = $(OBJDIR)/forward.obj
+
+all:	$(OBJDIR) $(OBJDIR)/forward2.exe $(OBJDIR)/forward.exe
+
+objemx/debug:	objemx
+	mkdir objemx\debug
+objemx:
+	mkdir objemx
+
+$(OBJDIR)/forward.exe:	forward.dos $(OBJDIR)/forward2.exe
+	cp $(OBJDIR)\forward2.exe $@
+	lxlite /D+ /MLN /MRN /Tforward.dos $@
+
+$(OBJDIR)/forward2.exe:	$(OBJ) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LINK) $(LFLAGS) $(OBJ) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	lxlite /D+ /MLN /MRN $@
+
+$(OBJDIR)/forward.obj:	forward.c
+	$(CC) $(CFLAGS) $<
+
+$(OBJS):	../lib/libgate.h ../fidolib/fidolib.h
+
+clean:
+	rm -f $(OBJDIR)/*.obj

@@ -1,0 +1,64 @@
+CC = tcc
+LINK = tlink20
+CFLAGS = 
+LFLAGS = /v /x /l /d
+OBJDIR = obj
+
+.c.obj:
+  $(CC) -c $(CFLAGS) -o$@ $<
+
+all: forward.dos
+
+forward.dos:	forward.exe
+!ifndef DEBUG
+  tdstrip forward.exe
+!endif
+  copy forward.exe forward.dos
+
+OBJS = $(OBJDIR)\forward.obj
+
+$(OBJDIR)\forward.obj:   forward.c ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) -c $(CFLAGS) -o$@ $&
+
+forward.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\lgate.lib ..\fidolib\flib_l.lib
+  $(CC) -e$@ $(OBJS) lgate.lib flib_l.lib
+
+turboc.cfg:
+  copy &&|
+-ml
+-w
+-K
+-C
+-O
+-Z
+-k-
+-d
+-I..\fidolib;..\lib;D:\TC\INCLUDE
+-L..\fidolib;..\lib;D:\TC\LIB
+-f-
+-v
+-y
+-DHAVE_IO_H
+-DHAVE_DIRENT_H
+-DHAVE_DOS_H
+-DHAVE_ALLOC_H
+-DHAVE_PROCESS_H
+-DHAVE_SHARE_H
+-DHAVE_UTIME_H
+-DHAVE_DIR_H
+-DHAVE_STRUPR
+-DHAVE_ENVIRON
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_FILELENGTH
+-DHAVE_SETMODE
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+debug: forward.exe
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist turboc.cfg del turboc.cfg

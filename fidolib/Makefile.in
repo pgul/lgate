@@ -1,0 +1,41 @@
+CC   = gcc
+DEFINES=@DEFS@ -DUNIX -DHAVE_FORK
+CFLAGS=$(DEFINES) -Wall -Wno-char-subscripts -O2 -funsigned-char -s
+LIBS=@LIBS@
+
+SRCS = \
+ myopen.c \
+ montable.c \
+ weekday.c \
+ daymon.c \
+ copyfile.c \
+ getfaddr.c \
+ crc.c \
+ binksem.c \
+ fdsem.c \
+ lbsosem.c \
+ bsyname.c \
+ getfmask.c \
+ chkmask.c \
+ touch.c \
+ dayweek.c \
+ movefile.c \
+ rmove.c \
+ scanbnk.c
+
+OBJS=${SRCS:.c=.o} 
+
+.c.o:
+	@echo Compiling $*.c...
+	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+
+all:	libfido.a
+
+clean:
+	rm -f $(OBJS)
+
+libfido.a:	$(OBJS)
+	@echo Creating library...
+	@ar r $@ $?
+
+$(OBJS):	fidolib.h

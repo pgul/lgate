@@ -1,0 +1,114 @@
+
+CC   = tcc
+ASM  = tasm
+LIB  = tlib
+
+!ifndef DEST
+DEST = flib_l.lib
+MODL = LARGE
+OBJDIR = obj
+CFLAGS = -ml
+!endif
+
+OBJS = \
+ $(OBJDIR)\myopen.obj \
+ $(OBJDIR)\montable.obj \
+ $(OBJDIR)\weekday.obj \
+ $(OBJDIR)\daymon.obj \
+ $(OBJDIR)\dvdelay.obj \
+ $(OBJDIR)\copyfile.obj \
+ $(OBJDIR)\getfaddr.obj \
+ $(OBJDIR)\crc.obj \
+ $(OBJDIR)\binksem.obj \
+ $(OBJDIR)\fdsem.obj \
+ $(OBJDIR)\bsyname.obj \
+ $(OBJDIR)\getfmask.obj \
+ $(OBJDIR)\chkmask.obj \
+ $(OBJDIR)\touch.obj \
+ $(OBJDIR)\dayweek.obj \
+ $(OBJDIR)\movefile.obj \
+ $(OBJDIR)\rmove.obj \
+ $(OBJDIR)\scanbnk.obj \
+ $(OBJDIR)\dirent.obj
+
+all:	$(OBJDIR)\nul $(DEST)
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+clean:
+	if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+	if exist turboc.cfg del turboc.cfg
+
+$(DEST):	$(OBJS)
+	sed "s/ [a-z]/ +-&/g" >objlist.tmp < &&|
+$?
+|
+	$(LIB) $@ +- @objlist.tmp
+	del objlist.tmp
+
+turboc.cfg:
+	copy &&|
+-w
+-K
+-C
+-lc
+-O
+-Z
+-k-
+-d
+-I.;D:\TC\INCLUDE
+-c
+-f-
+-DHAVE_DIR_H
+-DHAVE_IO_H
+-DHAVE_DOS_H
+-DHAVE_ALLOC_H
+-DHAVE_DIRENT_H
+-DHAVE_FILELENGTH
+| $@
+
+.c.obj:
+	$(CC) $(CFLAGS) -o$@ $&
+
+.asm.obj:
+	$(ASM) /dMODL=$(MODL) $&,$@
+
+$(OBJDIR)\myopen.obj:	myopen.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\montable.obj:	montable.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\weekday.obj:	weekday.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\daymon.obj:	daymon.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\dvdelay.obj:	dvdelay.asm
+	$(ASM) /dMODL=$(MODL) $&,$@
+$(OBJDIR)\copyfile.obj:	copyfile.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getfaddr.obj:	getfaddr.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\crc.obj:	crc.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\binksem.obj:	binksem.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\fdsem.obj:	fdsem.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\bsyname.obj:	bsyname.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getfmask.obj:	getfmask.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\chkmask.obj:	chkmask.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\touch.obj:	touch.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\dayweek.obj:	dayweek.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\movefile.obj:	movefile.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rmove.obj:	rmove.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\scanbnk.obj:	scanbnk.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\dirent.obj:	dirent.c fidolib.h turboc.cfg
+	$(CC) $(CFLAGS) -o$@ $&

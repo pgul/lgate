@@ -1,0 +1,104 @@
+CC = tcc
+LINK = tlink20
+LIBDIR = d:\tc\lib
+INCDIR = d:\tc\include
+CFLAGS = 
+LFLAGS = /v /x /l /d
+OBJDIR = obj
+
+.c.obj:
+  $(CC) $(CFLAGS) -o$@ $<
+
+all: debug
+!ifndef DEBUG
+  tdstrip attuucp.exe
+  copy attuucp.exe attuucp.dos
+!endif
+
+OBJS = \
+ $(OBJDIR)\attach.obj \
+ $(OBJDIR)\config.obj \
+ $(OBJDIR)\from.obj \
+ $(OBJDIR)\misc.obj \
+ $(OBJDIR)\uuencode.obj \
+ $(OBJDIR)\uudecode.obj \
+ $(OBJDIR)\checktmp.obj \
+ $(OBJDIR)\do_uuen.obj \
+ $(OBJDIR)\do_uude.obj \
+ $(OBJDIR)\do_b64.obj \
+ $(OBJDIR)\do_unb64.obj \
+ $(OBJDIR)\hgets.obj
+
+$(OBJDIR)\attach.obj:   attach.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj:   config.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\from.obj:     from.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\misc.obj:     misc.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\uuencode.obj: uuencode.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\uudecode.obj: uudecode.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\checktmp.obj: checktmp.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_uuen.obj:  do_uuen.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_uude.obj:  do_uude.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_b64.obj:   do_b64.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_unb64.obj: do_unb64.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\hgets.obj:    hgets.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+
+attuucp.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib
+  $(LINK) $(LFLAGS) @&&|
+$(LIBDIR)\c0l+
+$(OBJS)
+$@
+
+..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib $(LIBDIR)\cl
+|
+
+turboc.cfg:
+  copy &&|
+-ml
+-w
+-K
+-C
+-O
+-Z
+-k-
+-d
+-I..\fidolib;..\lib;$(INCDIR)
+-c
+-f-
+-v
+-y
+-DHAVE_IO_H
+-DHAVE_DIRENT_H
+-DHAVE_DOS_H
+-DHAVE_ALLOC_H
+-DHAVE_PROCESS_H
+-DHAVE_SHARE_H
+-DHAVE_UTIME_H
+-DHAVE_DIR_H
+-DHAVE_STRUPR
+-DHAVE_ENVIRON
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_FILELENGTH
+-DHAVE_SETMODE
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+debug: attuucp.exe
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist turboc.cfg del turboc.cfg

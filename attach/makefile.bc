@@ -1,0 +1,117 @@
+CC = bcc
+LINK = tlink
+LIBDIR = d:\bc\lib
+INCDIR = d:\bc\include
+CFLAGS = +bc.cfg
+LFLAGS = /v /x /l /d /L$(LIBDIR)
+OBJDIR = objbc
+
+.c.obj:
+  $(CC) $(CFLAGS) -o$@ $<
+
+all: debug
+!ifndef DEBUG
+  tdstrip attuucp.exe
+  copy attuucp.exe attuucp.dos
+!endif
+
+OBJS = \
+ $(OBJDIR)\attach.obj \
+ $(OBJDIR)\config.obj \
+ $(OBJDIR)\from.obj \
+ $(OBJDIR)\misc.obj \
+ $(OBJDIR)\uuencode.obj \
+ $(OBJDIR)\uudecode.obj \
+ $(OBJDIR)\checktmp.obj \
+ $(OBJDIR)\do_uuen.obj \
+ $(OBJDIR)\do_uude.obj \
+ $(OBJDIR)\do_b64.obj \
+ $(OBJDIR)\do_unb64.obj \
+ $(OBJDIR)\hgets.obj
+
+$(OBJDIR)\attach.obj:   attach.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj:   config.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\from.obj:     from.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\misc.obj:     misc.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\uuencode.obj: uuencode.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\uudecode.obj: uudecode.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\checktmp.obj: checktmp.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_uuen.obj:  do_uuen.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_uude.obj:  do_uude.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_b64.obj:   do_b64.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\do_unb64.obj: do_unb64.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\hgets.obj:    hgets.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+
+attuucp.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\execl.lib ..\lib\lgateb.lib ..\fidolib\flib_bl.lib
+  $(LINK) $(LFLAGS) @&&|
+c0l+
+$(OBJS)
+$@
+
+..\lib\execl.lib ..\lib\lgateb.lib ..\fidolib\flib_bl.lib cl
+|
+
+bc.cfg:
+  copy &&|
+-w
+-w-eff
+-K
+-C
+-lc
+-O
+-Og
+-Oe
+-Ol
+-Ob
+-Z
+-k-
+-d
+-I$(INCDIR);..\lib;..\fidolib
+-c
+-f-
+-P-C
+-ml
+-v
+-y
+-DHAVE_DIR_H
+-DHAVE_IO_H
+-DHAVE_DOS_H
+-DHAVE_MALLOC_H
+-DHAVE_DIRENT_H
+-DHAVE_UTIME_H
+-DHAVE_SHARE_H
+-DHAVE_STRING_H
+-DHAVE_STDARG_H
+-DHAVE_PROCESS_H
+-DHAVE_FILELENGTH
+-DHAVE_MKTIME
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRUPR
+-DREGEX_MALLOC
+-DHAVE_SOPEN
+-DHAVE_ISASCII
+-DHAVE_SETMODE
+-DHAVE_ENVIRON
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+debug: attuucp.exe
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist bc.cfg del bc.cfg

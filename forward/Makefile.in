@@ -1,0 +1,28 @@
+APPL=forward
+
+CC=@CC@
+AWK=@AWK@
+prefix=@prefix@
+
+SRCS=forward.c
+
+OBJS=${SRCS:.c=.o} 
+DEFINES=@DEFS@ -DUNIX -DHAVE_FORK -DSYSCONFDIR=\"@sysconfdir@\"
+CFLAGS=$(DEFINES) -Wall -idirafter ../fidolib -idirafter ../lib -Wno-char-subscripts -O2 -funsigned-char -s
+LIBS=@LIBS@
+LIBRARY=../lib/lgate.a ../fidolib/libfido.a
+
+all: $(APPL)
+
+$(APPL): $(OBJS) $(LIBRARY)
+	@echo Linking $@...
+	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBRARY)
+
+clean:
+	rm -f *.o core *.core *.o *.err
+
+.c.o:
+	@echo Compiling $*.c...
+	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+
+$(OBJS):	../lib/libgate.h ../fidolib/fidolib.h

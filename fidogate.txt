@@ -1,0 +1,37 @@
+===[ http://morannon.fido.de/fidogate/msgid-5.html ]===
+
+RFC Message-IDs are converted by putting the entire string into the origin
+address part of FTN MSGID and adding a hex serial number.
+
+* For EchoMail, the `abcd1234' hex number is a checksum computed for the
+concatenation of the Message-ID string and the FTN area name (upper case
+letters). abcd1234 = CRC32("<id@do.main>" + "AREA")
+* For NetMail the hex number is just the checksum computed for the Message-ID
+string. abcd1234 = CRC32("<id@domain>")
+
+If the Message-ID contains the characters ` ' (space) or `"', the `<id@domain>'
+string must be quoted using "..." according to FTS-0009. Any `"' within this
+string must be doubled.
+
+Putting the area name into the CRC32 value generates different MSGIDs for
+different areas, preventing nopes, if the FTN tosser does dupe checking
+on a global basis. Examples:
+
+Message-ID: <1991Aug9.034239.10837@bisun.nbg.sub.org>
+FTN Area: DE.COMM.GATEWAYS
+-->
+^AMSGID: <1991Aug9.034239.10837@bisun.nbg.sub.org> 9dc743f7
+
+
+Message-ID: <IBNTXSD@methan.chemie.fu-berlin.de>
+FTN Area: GATEWAYS.GER
+-->
+^AMSGID: <IBNTXSD@methan.chemie.fu-berlin.de> 22f000eb
+
+
+Message-ID: <junk" id "@illegal>
+FTN Area: JUNK
+-->
+^AMSGID: "<junk"" id ""@illegal>" 22a75d09
+
+===-===-===

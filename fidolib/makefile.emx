@@ -1,0 +1,80 @@
+DEFINES = -DHAVE_DIRENT_H -DHAVE_IO_H -DHAVE_DOS_H -DHAVE_MALLOC_H \
+          -DHAVE_UTIME_H -DHAVE_MKTIME -DHAVE_FILELENGTH -DHAVE_UNISTD_H
+CC   = gcc
+CFLAGS = -Zomf -Zcrtdll -Zmt -O2 -Wall -Wno-char-subscripts -c -D__OS2__ $(DEFINES) -funsigned-char -s
+OBJDIR = objemx
+
+OBJS = \
+ $(OBJDIR)/myopen.obj \
+ $(OBJDIR)/montable.obj \
+ $(OBJDIR)/weekday.obj \
+ $(OBJDIR)/daymon.obj \
+ $(OBJDIR)/copyfile.obj \
+ $(OBJDIR)/getfaddr.obj \
+ $(OBJDIR)/crc.obj \
+ $(OBJDIR)/binksem.obj \
+ $(OBJDIR)/fdsem.obj \
+ $(OBJDIR)/lbsosem.obj \
+ $(OBJDIR)/bsyname.obj \
+ $(OBJDIR)/getfmask.obj \
+ $(OBJDIR)/chkmask.obj \
+ $(OBJDIR)/touch.obj \
+ $(OBJDIR)/dayweek.obj \
+ $(OBJDIR)/movefile.obj \
+ $(OBJDIR)/rmove.obj \
+ $(OBJDIR)/scanbnk.obj
+
+all:		$(OBJDIR) flibpe.lib
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+clean:
+	rm -f $(OBJS) flibpe.bak
+
+flibpe.lib:	$(OBJS)
+	emxomfar r $@ $?
+
+%.obj:	%.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(OBJS):	fidolib.h
+
+$(OBJDIR)/binksem.obj:	binksem.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/bsyname.obj:	bsyname.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/chkmask.obj:	chkmask.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/copyfile.obj:	copyfile.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/crc.obj:	crc.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/daymon.obj:	daymon.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/dayweek.obj:	dayweek.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/fdsem.obj:	fdsem.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/getfaddr.obj:	getfaddr.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/getfmask.obj:	getfmask.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/getmsgid.obj:	getmsgid.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/lbsosem.obj:	lbsosem.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/montable.obj:	montable.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/movefile.obj:	movefile.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/myopen.obj:	myopen.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/rmove.obj:	rmove.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/scanbnk.obj:	scanbnk.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/touch.obj:	touch.c
+	$(CC) $(CFLAGS) -o $@ $<
+$(OBJDIR)/weekday.obj:	weekday.c
+	$(CC) $(CFLAGS) -o $@ $<

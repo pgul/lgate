@@ -1,0 +1,44 @@
+CC   = gcc
+prefix=@prefix@
+DEFINES=@DEFS@ -DUNIX -DHAVE_FORK -DSYSCONFDIR=\"@sysconfdir@\"
+CFLAGS=$(DEFINES) -Wall -Wno-char-subscripts -O2 -funsigned-char -s -idirafter ../fidolib
+LIBS=@LIBS@
+PERL=@PERL@
+
+SRCS = \
+ cmpaddr.c \
+ debug.c \
+ gettz.c \
+ logwrite.c \
+ myfopen.c \
+ regex.c \
+ run.c \
+ rwmsghdr.c \
+ savein.c \
+ sysexit.c \
+ sysfuncs.c \
+ template.c \
+ charsets.c
+
+OBJS=${SRCS:.c=.o} 
+
+.c.o:
+	@echo Compiling $*.c...
+	@$(CC) -c $(CFLAGS) -o $*.o $*.c
+
+all:	lgate.a
+
+regex.o:	regex.c regex.h
+	@echo Compiling regex.c...
+	@$(PERL) -p -n -e s/\\r\\n/\\n/ < $< > regexu.c
+	@$(CC) -c $(CFLAGS) -o $*.o regexu.c
+	@rm regexu.c
+
+clean:
+	rm -f $(OBJS)
+
+lgate.a:	$(OBJS)
+	@echo Creating library...
+	@ar r $@ $?
+
+$(OBJS):	../fidolib/fidolib.h libgate.h

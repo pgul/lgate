@@ -1,0 +1,54 @@
+- rel2fido: don't recode msgs with incorrect charset (unexistant chars, '?').
+- ftrans "U:\\FILES.OUT\\OUTBOUND\\" "/fido/files.out/outbound/"
+- attuucp: q-p attaches
+- attuucp: transx compatibility
+- external checker: возможность сделать echomail из netmail и наоборот.
+- External filter.
+- perl && rexx API
+- mailbox в формате Minihost (mdaemon.zip).
+- rel2fido: более нормальная разбивка на части писем с huge header
+- rel2fido: проверять начало subject не только на "[News]", а на
+  произвольную (конфигурируемую) строку.
+- lastreads for forward.exe.
+- boundary более высокого порядка - тоже boundary
+- AKA-Match 2:463/68.128 2:463/68.*, aka match по региону
+- ext-check на аттачи
+- FAIP, SEAT (attuucp)
+- rel2fido: преобразовывать адрес обратно в ftn только при совпадении
+  зоны с текущим aka
+- review all sources for possible buffer overflow (getvalue, chsubstr, ...)
+- прием по pop/imap/nnrp/smtp/nntp, отправка по smtp/nntp.
+- soup
+- rel2fido: сделать 'split-subject="(%d/%d) %s"'
+- attuucp: freq
+- xms/dpmi support.
+- lgate/win32
+- fido2rel: разбивать аттачи на части.
+? fido2rel глючит под msdos без share
+
+   Не уверен, надо ли и если надо, то как именно, поэтому далеко
+   не в первую очередь:
+
+? дока в lgate.html.
+? раскрывать кавычки ('itwit-from=""').
+? install.exe для sendmail.
+? rel2fido: пытаться исправить кривой заголовок, а не вываливаться
+  по "incorrect message"
+? rel2fido: паковать аттачи (большие письма на hold)
+? hook на конвертацию имени конференции и ее параметры (autocreate)
+? разрешить неполные пути в gate.cfg
+? dll
+? однопроходное чтение конфига (в буфер)
+? precompiled config
+? X-Mailer (X-Newsreader) -> tearline; LuckyGate -> PID
+? split <-> message/partial
+? ^aSPLIT kludge - собирать из кусков при fido2rel.com. 
+   To:, CC:, Subject:, Real-Name:, tearline, origin из частей удалять.
+? rel2fido: "To:" -> "\1RFC-To:", если golded=yes
+? rel2fido: Gate new echoes (autocreate); ┐  Пишется на Itrack или MixFix,
+? areafix 2:46/128, uplink manager.       ┘  у меня работает на Itrack
+? пакованый arcmail
+? адреса типа sysop@f68.n463.r46.z2.fidonet.org (задание региона в адресе) -
+  делается через rel2fido-chk.
+? Transit attaches, pack attach messages - attuucp (делает itrack)
+? брать номера зон/поинтов из бинарного заголовка msg (FTS-0001.015).

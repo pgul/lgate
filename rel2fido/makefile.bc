@@ -1,0 +1,117 @@
+CC = bcc
+LINK = tlink
+LIBDIR = d:\bc\lib
+INCDIR = d:\bc\include
+CFLAGS = +bc.cfg
+LFLAGS = /v /x /d /l /L$(LIBDIR)
+OBJDIR = objbc
+
+.c.obj:
+  $(CC) $(CFLAGS) -o$@ $&
+
+All: debug
+!ifndef DEBUG
+  tdstrip rel2fido.exe
+  copy rel2fido.exe rel2fido.dos
+!endif
+
+OBJS = \
+ $(OBJDIR)\arbmath.obj \
+ $(OBJDIR)\config.obj \
+ $(OBJDIR)\from.obj \
+ $(OBJDIR)\rel2fido.obj \
+ $(OBJDIR)\getput.obj \
+ $(OBJDIR)\getspool.obj \
+ $(OBJDIR)\import.obj \
+ $(OBJDIR)\transadr.obj \
+ $(OBJDIR)\misc.obj \
+ $(OBJDIR)\parseadr.obj \
+ $(OBJDIR)\readhdr.obj \
+ $(OBJDIR)\unmime.obj
+
+debug: rel2fido.exe
+
+$(OBJDIR)\arbmath.obj:  arbmath.c lib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj:   config.c lib.h import.h gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\from.obj:     from.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getput.obj:   getput.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getspool.obj: getspool.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\import.obj:   import.c lib.h import.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\misc.obj:     misc.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\parseadr.obj: parseadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\readhdr.obj:  readhdr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rel2fido.obj: rel2fido.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\transadr.obj: transadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\unmime.obj:   unmime.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+
+rel2fido.exe: $(OBJDIR)\nul $(OBJS) ..\lib\execl.lib ..\lib\lgateb.lib ..\fidolib\flib_bl.lib
+	$(LINK) $(LFLAGS) @&&|
+c0l.obj+
+$(OBJS)
+$@
+
+..\lib\execl.lib ..\lib\lgateb.lib ..\fidolib\flib_bl.lib cl
+|
+
+bc.cfg:
+	copy &&|
+-w
+-w-eff
+-K
+-C
+-lc
+-O
+-Og
+-Oe
+-Ol
+-Ob
+-Z
+-k-
+-d
+-I$(INCDIR);..\lib;..\fidolib
+-c
+-f-
+-P-C
+-ml
+-v
+-y
+-DHAVE_DIR_H
+-DHAVE_IO_H
+-DHAVE_DOS_H
+-DHAVE_MALLOC_H
+-DHAVE_DIRENT_H
+-DHAVE_UTIME_H
+-DHAVE_SHARE_H
+-DHAVE_STRING_H
+-DHAVE_STDARG_H
+-DHAVE_PROCESS_H
+-DHAVE_FILELENGTH
+-DHAVE_MKTIME
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRUPR
+-DREGEX_MALLOC
+-DHAVE_SOPEN
+-DHAVE_ISASCII
+-DHAVE_SETMODE
+-DHAVE_ENVIRON
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist bc.cfg del bc.cfg

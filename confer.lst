@@ -1,0 +1,103 @@
+# Group description:
+# group <distribution> <newsserv,system,directory> [<switches>]
+# switches: /noseenby, /cnews, /feed, /dir, /noxc, /nosubj,
+# /net=<domain>, /aka=<addr>
+# aka - 2d-5d address.
+# /noxc - не кросспостить в эту эху
+# /nosubj - не проверять, начинается ли subject с "[News]"
+# /net используется только в поле Path.
+
+# При получении всегда смотрится и в mailbox, и в каталог ньюсов uupc.
+# Если что-то найдено - гейтуется.
+#  Первый параметр строки group - поле Distribution, которое будет
+# ставится во всех гейтуемых письмах. Обычно может быть
+# world, su, ua, kiev, local.
+#  Второй параметр - адрес, куда отправлять ньюсы. Если отправка идет
+# по cnews, то там должно быть uucp-имя системы аплинка (обычно - параметр
+# MailServ из uupc.rc), например, carrier.
+# Если отправка идет через ньюс-сервер, то вторым параметром должен быть
+# полный адрес этого ньюссервера. Например, news@carrier.kiev.ua.
+# Если исходящие ньюсы просто складываются в какой-то каталог для
+# последующей обработки, то там должно быть имя каталога, например,
+# /var/spool/new/outgoing.
+
+group su news@carrier.kiev.ua
+
+#    Echoes description - fido name, usenet name
+conference    KIEV.CLUB            kiev.fido.club
+
+group local carrier /cnews /aka=2:46/128 /net=fidonet.org /noseenby /noxc
+
+conference    MERCURY.TEST         mercury.test
+conference    MERCURY.KENT         mercury.kent
+
+group su /var/spool/news/incoming /aka=16:463/128@unity.net /dir
+
+conference    MERCURY.BAZAR        mercury.bazar
+conference    MERCURY.MONEY        mercury.money
+conference    MERCURY.MONEY.OTHERS mercury.money.others
+
+group su carrier /cnews
+
+conference    SITA.BEER            sita.beer
+conference    RELCOM.NETNEWS       relcom.netnews
+conference    RELCOM.NEWUSERS      relcom.newusers
+conference    RELCOM.MSDOS         relcom.msdos
+conference    RELCOM.HUMOR         relcom.humor
+conference    RELCOM.ARCHIVES      relcom.archives
+conference    RELCOM.POSTMASTERS.D relcom.postmasters.d
+conference    RELCOM.POSTMASTERS   relcom.postmasters
+conference    RELCOM.ARCHIVES      relcom.archives.d
+conference    RELCOM.ARTS.EPIC     relcom.arts.epic
+conference    RELCOM.ARTS.QWERTY   relcom.arts.qwerty
+conference    UKR.SOFT-HOUSE       ukr.soft-house
+conference    RELCOM.TALK          relcom.talk
+conference    RELCOM.BBS           relcom.bbs
+conference    RELCOM.TCPIP         relcom.tcpip
+conference    UKR.NODES            ukr.nodes
+
+group world carrier /cnews
+
+conference    ALT.CAVING                          alt.caving
+conference    COMP.ARCHIVES.MSDOS.ANNOUNCE        comp.archives.msdos.announce
+conference    COMP.LANG.C++                       comp.lang.c++
+conference    COMP.OBJECT                         comp.object
+conference    COMP.OBJECT.LOGIC                   comp.object.logic
+conference    COMP.LANG.PASCAL                    comp.lang.pascal
+conference    COMP.OS.MS-WINDOWS.NT.MISC          comp.os.ms-windows.nt.misc
+conference    COMP.OS.MS-WINDOWS.PROGRAMMER.MISC  comp.os.ms-windows.programmer.misc
+conference    COMP.OS.MS-WINDOWS.PROGRAMMER.WIN32 comp.os.ms-windows.programmer.win32
+conference    COMP.OS.OS2.PROGRAMMER.MISC         comp.os.os2.programmer.misc
+conference    COMP.OS.OS2.PROGRAMMER.PORTING      comp.os.os2.programmer.porting
+conference    COMP.PROTOCOLS.ISO                  comp.protocols.iso
+conference    COMP.SYS.IBM.PC                     comp.sys.ibm.pc
+conference    COMP.SYS.IBM.PC.DEMOS               comp.sys.ibm.pc.demos
+conference    COMP.SYS.IBM.PC.DIGEST              comp.sys.ibm.pc.digest
+conference    COMP.SYS.IBM.PC.GAMES.ACTION        comp.sys.ibm.pc.games.action
+conference    COMP.SYS.IBM.PC.GAMES.ADVENTURE     comp.sys.ibm.pc.games.adventure
+conference    COMP.SYS.IBM.PC.GAMES.ANNOUNCE      comp.sys.ibm.pc.games.announce
+conference    COMP.SYS.IBM.PC.GAMES.FLIGHT-SIM    comp.sys.ibm.pc.games.flight-sim
+conference    COMP.SYS.IBM.PC.GAMES.MISC          comp.sys.ibm.pc.games.misc
+conference    COMP.SYS.IBM.PC.GAMES.RPG           comp.sys.ibm.pc.games.rpg
+conference    COMP.SYS.IBM.PC.GAMES.STRATEGIC     comp.sys.ibm.pc.games.strategic
+conference    ALT.CD-ROM                          alt.cd-rom
+conference    BIT.LISTSERV.CDROMLAN               bit.listserv.cdromlan
+conference    COMP.PUBLISH.CDROM.HARDWARE         comp.publish.cdrom.hardware
+conference    COMP.PUBLISH.CDROM.SOFTWARE         comp.publish.cdrom.software
+conference    COMP.SYS.IBM.PC.HARDWARE.CD-ROM     comp.sys.ibm.pc.hardware.cd-rom
+conference    REC.MUSIC.INFO                      rec.music.info
+conference    REC.GAMES.BOARD                     rec.games.board
+conference    REC.GAMES.DESIGN                    rec.games.design
+conference    REC.GAMES.FRP.ANNOUNCE              rec.games.frp.announce
+conference    REC.GAMES.FRP.ARCHIVES              rec.games.frp.archives
+conference    REC.GAMES.FRP.LIVE-ACTION           rec.games.frp.live-action
+conference    REC.GAMES.FRP.MARKETPLACE           rec.games.frp.marketplace
+conference    REC.GAMES.HACK                      rec.games.hack
+conference    REC.GAMES.INT-FICTION               rec.games.int-fiction
+conference    REC.GAMES.MISC                      rec.games.misc
+conference    COMP.OS.OS2.GAMES                   comp.os.os2.games
+conference    COMP.OS.OS2.NETWORKING.MISC         comp.os.os2.networking.misc
+conference    COMP.OS.OS2.NETWORKING.TCP-IP       comp.os.os2.networking.tcp-ip
+conference    COMP.OS.OS2.PROGRAMMER.OOP          comp.os.os2.programmer.oop
+conference    COMP.OS.OS2.PROGRAMMER.TOOLS        comp.os.os2.programmer.tools
+conference    COMP.LANG.ASM.X86                   comp.lang.asm.x86

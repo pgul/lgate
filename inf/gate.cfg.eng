@@ -1,0 +1,236 @@
+#         Configuration file for uucp <-> FTN gate
+# Lines begin from '#', and all after ';' is comments.
+
+# Gate address, 5d
+# address contained '%' is senseble only for sending messages, it
+# must be followed by usual address for receiving messages.
+address=2:46/128@fidonet.org
+address=2:463/68.128%fidonet.org@lucky.carrier.kiev.ua
+aka=2:463/68.128@fidonet.org
+aka=2:46/128@fidonet.carrier.kiev.ua
+
+fidosystem=fidonet               ; location of spool, writen in the hostpath
+
+log=lgate.log                    ; no comments
+
+# Character '\' at eon of line is ignored if it is not root directory.
+# Pathes must be complete, not relative.
+uupc=c:\uupc                     ; uupc configuration, spool, rmail etc.
+
+netmail=c:\fido\netmail          ; netmail directory
+
+pktin=c:\fido\outbound           ; echomail for gate (uncompressed!)
+;binkout=c:\fido\outbound         ; binkley-style outbound for main aka
+                                 ; comment pktin and set binkout if
+                                 ; you use binkley-style outbound.
+
+pktout=c:\fido\inbound           ; echomail from gate
+
+SysOp=2:463/68 Pavel Gulchouck   ; send messages about troubles
+
+uplink=2:463/68                  ; echomail link for gate
+
+# "Organization:" field in news.
+# This field used for detecting returned twice-gated messages.
+organization=Gate at Lucky Carrier BBS
+
+# Message must match one of "send-to" mask and must not match
+# all "no-send" mask for gate to internet not from privel user
+send-to=*
+# bang addressing not parsed
+no-send=mailserv*
+no-send=news*
+no-send=ftp*
+no-send=relis@kiae.su
+no-send=MAILER-DAEMON*
+
+# Limits by size and binary ignores for these addresses
+free=*.su
+free=*.ua
+free=*.by
+free=*.ru
+
+# Templates. Use built-in if not specefied
+reject-tpl=reject.tpl
+badaddr-tpl=badaddr.tpl
+held-tpl=held.tpl
+
+# These parameters are optional, not requered
+
+pktpwd=                         ; password for ARCmail
+
+timezone=UKR-03                 ; Use environment variable TZ by default
+
+postmaster=gul                  ; postmaster by default
+
+rmail=rmail.exe                 ; rmail.exe by default. Search uupc directory
+                                ; if path not specified.
+
+uupcver=6                       ; version of UUPC.
+                                ; Set 5 vor versions 5.x,
+                                ; 6 for 6.x,
+                                ; 6.15 for 6.15 and up.
+
+size=16                         ; max size of fidonet message. Lager messages
+                                ; will split when rel2fido gating.
+
+maxline=79                      ; max line length in internet messages,
+                                ; Longer lines will be split by fido2rel.
+
+maxsize=8                       ; max fidonet message, which will be gating
+                                ; to internet.
+
+uucode=no                       ; pass messages with binary info from fido
+
+pktsize=64                      ; size of creating pkt in Kb
+
+cnewssize=100                   ; max size of creating cnews-packets
+                                ; (before compression)
+
+holdsize=32			; size of gating to fido messages in Kb.
+                                ; If large message will be hold and
+                                ; recipient will be notified about it.
+				
+holdpath=c:\fd\hold		; directory for held messages
+
+temp=c:\tmp                     ; directory for temporary files.
+                                ; by default use environment variable
+                                ; TEMP or TMP
+
+user=lgate                      ; user which subscribed to gated newsgroups
+                                ; (if mailnews, not cnews)
+
+pack=no                         ; pack netmail to pkt or leave in msg
+
+badmail=c:\fido\msgbase\bad.mail; netmail by default
+
+echolog=no                      ; logging echomail gating
+
+rcv2via=yes                     ; convert received to via, or delete
+
+gatevia=all			; set gate internet via in double-gating.
+                                ; no - delete, yes - internet via only,
+                                ; all - set all of them
+
+savehdr=yes                     ; {no|yes|all} save unknown header fields
+                                ; as ^aRFC-* cludges
+
+domain-id=yes			; write domain (as ifgate) or gate FTN-address
+                                ; (as U1) at MSGID cludge
+
+message-id=ifgate		; {ifgate|fsc-0070} - method of converting
+                                ; ^aMSGID to Message-Id: as ifgate or
+                                ; according to fsc-0070
+
+to-uucp=yes			; Not allow write "To: RealName" in message
+                                ; header (only "To: uucp") if internet
+                                ; address specified in message body
+
+errors-to=master                ; {master|sender} - person which resent
+                                ; error messages (other will get header
+                                ; only).
+
+swap=exf                        ; swap: ems, xms, file
+
+by-uux=yes			; send cnews-packets via exec uux or
+                                ; direct to spool
+
+tabsize=0                       ; convert tabs when gating to FTN.
+                                ; 0 - don't, other - tab size.
+
+resend-bad=yes			; resend bad messages (not echomail)
+                                ; from box to postmaster, or put it
+                                ; to badmail.pst
+
+maxhops=0			; max hop cound for uucp message. Move to
+                                ; badmail if more. 0 - don't checking.
+				
+max-received=0			; How many received fields gate may put in
+                                ; internet message (avoid hopcount check).
+                                ; If more - generate X-FTN-Via.
+
+golded=yes			; Generate cludges for golded
+
+compress=gzip.exe -9            ; Used for cnews-packets compressing
+
+uncompress=gzip.exe -d %s       ; Used for cnews-packets uncompressing
+
+myorigin=no                     ; always set own origin, or get it from
+                                ; "Organization:" field
+
+hide-origin=no			; hide origin to message header {yes|no|echo|net}
+
+hide-tearline=no		; hide tearline to message header {yes|no|echo|net}
+
+softCR=H			; change cyrillic 'ç' (0x8D) when gating to FTN
+
+8bit-header=yes			; allow 8-bit headers,
+				; or convert it to MIME format (rfc2047).
+
+X-Comment-To=no			; use X-Comment-To header field or write "To:"
+                                ; as first line in message body when echomail
+                                ; gating
+
+via=long                        ; {short|long} - write via in itrack format
+                                ; (short) or squish (long)
+
+replyto=empty                   ; {empty|uucp|addr} - what's write at
+                                ; replyto cludge after gate address
+
+decode-attach=no                ; {yes|no} - how to gate file attaches to fido:
+                                ; generate FTN-attach and notify (yes),
+                                ; or leave in base64 base64 (no). Default is no.
+
+del-transit-files=no		; {yes|no} - kill transit attaches from fido
+				; without KFS and TFS after send fido2rel
+
+; attributes of created FTN-messages
+;  P - private
+;  K - KillSent
+;  L - Local
+;  D - Direct
+;  C - Crash
+;  H - Hold
+;  S - Sent
+;  R - Read
+;  A - FileAttach
+;  W - Forward
+;  O - Orphan
+;  F - FileRequest
+;  Q - RetRecReq
+;  T - RetRec
+attrib=pkl
+
+# set when created new netmail message if specefied
+;rescan=c:\fido\semaph\fdrescan.now
+
+# set when created new pkt or receive file by attuucp if specified
+;newecho=c:\fido\semaph\newecho.now
+
+# change From field when gating
+chaddr="Pavel Gulchouck" 2:463/68.0 Pavel Gulchouck <gul@lucky.carrier.kiev.ua>
+chaddr="Yutta Gulchouck" 2:463/68.1 Yutta Gulchouck <yutka@lucky.carrier.kiev.ua>
+
+# All limits are ignored for these addresses
+privel=2:463/68
+privel=2:463/94 Pavel Gulchouck
+
+# Disable gating messages from this addresses
+;twit=*
+
+# Exception from twit
+;no-twit=2:46*/*
+;no-twit=2:50*/*
+
+# Allow send attaches from fido (if all other limits are passed)
+;attach-from=*
+
+# Disable gating messages to fido from this addresses
+;itwit=news@*
+
+if not [Module]==Attuucp
+include confer.lst
+endif
+include route.cfg
+
+#                        End of file gate.cfg

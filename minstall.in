@@ -1,0 +1,23 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+update: attach/attuucp fido2rel/fido2rel rel2fido/rel2fido
+	$(INSTALL) -g $(GROUP) -o $(USER) attach/attuucp rel2fido/rel2fido fido2rel/fido2rel forward/forward @bindir@
+	@echo
+	@echo Binary files updated.
+
+install: attach/attuucp fido2rel/fido2rel rel2fido/rel2fido
+	$(INSTALL) -g $(GROUP) -o $(USER) attach/attuucp rel2fido/rel2fido fido2rel/fido2rel forward/forward @bindir@
+	$(INSTALL) -g $(GROUP) -o $(USER) gate.conf confer.lst route.cfg forward/forward.cfg @sysconfdir@
+	$(INSTALL) -g $(GROUP) -o $(USER) badaddr.tpl reject.tpl help.tpl @sysconfdir@
+	@echo
+	@echo Installation complete.
+	@echo
+	@echo Edit your @sysconfdir@/gate.conf file.
+	@echo
+	@echo Add line
+	@echo Mgateway,	P=@bindir@/rel2fido, F=lsDFu, S=10, R=0, A=rel2fido -l \$$h \$$u
+	@echo to your sendmail.cf, line
+	@echo .z2.fidonet.org	gateway:localhost
+	@echo to your mailertable, then run newmailertable and restart sendmail.
+

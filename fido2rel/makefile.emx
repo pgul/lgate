@@ -1,0 +1,83 @@
+CC = gcc
+LINK = gcc
+DEFINES = -DHAVE_FILELENGTH -DHAVE_UNISTD_H -DHAVE_MALLOC_H -DHAVE_SYS_TIME_H \
+          -DHAVE_STDARG_H -DHAVE_DOS_H -DHAVE_DIRENT_H -DHAVE_SYS_UTIME_H \
+          -DHAVE_IO_H -DHAVE_PROCESS_H -DHAVE_SNPRINTF -DHAVE_SHARE_H \
+          -DHAVE_PIPE -DHAVE_ENVIRON -DHAVE_STRICMP -DHAVE_STRNICMP \
+          -DHAVE_STRING_H -DHAVE_ALLOCA_H -DHAVE_SETMODE
+COPT = -c -Zomf -Zmt -Zcrtdll -idirafter ../fidolib -idirafter ../lib -Wall -Wno-char-subscripts -O2 -D__OS2__ -funsigned-char $(DEFINES) -o $@
+LOPT = -Zomf -Zmt -Zcrtdll -Wall -Zstack 512 -lwrap -Zlinker /PM:VIO -o $@
+
+ifdef DEBUG
+CFLAGS = $(COPT) -g
+LFLAGS = $(LOPT) -g
+OBJDIR = objemx/debug
+LXLITE = @rem
+else
+CFLAGS = $(COPT) -s
+LFLAGS = $(LOPT) -s
+OBJDIR = objemx
+LXLITE = lxlite
+endif
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+All: $(OBJDIR) $(OBJDIR)/fido2rel.exe
+
+objemx/debug:	objemx
+	mkdir objemx\debug
+objemx:
+	mkdir objemx
+
+OBJS = \
+ $(OBJDIR)/arbmath.obj \
+ $(OBJDIR)/config.obj \
+ $(OBJDIR)/fido2rel.obj \
+ $(OBJDIR)/one_mess.obj \
+ $(OBJDIR)/genrej.obj \
+ $(OBJDIR)/getfaddr.obj \
+ $(OBJDIR)/import.obj \
+ $(OBJDIR)/makeaddr.obj \
+ $(OBJDIR)/rsend.obj \
+ $(OBJDIR)/virtfile.obj \
+ $(OBJDIR)/misc.obj \
+ $(OBJDIR)/base64.obj
+
+$(OBJDIR)/arbmath.obj: arbmath.c lib.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/config.obj: config.c lib.h import.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/fido2rel.obj: fido2rel.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/one_mess.obj: one_mess.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/genrej.obj: genrej.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/getfaddr.obj: getfaddr.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/import.obj: import.c lib.h import.h
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/makeaddr.obj: makeaddr.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/misc.obj: misc.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/base64.obj: base64.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/rsend.obj: rsend.c
+	$(CC) $(CFLAGS) $<
+$(OBJDIR)/virtfile.obj: virtfile.c
+	$(CC) $(CFLAGS) $<
+
+$(OBJS):	gate.h ../lib/libgate.h ../fidolib/fidolib.h
+
+$(OBJDIR)/fido2rel.exe: $(OBJDIR)/fido2rel2.exe fido2rel.com
+	cp $(OBJDIR)/fido2rel2.exe $@
+	$(LXLITE) /D+ /MLN /MRN /Tfido2rel.com $@
+
+$(OBJDIR)/fido2rel2.exe: $(OBJS) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LINK) $(LFLAGS) $(OBJS) ../fidolib/flibpe.lib ../lib/lgatepe.lib
+	$(LXLITE) /D+ /MLN /MRN $@
+
+clean:
+	rm -f $(OBJDIR)/*.obj $(OBJDIR)/*.exe

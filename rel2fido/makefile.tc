@@ -1,0 +1,107 @@
+CC = tcc
+LINK = tlink20
+CFLAGS = 
+LIBDIR = d:\tc\lib
+INCDIR = d:\tc\include
+LFLAGS = /v /x /d /l
+OBJDIR = obj
+
+.c.obj:
+  $(CC) $(CFLAGS) -o$@ $&
+
+All: debug
+!ifndef DEBUG
+  tdstrip rel2fido.exe
+  copy rel2fido.exe rel2fido.dos
+!endif
+
+OBJS = \
+ $(OBJDIR)\arbmath.obj \
+ $(OBJDIR)\config.obj \
+ $(OBJDIR)\from.obj \
+ $(OBJDIR)\rel2fido.obj \
+ $(OBJDIR)\getput.obj \
+ $(OBJDIR)\getspool.obj \
+ $(OBJDIR)\import.obj \
+ $(OBJDIR)\transadr.obj \
+ $(OBJDIR)\misc.obj \
+ $(OBJDIR)\parseadr.obj \
+ $(OBJDIR)\readhdr.obj \
+ $(OBJDIR)\unmime.obj
+
+debug: rel2fido.exe
+
+$(OBJDIR)\arbmath.obj:  arbmath.c lib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj:   config.c lib.h import.h gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\from.obj:     from.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getput.obj:   getput.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\getspool.obj: getspool.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\import.obj:   import.c lib.h import.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\misc.obj:     misc.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\parseadr.obj: parseadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\readhdr.obj:  readhdr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rel2fido.obj: rel2fido.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\transadr.obj: transadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\unmime.obj:   unmime.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) $(CFLAGS) -o$@ $&
+
+rel2fido.exe: $(OBJDIR)\nul $(OBJS) ..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib
+  $(LINK) $(LFLAGS) @&&|
+$(LIBDIR)\c0l.obj+
+$(OBJS)
+$@
+
+..\lib\execl.lib ..\lib\lgate.lib ..\fidolib\flib_l.lib $(LIBDIR)\cl
+|
+
+turboc.cfg:
+  copy &&|
+-ml
+-w
+-K
+-C
+-O
+-Z
+-k-
+-I..\lib;..\fidolib;$(INCDIR)
+-c
+-f-
+-v
+-y
+-DHAVE_FILELENGTH
+-DHAVE_ALLOC_H
+-DHAVE_STDARG_H
+-DHAVE_DOS_H
+-DHAVE_DIR_H
+-DHAVE_DIRENT_H
+-DHAVE_UTIME_H
+-DHAVE_IO_H
+-DHAVE_PROCESS_H
+-DHAVE_SHARE_H
+-DHAVE_ENVIRON
+-DHAVE_STRUPR
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRING_H
+-DREGEX_MALLOC
+-DHAVE_SETMODE
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist turboc.cfg del turboc.cfg
+

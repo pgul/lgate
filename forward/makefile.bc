@@ -1,0 +1,79 @@
+CC = bcc
+LINK = tlink
+INCDIR = d:\bc\include
+LIBDIR = d:\bc\lib
+CFLAGS = +bc.cfg
+LFLAGS = /v /x /l /d /L$(LIBDIR)
+OBJDIR = objbc
+
+.c.obj:
+  $(CC) -c $(CFLAGS) -o$@ $<
+
+all: forward.dos
+
+forward.dos:	forward.exe
+!ifndef DEBUG
+  tdstrip forward.exe
+!endif
+  copy forward.exe forward.dos
+
+OBJS = $(OBJDIR)\forward.obj
+
+$(OBJDIR)\forward.obj:   forward.c ..\lib\libgate.h ..\fidolib\fidolib.h bc.cfg
+  $(CC) -c $(CFLAGS) -o$@ $&
+
+forward.exe:	$(OBJDIR)\nul $(OBJS) ..\lib\lgate.lib ..\fidolib\flib_l.lib
+  $(LINK) $(LFLAGS) c0l $(OBJS), $@,, ..\fidolib\flib_bl.lib ..\lib\lgateb.lib cl.lib
+
+bc.cfg:
+  copy &&|
+-w
+-w-eff
+-K
+-C
+-lc
+-O
+-Og
+-Oe
+-Ol
+-Ob
+-Z
+-k-
+-d
+-I$(INCDIR);..\lib;..\fidolib
+-c
+-f-
+-P-C
+-ml
+-v
+-y
+-DHAVE_DIR_H
+-DHAVE_IO_H
+-DHAVE_DOS_H
+-DHAVE_MALLOC_H
+-DHAVE_DIRENT_H
+-DHAVE_UTIME_H
+-DHAVE_SHARE_H
+-DHAVE_STRING_H
+-DHAVE_STDARG_H
+-DHAVE_PROCESS_H
+-DHAVE_FILELENGTH
+-DHAVE_MKTIME
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
+-DHAVE_STRUPR
+-DREGEX_MALLOC
+-DHAVE_SOPEN
+-DHAVE_ISASCII
+-DHAVE_SETMODE
+-DHAVE_ENVIRON
+| $@
+
+$(OBJDIR)\nul:
+	mkdir $(OBJDIR)
+
+debug: forward.exe
+
+clean:
+  if exist $(OBJDIR)\*.obj del $(OBJDIR)\*.obj
+  if exist bc.cfg del bc.cfg

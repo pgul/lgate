@@ -1,0 +1,59 @@
+1. Building.
+
+./configure
+make
+make install
+
+2. Update from older version.
+
+./configure
+make
+make update
+
+3. Configuring.
+
+Inspect and edit /usr/local/etc/gate.conf, /usr/local/etc/confer.lst,
+/usr/local/etc/route.cfg.
+
+Add line
+Mgateway,	P=/usr/local/bin/rel2fido, F=lsDFu, S=10, R=0, A=rel2fido -l $h $u
+to your sendmail.cf, add line
+.z2.fidonet.org	gateway:localhost
+to your mailertable, then restart sendmail and rebuild mailertable.db
+(usually by running `newmailertable`).
+
+Check for access rights. It's possible to install rel2fido and attuucp
+as setuid (I think, not suid root, but suid fnet:).
+
+If you want to use attuucp, add line
+fnet:	"| /usr/local/bin/attuucp -l"
+to your /etc/aliases and run newaliases.
+Another (and I think better) way is to create file ~fnet/.forward
+contains ont line
+"| /usr/local/bin/attuucp -l"
+In this case attuucp will run from user fnet, and not daemon
+or mail as at first case (running from aliases file).
+
+For gating echomail you need:
+
+   1. Subscribe to this newsgroup by cnews or mailnews (feed).
+In last case feed user lgate. You can receive some newsgroups
+by feed and another by cnews.
+   2. Uncomment line "include confer.lst" in gate.conf and
+setup gating newsgroups in confer.lst.
+   3. Setup gate in your tosser, i.e. make a fake-link. Note, that
+mail packets should not be compressed.
+   4. Subscribe gate to all gating echoes.
+
+Note! You can not gate echomail unless you give separate FTN-address
+to your gate, you cannot share the same address between you and your
+gate.
+
+It's all.
+
+For more detail learn of LuckyGate and use its extended features
+you can read files gate.doc and techdoc.txt.
+
+				Lucky carrier,
+					Pavel Gulchouck   2:463/68
+					aka gul@gul.kiev.ua
