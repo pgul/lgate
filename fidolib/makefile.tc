@@ -67,6 +67,8 @@ turboc.cfg:	makefile.tc
 -DHAVE_ALLOC_H
 -DHAVE_DIRENT_H
 -DHAVE_FILELENGTH
+-DHAVE_STRICMP
+-DHAVE_STRNICMP
 | $@
 
 .c.obj:
