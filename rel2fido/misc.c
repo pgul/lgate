@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2002/01/28 14:02:04  gul
+ * bugfix in %hdr hash
+ *
  * Revision 2.8  2002/01/09 09:40:57  gul
  * Added $hdr{"From "}
  *
@@ -2558,8 +2561,8 @@ chk_fork:
 #endif
       p=strchr(p1, ':');
       if (p)
-      { *p++='\0';
-        plen=p-p1;
+      { plen=p-p1;
+        *p++='\0';
         while (isspace(*p)) p++;
         strlwr(p1);
         *p1=toupper(*p1);
