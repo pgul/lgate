@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/21 10:20:00  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -275,7 +278,7 @@ extern int  seqf;
 extern int  hdr8bit;
 extern char *header;
 extern char *myname;
-extern int  writereason, bangfrom, env_chaddr;
+extern int  writereason, bangfrom, env_chaddr, fromtop;
 extern struct attfiletype
        { char *name;
          unsigned long attr;

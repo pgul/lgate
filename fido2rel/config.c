@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/21 10:20:00  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.2  2001/01/19 17:52:59  gul
  * Translate comments and cosmetic changes
  *
@@ -376,6 +379,7 @@ int config(void)
 #endif
   bangfrom=1;
   env_chaddr=0;
+  fromtop=0;
 #ifdef __MSDOS__
   use_swap=-1;
 #endif
@@ -1636,6 +1640,15 @@ notfull:
         env_chaddr=1;
       else if (tolower(str[11])=='n')
         env_chaddr=0;
+      else
+        goto invparam;
+      continue;
+    }
+    if (strnicmp(str, "fromtop=", 8)==0)
+    { if (tolower(str[8])=='y')
+        fromtop=1;
+      else if (tolower(str[8])=='n')
+        fromtop=0;
       else
         goto invparam;
       continue;

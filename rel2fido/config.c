@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/21 10:20:02  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.0  2001/01/10 20:42:24  gul
  * We are under CVS for now
  *
@@ -148,7 +151,8 @@ static char *ignore[]={
 "env-chaddr=",
 "sysop=",
 "fido2rel-chk-pl=",
-"inb-dir="
+"inb-dir=",
+"fromtop="
 };
 
 static void * galloc(long bytes)

@@ -1218,3 +1218,6 @@ ver 7.1 - 16 Jan 01
 
 ver 7.02 -
   * forward: fromname-field in forward.cfg is wildcard now
+  + новый параметр gate.cfg fromtop={yes|no} - если inet-addr не
+    указан в заголовке msg, искать ли строки "To:" по всему тексту,
+    или только в первой строке. По умолчанию no (по всему тексту).

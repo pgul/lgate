@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/01/21 10:20:01  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.3  2001/01/20 01:33:40  gul
  * Added some debug messages
  *
@@ -836,27 +839,21 @@ lbadmsg:
       if ((origin_pos!=-1) && strcmp(str, "\n"))
         origin_len=strlen(str);
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
-#ifdef FROMTOP
-          fromtext &&
-#endif
+          (fromtext || !fromtop) &&
           (strnicmp(str, "To:", 3)==0) && strchr(str, '@') && gw_to[0]=='\0' &&
           ((!touucp) || stricmp(msghdr.to, "uucp")==0))
       { tofield(str+3, to);
         continue;
       }
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
-#ifdef FROMTOP
-          fromtext &&
-#endif
+          (fromtext || !fromtop) &&
           (strnicmp(str, "GW-To:", 6)==0) && strchr(str, '@'))
       { to[0]='\0'; /* replace "To:" field */
         tofield(str+6, gw_to);
         continue;
       }
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
-#ifdef FROMTOP
-          fromtext &&
-#endif
+          (fromtext || !fromtop) &&
           (strnicmp(str, "GW-Cc:", 6)==0) && strchr(str, '@'))
       { tofield(str+6, gw_to);
         if (cont) cont=2; /* put to header */
@@ -866,9 +863,7 @@ lbadmsg:
         continue;
       }
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
-#ifdef FROMTOP
-          fromtext &&
-#endif
+          (fromtext || !fromtop) &&
           (strnicmp(str, "GW-Bcc:", 7)==0) && strchr(str, '@'))
       { tofield(str+7, gw_to);
         if (cont) cont=1; /* don't put to header */

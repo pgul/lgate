@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/21 10:20:00  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.0  2001/01/10 20:42:15  gul
  * We are under CVS for now
  *
@@ -180,7 +183,8 @@ static char *ignore[]={
 "env-chaddr=",
 "fido2rel-chk-pl=",
 "rel2fido-chk-pl=",
-"inb-dir="
+"inb-dir=",
+"fromtop="
 };
 
 static void canondir(char *dir)

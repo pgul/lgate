@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/01/21 10:20:00  gul
+ * new cfg param 'fromtop'
+ *
  * Revision 2.4  2001/01/20 01:33:40  gul
  * Added some debug messages
  *
@@ -128,7 +131,7 @@ char str[2048];
 char *buffer;
 unsigned ibuf;
 unsigned long offs_beg;
-int h;
+int  h;
 char msgname[FNAME_MAX]="";
 struct packet pkthdr;
 struct lrd_type lastread, new_lrd;
@@ -138,7 +141,7 @@ int  cheader;
 ftnaddress pktdest;
 int  ourpkt;
 int  hidetear, hideorigin;
-int  fsp1004, bangfrom, env_chaddr;
+int  fsp1004, bangfrom, env_chaddr, fromtop;
 char *myname;
 int  writereason=0;
 char inb_dir[FNAME_MAX], charsetsdir[FNAME_MAX], charsetalias[FNAME_MAX];
