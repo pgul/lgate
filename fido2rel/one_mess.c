@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2002/09/22 11:42:23  gul
+ * bugfix
+ *
  * Revision 2.9  2002/09/22 10:58:36  gul
  * several bugfixes
  *
@@ -2285,6 +2288,7 @@ errwrite2:
               p=strpbrk(str, "@%");
               if (p) *p=0;
               strcat(cmdline, str);
+	      *str='\0';
             }
             else
               strcpy(str, gatemaster);
