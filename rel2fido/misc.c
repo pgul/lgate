@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/01/06 21:17:41  gul
+ * %hdr in perl hook
+ *
  * Revision 2.4  2001/04/22 15:42:44  gul
  * Buffer overflow in date parser fixed
  *
@@ -2378,7 +2381,10 @@ externtype extcheck(char *to, char *from, char **news
 #ifdef DO_PERL
   SV *svfrom, *svto, *svsize, *svarea, *svattname, *svtext, *svsubj;
   SV *svintsetname;
+  HV *hdr;
   STRLEN n_a;
+  int psize;
+  char *hstr;
 #endif
   static char cmdline[CMDLINELEN+128];
   FILE *f;
@@ -2485,6 +2491,74 @@ chk_fork:
     if (subj)
       sv_setpv(svsubj, subj);
     sv_setpv(svintsetname, intsetname);
+    /* Create %hdr */
+    hdr = perl_get_hv("hdr", 1);
+    hrewind();
+    hstr=NULL;
+    psize=0;
+    while (hgets())
+    { int plen, slen;
+      char *p;
+      plen=0;
+      slen = strlen(str);
+      p1=str;
+      if (slen==sizeof(str)-1 && str[sizeof(str)-1]!='\r')
+        for (;;)
+        { if (plen+slen>=psize)
+          { if (psize)
+              p=realloc(hstr, psize*=2);
+            else
+              p=malloc(psize=sizeof(str)*2);
+            if (p==NULL)
+            { if (hstr) free(hstr);
+              logwrite('!', "Not enough memory (needed %d bytes)\n", psize);
+              p1=hstr=NULL;
+              break;
+            }
+            hstr=p;
+          }
+          p1=hstr;
+          strcpy(p1+plen, str);
+          plen+=slen;
+          if (slen<sizeof(str)-1 || str[sizeof(str)-1]=='\r') break;
+          if (!hgets())
+          { p1=NULL;
+            break;
+          }
+          slen = strlen(str);
+        }
+      else
+        plen=slen;
+      if (p1==NULL) break;
+      if (plen) p1[--plen]='\0'; /* remove last '\r' */
+#if 0
+      for (p=p1; *p; p++)
+        if (*p == '\r') *p='\n';
+#else
+      /* unfolding */
+      if (strchr(p1, '\r'))
+      { char *pdest;
+        for (p=pdest=p1; *p;)
+        { if (*p=='\r')
+          { *pdest++=' ';
+            while (isspace(*++p));
+          } else
+            *pdest++=*p++;
+        }
+      }
+#endif
+      p=strchr(p1, ':');
+      if (p)
+      { *p++='\0';
+        plen=p-p1;
+        while (isspace(*p)) p++;
+      } else
+        p=p1+plen;
+      strlwr(p1);
+      hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
+    }
+    if (hstr) free(hstr);
+
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
