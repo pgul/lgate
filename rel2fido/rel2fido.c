@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2001/04/19 10:10:44  gul
+ * sometimes coredump on large messages with long lines
+ *
  * Revision 2.5  2001/01/28 03:56:41  gul
  * fixed compilation error
  *
@@ -1339,9 +1342,8 @@ errlet:
         }
         break;
       }
-      /*
-      if (ibufpart+strlen(str)+1>1024l*maxpart+RESPART) break;
-      */
+      if (ibufpart+strlen(str)+1>(maxpart ? 1024l*maxpart : fsize)+RESPART)
+        break;
       if (cont) continue;
       if (area!=-1)
       {
