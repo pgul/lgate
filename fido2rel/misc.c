@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.15  2004/06/16 18:35:07  gul
+ * Fixed $from var in perl filter if it was changed by chaddr
+ *
  * Revision 2.14  2003/03/25 20:07:09  gul
  * Clean attributes for unpack messages
  *
@@ -1856,9 +1859,17 @@ chk_fork:
     svextsetname=perl_get_sv("extsetname", TRUE);
     p=strchr(from, ' ');
     if (p==NULL) p=from+strlen(from);
-    memcpy(tmpaddr, from, sizeof(tmpaddr));
+    strncpy(tmpaddr, from, sizeof(tmpaddr));
     tmpaddr[(unsigned)p-(unsigned)from]='\0';
-    sv_setpv(svfrom, tmpaddr);
+    if (strchr(tmpaddr, '@'))
+      sv_setpv(svfrom, tmpaddr);
+    else /* chaddr? */
+    { p=strrchr(from, ' ');
+      if (p==NULL || strchr(p, '@')==NULL)
+        p=from;
+      else
+        p++;
+    }
     sv_setpv(svto,   addr);
     sv_setiv(svsize, txtsize);
     sv_setpv(svarea, (*area==-1) ? "NetMail" : echoes[*area].usenet);
