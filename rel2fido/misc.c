@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2002/01/28 22:35:12  gul
+ * Bugfix in %hdr hash with folded header lines
+ *
  * Revision 2.9  2002/01/28 14:02:04  gul
  * bugfix in %hdr hash
  *
@@ -2508,67 +2511,56 @@ chk_fork:
     hrewind();
     hstr=NULL;
     psize=0;
-    while (textline(str, sizeof(str)))
+    if (!textline(str, sizeof(str))) str[0]='\0';
+    while (str[0])
     { int plen, slen;
       char *p;
       plen=0;
-      slen = strlen(str);
-      p1=str;
-      if (slen==sizeof(str)-1 && str[sizeof(str)-1]!='\r')
-        for (;;)
-        { if (plen+slen>=psize)
-          { if (psize)
-              p=realloc(hstr, psize*=2);
-            else
-              p=malloc(psize=sizeof(str)*2);
-            if (p==NULL)
-            { if (hstr) free(hstr);
-              logwrite('!', "Not enough memory (needed %d bytes)\n", psize);
-              p1=hstr=NULL;
-              break;
-            }
-            hstr=p;
-          }
-          p1=hstr;
-          strcpy(p1+plen, str);
-          plen+=slen;
-          if (slen<sizeof(str)-1 || str[sizeof(str)-1]=='\r') break;
-          if (!textline(str, sizeof(str)))
-          { p1=NULL;
+      p1=hstr;
+      for (;;)
+      {
+        slen=strlen(str);
+        if (plen+slen>=psize)
+        { if (psize)
+            p=realloc(hstr, psize*=2);
+          else
+            p=malloc(psize=sizeof(str)*2);
+          if (p==NULL)
+          { if (hstr) free(hstr);
+            logwrite('!', "Not enough memory (needed %d bytes)\n", psize);
+            p1=hstr=NULL;
             break;
           }
-          slen = strlen(str);
+          hstr=p;
         }
-      else
-        plen=slen;
+        p1=hstr;
+        strcpy(p1+plen, str);
+        plen+=slen;
+        if (slen && str[slen-1]!='\r')
+        { if (textline(str, sizeof(str))) continue;
+          str[0]='\0';
+          break;
+        }
+        if (!textline(str, sizeof(str))) str[0]='\0';
+        if (str[0]!=' ' && str[0]!='\t') break;
+	/* unfolding */
+        hstr[plen-1]=' ';
+	for (p=str; *p==' ' || *p=='\t'; p++);
+	if (*p=='\0') p--;
+	strcpy(str, p);
+      }
       if (p1==NULL) break;
       if (plen) p1[--plen]='\0'; /* remove last '\r' */
-#if 0
-      for (p=p1; *p; p++)
-        if (*p == '\r') *p='\n';
-#else
-      /* unfolding */
-      if (strchr(p1, '\r'))
-      { char *pdest;
-        for (p=pdest=p1; *p;)
-        { if (*p=='\r')
-          { *pdest++=' ';
-            while (isspace(*++p));
-          } else
-            *pdest++=*p++;
-        }
-      }
-#endif
-      p=strchr(p1, ':');
-      if (p)
+      if (strnicmp(p1, "From ", 5)==0)
+        hv_store(hdr, p1, 5, newSVpv(p1+5, 0), 0);
+      else if ((p=strchr(p1, ':')) != NULL)
       { plen=p-p1;
         *p++='\0';
         while (isspace(*p)) p++;
         strlwr(p1);
         *p1=toupper(*p1);
         hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
-      } else if (strnicmp(p1, "From ", 5)==0)
-        hv_store(hdr, p1, 5, newSVpv(p1+5, 0), 0);
+      }
     }
     if (hstr) free(hstr);
 
