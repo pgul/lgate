@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/01/28 03:51:10  gul
+ * convert msgid to FTN-form for reply-linking even if there is another address
+ * (correct return address always is in the origin).
+ *
  * Revision 2.3  2001/01/27 21:58:48  gul
  * translate comments
  *
@@ -731,7 +735,9 @@ wasreject:
   { /* no X-FTN-MSGID */
     if (fmsgid[0])
     { if (getfidoaddr(&i, &j, &k, &n, fmsgid)==0)
-      { if ((i==hiszone) && (j==hisnet) && (k==hisnode) && (n==hispoint))
+      { /* put original msgid, addr is at origin
+        if ((i==hiszone) && (j==hisnet) && (k==hisnode) && (n==hispoint))
+        */
         { p=strchr(fmsgid, ' ');
           if (p)
           { l=strtoul(p+1, &p1, 16);
@@ -744,11 +750,13 @@ wasreject:
       }
       else fmsgid[0]=0;
     }
+    if (fmsgid[0]==0)
+      i=hiszone, j=hisnet, k=hisnode, n=hispoint;
     if (fmsgid[0] || (!domainmsgid) || (domainid[0]==0) || (waschaddr))
     { if (hispoint)
-        sprintf(str, "%u:%u/%u.%u", hiszone, hisnet, hisnode, hispoint);
+        sprintf(str, "%u:%u/%u.%u", i, j, k, n);
       else
-        sprintf(str, "%u:%u/%u", hiszone, hisnet, hisnode);
+        sprintf(str, "%u:%u/%u", i, j, k);
     }
     else
       /* not FTN and user ask to put domain */
@@ -1352,7 +1360,7 @@ errlet:
           else str[1]='';  /* '\x0f' */
         }
       }
-      /* if we need go to next part? */
+      /* do we need go to next part? */
       if (part!=parts-1)
       { if ((long)ibufpart+strlen(str)+sizeof(msghdr)+
            (pheader[cheader]-header)>=1024l*maxpart)
