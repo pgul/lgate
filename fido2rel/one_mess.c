@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.17  2004/07/20 18:47:19  gul
+ * \r\n -> \n
+ *
  * Revision 2.16  2004/07/20 18:45:43  gul
  * Fixed reject reasons logic
  *

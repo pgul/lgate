@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2004/07/20 18:47:18  gul
+ * \r\n -> \n
+ *
  * Revision 2.5  2002/11/17 20:55:26  gul
  * New option "tid" in gate.cfg
  *

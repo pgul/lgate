@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.18  2004/07/20 18:47:18  gul
+ * \r\n -> \n
+ *
  * Revision 2.17  2004/07/20 18:44:41  gul
  * Work with perl 5.8
  *

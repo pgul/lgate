@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2004/07/20 18:47:19  gul
+ * \r\n -> \n
+ *
  * Revision 2.9  2003/02/16 09:41:57  gul
  * bugfix: sometimes extra NUL-bytes occured at the end of pkt
  *

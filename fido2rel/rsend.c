@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/07/20 18:47:19  gul
+ * \r\n -> \n
+ *
  * Revision 2.1  2002/03/21 11:31:46  gul
  * Minor compilation fix
  *
