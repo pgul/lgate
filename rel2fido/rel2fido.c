@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.12  2002/11/17 20:23:18  gul
+ * Remove obsolete code
+ *
  * Revision 2.11  2002/03/21 11:19:16  gul
  * Added support of msgid style <newsgroup|123@domain>
  *
@@ -1191,11 +1194,7 @@ todevnull:
     msghdr.attr=0;
     /* change RFC-X-MAILER to PID */
     for (i=0; i<cheader; i++)
-    { if (strnicmp(pheader[i], "\x01RFC-X-Mailer: ", 14)==0)
-      { strcpy(pheader[i]+1, "PID: ");
-        strcpy(pheader[i]+6, pheader[i]+15);
-        continue;
-      }
+    {
       if (strncmp(pheader[i], "\x01Via", 4)==0)
         pheader[i][0]=0;
       if (strncmp(pheader[i], "\x01Recd", 5)==0)
