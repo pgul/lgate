@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/03/21 11:19:14  gul
+ * Added support of msgid style <newsgroup|123@domain>
+ *
  * Revision 2.4  2001/01/21 10:20:01  gul
  * new cfg param 'fromtop'
  *
@@ -479,6 +482,7 @@ lbadmsg:
             continue;
           sprintf(pheader[cheader], "X-FTN-MsgId: %s\n", klopt);
           nextline;
+          chkkludges;
           if (getfidoaddr(&u1, &u2, &u3, &u4, klopt))
           { /* fidogate? */
             if (!rfcid && chkregexp(klopt, "^<[a-z0-9\\-\\._&%$!^+=:;/~*]+\\@[a-zA-Z0-9\\-\\._&%$!^+=:;/~*]+> [a-z0-9]{8,8}\\s*$"
@@ -500,13 +504,13 @@ lbadmsg:
             { /* dequote */
               for (p=msgid, p1=klopt+2; p1[0] && p1[1] && p1[2] &&
                    (p1[0]!='>' || p1[1]!='\"' || p1[2]!=' ') &&
-                   p-msgid>sizeof(msgid); p++)
+                   p-msgid<sizeof(msgid)-1; p++)
               { if (p1[0]=='\"' && p1[1]=='\"')
                   *p++=*p1++;
                 else
                   *p++=*p1;
               }
-              msgid[sizeof(msgid)-1]='\0';
+              *p='\0';
               rfcid=1;
             }
             continue;
@@ -595,6 +599,47 @@ lbadmsg:
             continue;
           sprintf(pheader[cheader], "X-FTN-%s: %s\n", klname, klopt);
           nextline;
+          chkkludge(strlen(str)+strlen(echoes[area].usenet));
+          strcpy(pheader[cheader], "References: <");
+          if (area!=-1 && group[echoes[area].group].extmsgid)
+          { strcat(pheader[cheader], echoes[area].usenet);
+            strcat(pheader[cheader], "|");
+          }
+          if (klopt[0] == '<' || (klopt[0]=='\"' && klopt[1]=='<'))
+          { /* fidogate? */
+            char *p2, *p1=pheader[cheader]+strlen(pheader[cheader]);
+            p2=p1;
+            if (klopt[0]=='\"')
+            { p=klopt+1;
+              while (*p)
+              { if (*p=='\"')
+                { if (p[1]=='\"')
+                    p++;
+                  else
+                    break;
+                }
+                *p1++=*p++;
+              }
+              if (*p!='\"' || p[1]!=' ' || *(p1-1)!='>')
+                /* bad fidogate reply */
+                continue;
+            }
+            else
+            { p=strrchr(klopt, ' ');
+              if (p==NULL || *(p-1)!='>')
+                continue;
+              memcpy(p1, klopt, p-klopt);
+              p1[p-klopt]='\0';
+            }
+            /* is newsgroup exists twice in the msgid? */
+            if (area!=-1 && group[echoes[area].group].extmsgid)
+            { p=strstr(p2, echoes[area].usenet);
+              if (p && *(p-1)=='|' && p[echoes[area].usenet]=='|')
+                strcpy(strcpy(pheader[cheader]+13, p2);
+            }
+            nextline;
+            continue;
+          }
           if (fscmsgid)
           { p=strchr(klopt, '@');
             if (p)
@@ -604,7 +649,8 @@ lbadmsg:
             for (p=klopt; *p; p++)
               if (!isalpha(*p) && !isdigit(*p))
                 *p='-';
-            sprintf(pheader[cheader], "References: <%s@", klopt);
+            strcat(pheader[cheader], klopt);
+            strcat(pheader[cheader], "@");
           }
           else
           {
@@ -614,11 +660,11 @@ lbadmsg:
             if (getfidoaddr(&u1, &u2, &u3, &u4, klopt))
               continue;
             if (u4)
-              sprintf(pheader[cheader], "References: <%s@p%u.f%u.n%u.z%u.",
-                      p, u4, u3, u2, u1);
+              sprintf(pheader[cheader]+strlen(pheader[cheader],
+                      "%s@p%u.f%u.n%u.z%u.", p, u4, u3, u2, u1);
             else
-              sprintf(pheader[cheader], "References: <%s@f%u.n%u.z%u.",
-                      p, u3, u2, u1);
+              sprintf(pheader[cheader]+strlen(pheader[cheader],
+                      "%s@f%u.n%u.z%u.", p, u3, u2, u1);
           }
           /* try to get domain */
           if ((atoi(klopt)>0) && (atoi(klopt)<7))
@@ -632,10 +678,6 @@ lbadmsg:
             strcpy(p, myaka[i].domain);
             p=strpbrk(p, "%@");
             if (p) *p=0;
-          }
-          if (area!=-1 && group[echoes[area].group].extmsgid)
-          { strcat(pheader[cheader], "|");
-            strcat(pheader[cheader], echoes[area].usenet);
           }
           strcat(pheader[cheader], ">\n");
           nextline;
@@ -800,15 +842,13 @@ lbadmsg:
           nextline;
         }
         if (!isfield("Organization: "))
-        { strcpy(str, organization);
-          chkkludges;
+        { chkkludge(strlen(organization));
           sprintf(pheader[cheader], "Organization: %s\n", organization);
           nextline;
         }
         if (!isfield("Newsgroups: "))
-        { strcpy(str, echoes[area].usenet);
-          chkkludges;
-          sprintf(pheader[cheader], "Newsgroups: %s\n", str);
+        { chkkludge(strlen(echoes[area].usenet));
+          sprintf(pheader[cheader], "Newsgroups: %s\n", echoes[area].usenet);
           nextline;
         }
         continue;
@@ -961,7 +1001,7 @@ plaintext:
       if (((area==-1) && (hideorigin & 1)) ||
           ((area!=-1) && (hideorigin & 2)))
       { /* Put X-FTN-Origin to header and don't put it to body */
-        chkkludges;
+        chkkludge(origin_len);
         strcpy(pheader[cheader], "X-FTN-");
         frombuf(pheader[cheader]+6, memtxt, origin_pos+3, origin_len);
         pheader[cheader][origin_len+3] = '\0';
@@ -983,8 +1023,7 @@ plaintext:
       if (((area==-1) && (hidetear & 1)) ||
           ((area!=-1) && (hidetear & 2)))
       { /* Put X-FTN-Tearline to header and remove from memtxt */
-        /* ! FIX ME ! */
-        chkkludges; /* check if we have space for origin instead of tearline ;) */
+        chkkludge(tear_len);
         strcpy(pheader[cheader], "X-FTN-Tearline: ");
         frombuf(pheader[cheader]+16, memtxt, tear_pos+3, tear_len);
         pheader[cheader][tear_len+13]='\0';
@@ -1864,10 +1903,11 @@ plaintext:
     if (area!=-1 && group[echoes[area].group].extmsgid)
     { char *p1=strstr(msgid+1, echoes[area].usenet);
       if (p1) p=p1+strlen(echoes[area].usenet);
-      if (p1==NULL || *(p1-1)!='|' || (*p!='\0' && *p!='|'))
-      { strncat(msgid, "|", sizeof(msgid));
-        strncat(msgid, echoes[area].usenet, sizeof(msgid));
-        msgid[sizeof(msgid)-1]='\0';
+      if ((p1==NULL || (*(p1-1)!='|' && *(p1-1)!='<') || *p!='|') &&
+          strlen(msgid)+strlen(echoes[area].usenet)+1<sizeof(msgid))
+      { memmove(msgid+strlen(echoes[area].usenet)+2, msgid+1, strlen(msgid));
+        strcpy(msgid+1, echoes[area].usenet);
+        msgid[strlen(echoes[area].usenet)+1]='|';
       }
     }
     if (!isfield("Message-Id:"))
@@ -2105,7 +2145,7 @@ errwrite2:
     memtxt=NULL;
     if (area!=-1)
       strcpy(to, group[echoes[area].group].newsserv);
-    if ((area!=-1) && ((group[echoes[area].group].type==G_CNEWS)||
+    if ((area!=-1) && ((group[echoes[area].group].type==G_CNEWS) ||
         (group[echoes[area].group].type==G_DIR)))
     {
       debug(4, "Main: call rsend");

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.12  2002/03/21 11:19:15  gul
+ * Added support of msgid style <newsgroup|123@domain>
+ *
  * Revision 2.11  2002/01/28 22:47:37  gul
  * %hdr hash fix
  *
@@ -205,6 +208,10 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
 
   debug(8, "FidoMsgId(%s)", str);
   s[0]=domainid[0]=0;
+  p=strchr(str, '|');
+  if (conf && p && newsgroups && p-str>strlen(newsgroups) &&
+      *(p-strlen(newsgroups)-1)=='<')
+    strcpy(p-strlen(newsgroups), p+1);
   p=strchr(str, '@');
   if (p==NULL)
   { /* must not occure */

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2002/03/21 11:19:15  gul
+ * Added support of msgid style <newsgroup|123@domain>
+ *
  * Revision 2.5  2002/01/15 18:48:37  gul
  * Remove nkillattfiles=32 limitation
  *
@@ -86,7 +89,8 @@
 #define ZAPAS       40
 
 #define nextline pheader[cheader+1]=pheader[cheader]+strlen(pheader[cheader])+1, cheader++;
-#define chkkludges if ((strlen(str)+pheader[cheader]+ZAPAS>header+MAXHEADER) || (cheader>=MAXFIELDS)) { logwrite('?',"Too many kludges, messages moved to badmail!\n"); goto lbadmsg; }
+#define chkkludge(len) if (((len)+pheader[cheader]+ZAPAS>header+MAXHEADER) || (cheader>=MAXFIELDS)) { logwrite('?',"Too many kludges, messages moved to badmail!\n"); goto lbadmsg; }
+#define chkkludges chkkludge(strlen(str))
 
 #include <libgate.h>
 

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.11  2002/03/21 11:19:16  gul
+ * Added support of msgid style <newsgroup|123@domain>
+ *
  * Revision 2.10  2002/01/07 09:57:24  gul
  * Added init_textline() for hrewind()
  *
@@ -725,21 +728,17 @@ wasreject:
 #endif
   }
   if (area!=-1 && newsgr && strchr(newsgr, ',') == NULL)
-  { /* if message-id ended with "|newsgroup" - remove */
+  { /* if message-id started with "newsgroup|" - remove */
     for (i=0; i<cheader; i++)
       if (strncmp(pheader[i], "\x01RFCID:", 7) == 0)
       { if (strlen(pheader[i])>strlen(newsgr)+2)
-        { p=pheader[i]-strlen(newsgr)-2;
-          if (*p=='|' && strcmp(p+1, newsgr)==0)
-          { strcpy(p, "\r");
+        { if (strcmp(pheader[i]+7, newsgr)==0 &&
+              pheader[i][strlen(newsgr)+7]=='|')
+          { strcpy(pheader[i]+7, pheader[i]+7+strlen(newsgr)+1);
             if (strlen(domainid)>strlen(newsgr)+1)
-            { p=domainid-strlen(newsgr)-(domainmsgid==2 ? 2 : 1);
-              if (*p=='|' && strcmp(p+1, newsgr)==0)
-              { if (domainmsgid==2)
-                  strcpy(p, ">");
-                else
-                  *p='\0';
-              }
+            { p=domainid+(domainmsgid==2 ? 1 : 0);
+              if (strcmp(p, newsgr)==0 && p[strlen(newsgr)]=='|')
+                strcpy(p, p+strlen(newsgr)+1);
             }
           }
         }
