@@ -2,8 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.2  2001/09/10 15:13:19  gul
- * avoid warning
+ * Revision 2.1.2.1  2002/10/02 09:44:30  gul
+ * fix compiler warning
  *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
