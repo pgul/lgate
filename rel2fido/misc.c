@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.13  2002/10/29 19:46:36  gul
+ * fix msgid conversion
+ *
  * Revision 2.12  2002/03/21 11:19:15  gul
  * Added support of msgid style <newsgroup|123@domain>
  *
@@ -244,11 +247,12 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   domainid[MAXADDR-1]='\0';
   p=strchr(domainid, '>');
   if (p) *p=0;
-  if (str[0]=='<') str++;
-  for (i=j=0; (str[i]!='@') && str[i]; i++)
-  { if (!isxdigit(str[i]))
+  p1=str;
+  if (p1[0]=='<') p1++;
+  for (i=j=0; (p1[i]!='@') && p1[i]; i++)
+  { if (!isxdigit(p1[i]))
       j|=2;
-    if (!isdigit(str[i]))
+    if (!isdigit(p1[i]))
       j|=1;
   }
   strlwr(domainid);
@@ -262,13 +266,13 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   if (k==4)
   { /* yes! */
     if ((i<=8) && (i>=4) && (j<2))
-      sscanf(str, "%lx", msgid);
+      sscanf(p1, "%lx", msgid);
     else if ((i<=10) && (j==0))
-      sscanf(str, "%lu", msgid);
+      sscanf(p1, "%lu", msgid);
     else
-    { str[i]=0;
+    { p1[i]=0;
       *msgid=crc32(str);
-      str[i]='@';
+      p1[i]='@';
     }
     if (pp)
       sprintf(s, "%u:%u/%u.%u %lx", zz, nn, ff, pp, *msgid);
@@ -276,7 +280,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
       sprintf(s, "%u:%u/%u %lx", zz, nn, ff, *msgid);
     return 1;
   }
-  strncpy(domainid, str+i+1, MAXADDR);
+  strncpy(domainid, p1+i+1, MAXADDR);
   domainid[MAXADDR-1]='\0';
   p=strchr(domainid, '>');
   if (p) *p=0;
@@ -295,15 +299,15 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
     *msgid=crc32(domainid)^0xfffffffflu;
   }
   else if (domainmsgid==1)
-  { p=strchr(str, '@');
+  { p=strchr(p1, '@');
     *p=0;
-    *msgid=crc32(str);
+    *msgid=crc32(p1);
     *p='@';
   }
   else
-    *msgid=crc32(str);
+    *msgid=crc32(p1);
   /* check for fsc-style */
-  p=str;
+  p=p1;
   if (!isdigit(*p)) return 0;
   zz=atoi(p);
   while (isdigit(*p)) p++;
