@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2002/03/21 11:28:24  gul
+ * Cygwin support
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -95,10 +98,18 @@ FILE * myfopen(char * fname,char * attr);
 #define flock(h, mode)	(share ? (((mode) & LOCK_UN) ? unlock(h, 0, 0x7fffffffl) : lock(h, 0, 0x7fffffffl)) : 0)
 int _Cdecl lock    (int handle, long offset, long length);
 int _Cdecl unlock  (int handle, long offset, long length);
-#elif defined(__WATCOMC__)
+#elif defined(__WATCOMC__) || defined(__CYGWIN__)
 #define flock(h, mode)	(((mode) & LOCK_UN) ? unlock(h, 0, 0x7fffffffl) : lock(h, 0, 0x7fffffffl))
 int  lock(int __handle,unsigned long __offset,unsigned long __nbytes);
 int  unlock(int __handle,unsigned long __offset,unsigned long __nbytes);
+#elif defined(__CYGWIN__)
+#ifndef LK_LOCK
+#define LK_UNLOCK	0
+#define LK_LOCK		1
+#define LK_NBLCK	2
+#endif
+#define flock(h, mode) _locking(h, (((mode) & LOCK_IN) ? LK_UNLOCK : (((mode) & LONK_NB) ? LK_NBLCK : LK_LOCK))), -1)
+int _locking(int, int, int);
 #endif
 
 #include <fidolib.h>
@@ -148,7 +159,9 @@ void msghdr_byteorder(struct message *msg);
 void pkthdr_byteorder(struct packet *pkt);
 void logwrite(char level,char * format,...);
 char *strsysexit(int retcode);
+#ifndef HAVE_STRSIGNAL
 char *strsignal(int signo);
+#endif
 char *chsalias(char *charset);
 void addtable(char *charsetname, short int *table);
 short int *findtable(char *charset, char *charsetsdir);
@@ -178,11 +191,15 @@ int  writebuf(char *buf, long len, FILE *file);
 #define writebuf(buf, len, file)	((fwrite(buf, len, 1, file) == 1) ? 0 : -1)
 #define bufwrite(h, buf, size)          write(h, buf, size)
 #endif
-#ifdef __WATCOMC__
+#ifdef  __WATCOMC__
 #define WNOHANG         1
 typedef int pid_t;
 int kill(pid_t pid, int sig);
 int waitpid(pid_t pid, int *status, int options);
+#endif
+#ifdef __CYGWIN__
+int kill(pid_t pid, int sig);
+#define waitpid(pid, status, options)  cwait(status, pid, 0)
 #endif
 #ifndef HAVE_FILELENGTH
 unsigned long filelength(int h);
@@ -192,7 +209,7 @@ char *basename(char *fname);
 #endif
 #ifndef HAVE_MKTIME
 #include <time.h>
-time_t mktime(struct tm * ft);
+time_t mktime(struct tm *ft);
 #endif
 #ifndef HAVE_STRUPR
 char *strupr(char *str);
