@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 09:37:53  gul
+ * rename pkt to *.bad changed to rmove()
+ *
  * Revision 2.0  2001/01/10 20:42:18  gul
  * We are under CVS for now
  *
@@ -881,8 +884,7 @@ gobadpkt:
 }
 
 void badpkt(void)
-{ char * p;
-  int i;
+{ char *p;
 
   if (h!=-1)
   { flock(h, LOCK_UN);
@@ -893,13 +895,10 @@ void badpkt(void)
   strcpy(str, msgname);
   p=strrchr(str, PATHSEP);
   if (p==NULL) p=str;
-  p=strchr(p,'.');
+  p=strchr(p, '.');
   if (p==NULL) p=str+strlen(str);
-  strcpy(p,".bad");
-  i=0;
-  while (!access(str, 0))
-    p[3]=(char)((i++)+'0');
-  if (rename(msgname, str))
+  strcpy(p, ".bad");
+  if (rmove(msgname, str))
     logwrite('!', "Can't rename %s to %s: %s!\n", msgname, str, strerror(errno));
 }
 
