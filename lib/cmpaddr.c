@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/07/07 08:11:00  gul
+ * Change debug level for matched address
+ *
  * Revision 2.0  2001/01/10 20:42:21  gul
  * We are under CVS for now
  *
@@ -103,7 +106,7 @@ int chkregexp(char * str, char * regexp
 }
 
 #if !VIAREGEX
-static int mstrcmp(char * mask,char * adr)
+static int mstrcmp(char *mask, char *adr)
 {
   for (;;mask++,adr++)
   { if (*mask=='*') return 0;
@@ -117,7 +120,7 @@ static int mstrcmp(char * mask,char * adr)
 }
 #endif
 
-int wildcmp(char * addr,wildcard * mask)
+int wildcmp(char *addr, wildcard *mask)
 {
   char *p, *maskstr;
   int  r;
@@ -141,7 +144,10 @@ int wildcmp(char * addr,wildcard * mask)
 #endif
                 );
     free(p);
-    debug(16, "WildCmp, result is %s", r ? "FALSE" : "TRUE");
+    if (r)
+      debug(16, "WildCmp, result is FALSE");
+    else
+      debug(6, "WildCmp: address %s matches mask %s", addr, maskstr);
     return r;
   }
 
