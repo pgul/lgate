@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.16  2004/07/07 08:24:32  gul
+ * Improved logging
+ *
  * Revision 2.15  2004/03/27 12:21:47  gul
  * Get only realname from X-Comment-To:
  *
@@ -647,7 +650,10 @@ int one_message(void)
           goto wasreject;
         }
         else
+        {
+          logwrite('-', "Message to %s from %s size %lu dropped: itwit\n", newsgroups ? newsgroups : "<>", orig_from, fsize);
           null=1;
+        }
       }
     if (tofield[0] && !conf)
       for (k=0; k<nitwitto; k++)
@@ -1876,7 +1882,7 @@ errspace:
   }
   if (area!=-1)
   {
-    logwrite('-', "AREA:%s\tFrom %s\n", echoes[area].fido, fromaddr);
+    logwrite('-', "AREA:%s\tFrom %s %lu butes OK\n", echoes[area].fido, fromaddr, maxmsgbuf+hdrsize);
     if (!bypipe)
       retcode|=RET_ECHOMAIL;
   }
