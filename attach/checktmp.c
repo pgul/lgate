@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/26 14:29:14  gul
+ * Added libgen.h for basename()
+ *
  * Revision 2.0  2001/01/10 20:42:15  gul
  * We are under CVS for now
  *
@@ -41,6 +44,9 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
 #include "gate.h"
 
