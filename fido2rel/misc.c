@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.16  2004/06/16 18:54:10  gul
+ * Fix prev patch
+ *
  * Revision 2.15  2004/06/16 18:35:07  gul
  * Fixed $from var in perl filter if it was changed by chaddr
  *
@@ -1869,6 +1872,7 @@ chk_fork:
         p=from;
       else
         p++;
+      sv_setpv(svfrom, p);
     }
     sv_setpv(svto,   addr);
     sv_setiv(svsize, txtsize);
