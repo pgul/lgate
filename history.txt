@@ -1215,3 +1215,6 @@ ver 7.1 - 16 Jan 01
     в message-id (после '|')
   + В badaddr.tpl новая переменная [Sender] - envelope-from адрес
   * Several attuucp changes
+
+ver 7.02 -
+  * forward: fromname-field in forward.cfg is wildcard now

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/20 01:47:41  gul
+ * fromname-field in forward.cfg is wildcard now
+ *
  * Revision 2.0  2001/01/10 20:42:20  gul
  * We are under CVS for now
  *
@@ -390,9 +393,13 @@ int main(int argc, char *argv[])
           (msghdr.dest_node==forw[i].fromnode))
       { if (forw[i].fromname[0])
         {
+#if 0
           if (stristr(msghdr.to, forw[i].fromname))
-/*        if (strnicmp(forw[i].fromname, msghdr.to, sizeof(msghdr.to))==0)
-*/
+#elif 0
+          if (strnicmp(forw[i].fromname, msghdr.to, sizeof(msghdr.to))==0)
+#else
+          if (cmpaddr(msghdr.to, forw[i].fromname)==0)
+#endif
             break;
         }
         else
