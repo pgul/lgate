@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/26 17:49:04  gul
+ * bugfix: truncate message if size=0
+ *
  * Revision 2.1  2001/01/24 01:59:18  gul
  * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
  *
@@ -1321,8 +1324,9 @@ errlet:
         }
         break;
       }
-      if (ibufpart+strlen(str)+1>1024l*maxpart+RESPART)
-        break;
+      /*
+      if (ibufpart+strlen(str)+1>1024l*maxpart+RESPART) break;
+      */
       if (cont) continue;
       if (area!=-1)
       {
