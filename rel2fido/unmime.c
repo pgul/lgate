@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/02/27 10:18:11  gul
+ * "Memory allocation failed" fixed
+ *
  * Revision 2.2  2001/01/29 17:45:33  gul
  * Bugfix: corrupt memory when size=0 and --with-perl on large messages
  *
@@ -2067,15 +2070,17 @@ int msg_unmime(long msize)
   { long freemem=getfreemem();
     debug(6, "msg_unmime: farcoreleft=%ld", freemem);
     if (mbufsize+maxpart*1024l+RESPART>freemem)
-      mbufsize=freemem-maxpart*1024-RESPART-0x1000;
+      mbufsize=freemem-maxpart*1024-RESPART-0x2000;
     /* if (mbufsize>0xffff) mbufsize=0x8000; */
     if (mbufsize==0) mbufsize=MSGBUFSIZE;
-    if (mbufsize>freemem-MINPARTSIZE-0x1000)
-      mbufsize=freemem-MINPARTSIZE-0x1000;
+    if (mbufsize>freemem-MINPARTSIZE-0x2000)
+      mbufsize=freemem-MINPARTSIZE-0x2000;
     if (mbufsize<=0)
-    { mbufsize=(freemem-0x1000)/4;
+    { mbufsize=(freemem-0x2000)/4;
       if (mbufsize>0xffff) mbufsize=0x8000;
     }
+    if (mbufsize>MSGBUFSIZE)
+      mbufsize=MSGBUFSIZE; /* do not allocate too large mem buffer */
     if (mbufsize<=0)
       mbufsize=0x8000; /* not enough core */
   }
