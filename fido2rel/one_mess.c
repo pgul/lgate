@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.13  2002/09/30 13:44:39  gul
+ * bugfix
+ *
  * Revision 2.12  2002/09/22 12:55:04  gul
  * extmsgid bugfix
  *
@@ -679,7 +682,7 @@ lbadmsg:
             char *p2, *p1=pheader[cheader]+strlen(pheader[cheader]);
             p2=p1;
             if (klopt[0]=='\"')
-            { p=klopt+1;
+            { p=klopt+2;
               while (*p)
               { if (*p=='\"')
                 { if (p[1]=='\"')
@@ -697,8 +700,8 @@ lbadmsg:
             { p=strrchr(klopt, ' ');
               if (p==NULL || *(p-1)!='>')
                 continue;
-              memcpy(p1, klopt, p-klopt);
-              p1[p-klopt]='\0';
+              memcpy(p1, klopt+1, p-klopt-1);
+              p1[p-klopt-1]='\0';
             }
             /* is newsgroup exists twice in the msgid? */
             if (area!=-1 && group[echoes[area].group].extmsgid)
@@ -706,6 +709,7 @@ lbadmsg:
               if (p && *(p-1)=='|' && p[strlen(echoes[area].usenet)]=='|')
                 strcpy(pheader[cheader]+13, p2);
             }
+            strcat(pheader[cheader], "\n");
             nextline;
             continue;
           }
