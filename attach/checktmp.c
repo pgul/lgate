@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/07/20 21:43:26  gul
+ * Decode attaches with 8bit encoding
+ *
  * Revision 2.4  2001/07/20 21:22:52  gul
  * multipart/mixed decode cleanup
  *
@@ -180,6 +183,8 @@ gotline:
             enc=ENC_BASE64;
           else if (strnicmp(p, "quoted-printable", 16)==0)
             enc=ENC_QP;
+          else if (strnicmp(p, "8bit", 16)==0)
+            enc=ENC_8BIT;
           else if (strnicmp(p, "x-pgp", 5)==0)
             enc=ENC_PGP;
         }
@@ -563,6 +568,8 @@ errfputs:
                   last->enc=ENC_BASE64;
                 else if (strnicmp(p, "quoted-printable", 16)==0)
                   last->enc=ENC_QP;
+                else if (strnicmp(p, "8bit", 16)==0)
+                  last->enc=ENC_8BIT;
                 else if (strnicmp(p, "x-pgp", 5)==0)
                   last->enc=ENC_PGP;
               }
@@ -587,7 +594,7 @@ errfputs:
             }
           }
           else
-          { if (enc==ENC_UUE && strnicmp(str, "begin ", 6)==0 &&
+          { if ((enc==ENC_UUE || enc==ENC_8BIT) && strnicmp(str, "begin ", 6)==0 &&
                 isdigit(str[6]) && isdigit(str[7]) && isdigit(str[8]) &&
                 ((str[9]==' ' && str[10] && !isspace(str[10])) ||
                 (isdigit(str[9]) && str[10]==' ' && str[11] && !isspace(str[11]))))
@@ -597,6 +604,7 @@ errfputs:
               last->arcname[sizeof(last->arcname)-1]='\0';
               for (p=last->arcname; *p && !isspace(*p); p++);
               *p='\0';
+              enc=ENC_UUE;
             }
           }
         }
@@ -679,8 +687,12 @@ errfputs:
         r=do_unbase64(tmpname, tmp_arc, decodepart);
       }
       else if (last->enc==ENC_QP)
-      { debug(5, "CheckTmp: run internal unbase64 %s to %s", tmpname, tmp_arc);
+      { debug(5, "CheckTmp: run internal q-p decoder %s to %s", tmpname, tmp_arc);
         r=do_unqp(tmpname, tmp_arc, decodepart);
+      }
+      else if (last->enc==ENC_8BIT)
+      { debug(5, "CheckTmp: run internal 8bit decoder %s to %s", tmpname, tmp_arc);
+        r=do_un8bit(tmpname, tmp_arc, decodepart);
       }
       else
       { debug(5, "CheckTmp: run internal uudecode %s to %s", tmpname, tmp_arc);

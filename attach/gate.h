@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/07/20 21:43:26  gul
+ * Decode attaches with 8bit encoding
+ *
  * Revision 2.4  2001/07/20 21:22:52  gul
  * multipart/mixed decode cleanup
  *
@@ -44,7 +47,7 @@
 
 #include <libgate.h>
 
-typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_QP, ENC_PGP } enctype;
+typedef enum { ENC_UUCP, ENC_UUE, ENC_BASE64, ENC_QP, ENC_8BIT, ENC_PGP } enctype;
 typedef enum {NO_SEM, FD_SEM, BINK_SEM, LBSO_SEM} semtype;
 typedef enum {RESEND, SECURE, UNSECURE} pwdtype;
 
@@ -68,6 +71,7 @@ void getparam(char *field, char *param, char *value, unsigned valsize);
 int  do_uudecode(char *infile, char *outfile);
 int  do_unbase64(char *infile, char *outfile, int decodepart);
 int  do_unqp(char *infile, char *outfile, int decodepart);
+int  do_un8bit(char *infile, char *outfile, int decodepart);
 int  str_unbase64(char *in, char *out);
 void str_base64(char *in, char *out, int len);
 #ifdef _IOFBF  /* stdio.h included */

@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2001/07/20 21:43:26  gul
+ * Decode attaches with 8bit encoding
+ *
  * Revision 2.4  2001/07/20 21:22:52  gul
  * multipart/mixed decode cleanup
  *
@@ -51,6 +54,7 @@
 int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int decode(FILE *, FILE *));
 static int decode_b64(FILE *in, FILE *out);
 static int decode_qp(FILE *in, FILE *out);
+static int decode_8bit(FILE *in, FILE *out);
 static char buf[128];
 
 int do_unbase64(char *infile, char *outfile, int decodepart)
@@ -60,6 +64,11 @@ int do_unbase64(char *infile, char *outfile, int decodepart)
 int do_unqp(char *infile, char *outfile, int decodepart)
 { return do_unmime(infile, outfile, decodepart, "quoted-printable", decode_qp);
 }
+
+int do_un8bit(char *infile, char *outfile, int decodepart)
+{ return do_unmime(infile, outfile, decodepart, "8bit", decode_8bit);
+}
+
 
 int do_unmime(char *infile, char *outfile, int decodepart, char *encoding, int decode(FILE *, FILE *))
 {
@@ -379,4 +388,12 @@ static int decode_qp(FILE *in, FILE *out)
     s[0]=c;
     s[1]='\0';
   }
+}
+
+static int decode_8bit(FILE *in, FILE *out)
+{ int i;
+  while ((i=fread(buf, 1, sizeof(buf), in))>0)
+    if (fwrite(buf, 1, i, out) != i)
+      return 3;
+  return 0;
 }

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2001/07/20 21:43:26  gul
+ * Decode attaches with 8bit encoding
+ *
  * Revision 2.3  2001/07/20 21:22:52  gul
  * multipart/mixed decode cleanup
  *
@@ -281,6 +284,8 @@ newmess:
             enc=ENC_BASE64;
           if (strnicmp(p, "quoted-printable", 16)==0)
             enc=ENC_QP;
+          if (strnicmp(p, "8bit", 16)==0)
+            enc=ENC_8BIT;
           else if (strnicmp(p, "x-pgp", 5)==0)
             enc=ENC_PGP;
           else if ((strnicmp(p, "x-uue", 5)==0) ||
@@ -437,7 +442,8 @@ newmess:
         pgpsig=NULL;
       }
     }
-    else if ((!inhdr) && (!inparthdr) && (enc==ENC_UUE || enc==ENC_UUCP))
+    else if ((!inhdr) && (!inparthdr) &&
+             (enc==ENC_UUE || enc==ENC_UUCP || enc==ENC_8BIT))
     { if ((strnicmp(sstr, "begin ", 6)==0) && isdigit(sstr[6]))
       { enc=ENC_UUE;
         decodepart=npart;
@@ -1012,6 +1018,10 @@ baduuderet:
   }
   else if (enc == ENC_QP)
   { if (do_unqp(tmp_uue, tmp_arc, decodepart))
+      goto baduuderet;
+  }
+  else if (enc == ENC_8BIT)
+  { if (do_un8bit(tmp_uue, tmp_arc, decodepart))
       goto baduuderet;
   } else
   { if (do_uudecode(tmp_uue, tmp_arc))
