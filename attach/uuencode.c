@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/06/08 11:00:30  gul
+ * Workaround reassemble message/partial bug in some MUA
+ *
  * Revision 2.1  2004/05/28 13:27:08  gul
  * Put Subject, From and Message-Id to header of first part of splitted message
  *
@@ -178,9 +181,50 @@ static int wait_rmail(void)
 
 #endif
 
+static void putcommon(FILE *h, int curpart, char *passwd, long confirm)
+{
+  char *p;
+
+  fprintf(h, "Date: %s, %2u %s %u  %02u:%02u:%02u %c%02u00\n",
+          weekday[curtm->tm_wday], curtm->tm_mday,
+          montable[curtm->tm_mon], curtm->tm_year+1900,
+          curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
+          (tz<=0) ? '+' : '-', (tz<0) ? -tz : tz);
+  fprintf(h, "From: %s@%s\n", user, local);
+  fputs("To: ", h);
+  for (p=addrlist; *p;)
+  { if (isspace(*p) || (*p==','))
+    { fputs(",\n\t", h);
+      while (isspace(*p) || (*p==','))
+        p++;
+      continue;
+    }
+    fputc(*p++, h);
+  }
+  fputc('\n', h);
+  fprintf(h, "X-FTNattach-Version: " FORMATVER " (LuckyGate " VER ")\n");
+  fputs("X-Mailer: " NAZVA "\n", h);
+  if (pgpsig && curpart==1)
+  { int i;
+    fprintf(h, "X-PGP-Sig:");
+    for (i=0; pgpsig[i]; i++)
+    { if (i%60==0)
+        fputs("\n\t", h);
+      fputc(pgpsig[i], h);
+    }
+    fputc('\n', h);
+  }
+  if (precedence[0])
+    fprintf(h, "Precedence: %s\n", precedence);
+  if (passwd[0])
+    fprintf(h, "X-Password: %s\n", passwd);
+  if (confirm && curpart<=1)
+    fprintf(h, "X-Confirm-To: %s@%s\n", user, local);
+}
+
 static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
 { FILE *h;
-  char *p, *fname;
+  char *fname;
 
   debug(5, "PutHdr");
 #ifdef __MSDOS__
@@ -221,12 +265,7 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
             montable[curtm->tm_mon], curtm->tm_mday,
             curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
             curtm->tm_year+1900);
-  fprintf(h, "From: %s@%s\n", user, local);
-  fprintf(h, "Date: %s, %2u %s %u  %02u:%02u:%02u %c%02u00\n",
-          weekday[curtm->tm_wday], curtm->tm_mday,
-          montable[curtm->tm_mon], curtm->tm_year+1900,
-          curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
-          (tz<=0) ? '+' : '-', (tz<0) ? -tz : tz);
+  putcommon(h, curpart, passwd, confirm);
   if (parts==1)
     fprintf(h, "Message-Id: <%s>\n", part_id);
   else
@@ -243,63 +282,33 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm)
             fname,
             ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
             ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
-
-  fputs("To: ", h);
-  for (p=addrlist; *p;)
-  { if (isspace(*p) || (*p==','))
-    { fputs(",\n\t", h);
-      while (isspace(*p) || (*p==','))
-        p++;
-      continue;
-    }
-    fputc(*p++, h);
+  fprintf(h, "Mime-Version: 1.0\n");
+  if (parts>1)
+    fprintf(h, "Content-Type: message/partial; id=\"%s\";\n"
+               "              number=%d; total=%d\n", part_id, curpart, parts);
+  if ((parts>1) && (curpart==1))
+  { fprintf(h, "\n");
+    fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
+            time(NULL), (unsigned)getpid(), seqf++, local);
+    fprintf(h, "Subject: %s; %02u.%02u.%02u %02u:%02u:%02u\n",
+            fname, ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
+            ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
+#if 1 /* workaround message/partial reassemble bug in some MUA */
+    putcommon(h, curpart, passwd, confirm);
+#endif
+    fprintf(h, "Mime-Version: 1.0\n");
   }
-  fputc('\n', h);
-  fprintf(h, "X-FTNattach-Version: " FORMATVER " (LuckyGate " VER ")\n");
-  fputs("X-Mailer: " NAZVA "\n", h);
-  if (passwd[0])
-    fprintf(h, "X-Password: %s\n", passwd);
-  if (confirm && curpart<=1)
-    fprintf(h, "X-Confirm-To: %s@%s\n", user, local);
-  if (pgpsig && curpart==1)
-  { int i;
-    fprintf(h, "X-PGP-Sig:");
-    for (i=0; pgpsig[i]; i++)
-    { if (i%60==0)
-        fputs("\n\t", h);
-      fputc(pgpsig[i], h);
+  if ((parts<=1) || (curpart==1))
+  { fprintf(h, "Content-Type: application/octet-stream; name=\"%s\"; crc32=%08lX\n",
+            fname, fcrc32);
+    fputs("Content-Transfer-Encoding: ", h);
+    switch (enc)
+    { case ENC_BASE64: fputs("base64\n", h);     break;
+      case ENC_UUE:    fputs("x-uuencode\n", h); break;
+      case ENC_PGP:    fputs("x-pgp\n", h);      break;
+      default:         fputs("binary\n", h);     break; /* never happens */
     }
-    fputc('\n', h);
-  }
-  if (precedence[0])
-    fprintf(h, "Precedence: %s\n", precedence);
-  /* if (enc==ENC_BASE64) */
-  { fprintf(h, "Mime-Version: 1.0\n");
-    if (parts>1)
-      fprintf(h, "Content-Type: message/partial; id=\"%s\";\n"
-                 "              number=%d; total=%d\n", part_id, curpart, parts);
-    if ((parts>1) && (curpart==1))
-    { fprintf(h, "\n");
-      fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
-              time(NULL), (unsigned)getpid(), seqf++, local);
-      fprintf(h, "Subject: %s; %02u.%02u.%02u %02u:%02u:%02u\n",
-              fname, ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
-              ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
-      fprintf(h, "From: %s@%s\n", user, local); /* TheBat workaround */
-      fprintf(h, "Mime-Version: 1.0\n");
-    }
-    if ((parts<=1) || (curpart==1))
-    { fprintf(h, "Content-Type: application/octet-stream; name=\"%s\"; crc32=%08lX\n",
-              fname, fcrc32);
-      fputs("Content-Transfer-Encoding: ", h);
-      switch (enc)
-      { case ENC_BASE64: fputs("base64\n", h);     break;
-        case ENC_UUE:    fputs("x-uuencode\n", h); break;
-        case ENC_PGP:    fputs("x-pgp\n", h);      break;
-        default:         fputs("binary\n", h);     break; /* never happens */
-      }
-      fprintf(h, "Content-Disposition: attachment; filename=\"%s\"\n", fname);
-    }
+    fprintf(h, "Content-Disposition: attachment; filename=\"%s\"\n", fname);
   }
   fprintf(h, "\n");
   return h;
