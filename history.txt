@@ -1223,3 +1223,5 @@ ver 7.02 -
     или только в первой строке. По умолчанию no (по всему тексту).
   ! rel2fido: иногда (при гейтовании из UUPC spool при pack=no) msg
     мог попадать в pktin под именем *.pkt.
+  ! rel2fido: "Memory allocation failed" fixed.
+
