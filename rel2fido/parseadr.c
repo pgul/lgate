@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2004/07/07 09:14:54  gul
+ * Fixed chaddr
+ *
  * Revision 2.2  2004/03/27 12:20:38  gul
  * Unquote realname
  *
@@ -19,7 +22,7 @@
 static void parseoneaddr(char *str, char *addr, int maxaddr,
                          char *realname, int chaddr)
 {
-  char *p, *p1;
+  char *p, *p1, c;
   int  i, j;
   int  r1, r2, curmatch, curchaddr;
 
@@ -59,21 +62,24 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
     addr[i]=0;
   if (*p=='<')
   { /* first format of address */
-    *p=0;
+    p1=p;
     for (i=0; (str[i]==' ') || (str[i]=='\t'); i++);
-    if (str[i])
+    if (str[i] != '<')
     {
-      for (p1=str+strlen(str)-1; (*p1==' ') || (*p=='\t'); *p1--='\0');
+      for (p1--; (*p1==' ') || (*p=='\t'); p1--);
       /* "Vasya Pupkin"  ->  Vasya Pupkin */
       if (str[i] == '\"' && *p1 == '\"' && p1>str+i)
       { i++;
-        *p1--='\0';
+        p1--;
       }
+      p1++;
+      c=*p1;
+      *p1='\0'; /* todo: make str const */
     }
     strncpy(realname, str+i, SSIZE-1);
+    *p1=c;
     for (i=1; (p[i]==' ') || (p[i]=='\t'); i++);
     strncpy(addr, p+i, maxaddr-1);
-    *p='<';
     p=strchr(p, '>');
     if (p)
     { stripspc(realname);
