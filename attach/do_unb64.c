@@ -5,6 +5,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/07/20 15:06:11  gul
+ * error processing cleanup
+ *
  * Revision 2.1  2001/07/20 14:55:22  gul
  * Decode quoted-printable attaches
  *
@@ -129,16 +132,19 @@ static int do_unmime(char *infile, char *outfile, int decode(FILE *, FILE *))
   if (i!=EOF)
     r=decode(in, out);
   else
-    r=3;
+    r=4;
 
   if (fflush(out)) r=3;
   flock(fileno(out), LOCK_UN);
   if (fclose(out)) r=3;
   if (in!=stdin) fclose(in);
-  else if (!isfile(fileno(in))) while (fgets(buf, sizeof(buf), in));
+  else if (!isfile(fileno(in)))
+    while (fgets(buf, sizeof(buf), in));
   if (r)
   { unlink(outfile);
-    if (r!=3) /* error write */
+    if (r==3) /* error write */
+      logwrite('?', "Can't write file %s: %s\n", outfile, strerror(errno));
+    else if (r<3)
       logwrite('?', "Incorrect %s-coding\n", (decode==decode_b64 ? "base64" : "qp"));
   }
   return r;
@@ -183,7 +189,6 @@ static int decode_b64(FILE *in, FILE *out)
     if (putc((c[0]<<2) | (c[1]>>4), out)==EOF)
     {
 errwrite:
-      logwrite('?', "Can't write to file: %s!\n", strerror(errno));
       return 3;
     }
     if (c[2]==64)

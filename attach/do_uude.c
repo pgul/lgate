@@ -10,6 +10,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/07/20 15:06:12  gul
+ * error processing cleanup
+ *
  * Revision 2.0  2001/01/10 20:42:16  gul
  * We are under CVS for now
  *
@@ -99,7 +102,10 @@ int do_uudecode(char *infile, char *outfile)
     return 3;
   }
   r=decode(in, out, &sum);
-  fflush(out);
+  if (fflush(out))
+  { logwrite('?', "Can't write to file: %s!\n", strerror(errno));
+    r = 8;
+  }
   flock(fileno(out), LOCK_UN);
 
   if (fgets(buf, sizeof buf, in) == NULL || strcmp(buf, "end\n")) 
@@ -108,6 +114,7 @@ int do_uudecode(char *infile, char *outfile)
     if (in!=stdin) fclose(in);
     else if (!isfile(fileno(in))) while (fgets(buf, sizeof(buf), in));
     fclose(out);
+    unlink(outfile);
     return 5;
   }
   /* checksum? */
@@ -128,8 +135,12 @@ int do_uudecode(char *infile, char *outfile)
       if (!isfile(fileno(in))) while (fgets(buf, sizeof(buf), in));
     }
   }
-  fclose(out); 
+  if (fclose(out))
   if (in!=stdin) fclose(in);
+  { logwrite('?', "Can't write to file: %s!\n", strerror(errno));
+    r = 8;
+  }
+  if (r) unlink(outfile);
   return r;
 }
 
