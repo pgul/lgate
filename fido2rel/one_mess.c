@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.12  2002/09/22 12:55:04  gul
+ * extmsgid bugfix
+ *
  * Revision 2.11  2002/09/22 12:43:24  gul
  * extmsgid bugfix
  *
@@ -665,7 +668,7 @@ lbadmsg:
             continue;
           sprintf(pheader[cheader], "X-FTN-%s: %s\n", klname, klopt);
           nextline;
-          chkkludge(strlen(str)+strlen(echoes[area].usenet));
+          chkkludge(strlen(str)+(area==-1 ? 0 : strlen(echoes[area].usenet)));
           strcpy(pheader[cheader], "References: <");
           if (area!=-1 && group[echoes[area].group].extmsgid)
           { strcat(pheader[cheader], echoes[area].usenet);
