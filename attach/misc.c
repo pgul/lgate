@@ -2,11 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.2  2001/01/25 13:14:09  gul
- * quiet var moved to logwrite.c
- *
- * Revision 2.1  2001/01/25 12:40:07  gul
- * Minor changes for fix compile warnings
+ * Revision 2.0.2.1  2002/10/02 09:53:45  gul
+ * Fix syntax error
  *
  * Revision 2.0  2001/01/10 20:42:16  gul
  * We are under CVS for now
@@ -47,7 +44,7 @@
 #endif
 #include "gate.h"
 
-int nosend, norcv, bypipe, fake, nocrc;
+int nosend,norcv,bypipe,quiet,fake,nocrc;
 #ifdef __MSDOS__
 int share;
 #endif
@@ -192,9 +189,9 @@ int params(int argc, char * argv[])
   { /* ⮫쪮 /? */
     return 1;
   }
-#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
-  if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
-  { puts("You do not allowed to use -c switch");
+#if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
+  if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid())
+  { puts("You do not allowed to use -c switch\n";
     return RET_ERR;
   }
 #endif

@@ -2,41 +2,8 @@
  * $Id$
  *
  * $Log$
- * Revision 2.12  2002/03/21 11:19:15  gul
- * Added support of msgid style <newsgroup|123@domain>
- *
- * Revision 2.11  2002/01/28 22:47:37  gul
- * %hdr hash fix
- *
- * Revision 2.10  2002/01/28 22:35:12  gul
- * Bugfix in %hdr hash with folded header lines
- *
- * Revision 2.9  2002/01/28 14:02:04  gul
- * bugfix in %hdr hash
- *
- * Revision 2.8  2002/01/09 09:40:57  gul
- * Added $hdr{"From "}
- *
- * Revision 2.7  2002/01/07 09:57:24  gul
- * Added init_textline() for hrewind()
- *
- * Revision 2.6  2002/01/07 08:52:35  gul
- * Bugfix for yesterday changes
- *
- * Revision 2.5  2002/01/06 21:17:41  gul
- * %hdr in perl hook
- *
- * Revision 2.4  2001/04/22 15:42:44  gul
- * Buffer overflow in date parser fixed
- *
- * Revision 2.3  2001/01/25 18:41:39  gul
- * myname moved to debug.c
- *
- * Revision 2.2  2001/01/25 13:14:09  gul
- * quiet var moved to logwrite.c
- *
- * Revision 2.1  2001/01/24 02:16:06  gul
- * translate comments and cosmetic changes
+ * Revision 2.0.2.1  2002/10/02 09:57:26  gul
+ * Fix syntax error
  *
  * Revision 2.0  2001/01/10 20:42:25  gul
  * We are under CVS for now
@@ -158,9 +125,10 @@ struct message msghdr;
 ftnaddr *uplink;
 int  nuplinks;
 int  tossbad, nonet, noecho, bypipe, tabsize;
-int  myorigin, notfile, fake, holdhuge;
+int  quiet, myorigin, notfile, fake, holdhuge;
 unsigned long pipetype;
 char *msgbuf;
+char *myname;
 long imsgbuf;
 long maxmsgbuf;
 char waseof;
@@ -196,9 +164,9 @@ long hstrlen(char _Huge *str)
 }
 
 int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
-{ /* str - usenet msgid,
-     s   - FTN (if it can be converted)
-     write domainid and msgid
+{ /* str - usenet-овский msgid,
+     s   - фидошный (если конвертится)
+     попутно пишем domainid и msgid
      sizeof(s) = SSIZE
      sizeof(domainid) = MAXADDR
   */
@@ -208,13 +176,9 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
 
   debug(8, "FidoMsgId(%s)", str);
   s[0]=domainid[0]=0;
-  p=strchr(str, '|');
-  if (conf && p && newsgroups && p-str>strlen(newsgroups) &&
-      *(p-strlen(newsgroups)-1)=='<')
-    strcpy(p-strlen(newsgroups), p+1);
   p=strchr(str, '@');
   if (p==NULL)
-  { /* must not occure */
+  { /* не бывает */
     if (domainmsgid==2)
     { if (str[0]=='<')
       { strncpy(domainid, str, MAXADDR);
@@ -239,7 +203,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
     *msgid=crc32(str);
     return 0;
   }
-  /* check for ifmail-style */
+  /* проверяем на ifmail-овость */
   strncpy(domainid, p+1, MAXADDR);
   domainid[MAXADDR-1]='\0';
   p=strchr(domainid, '>');
@@ -260,7 +224,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   }
   else k=0;
   if (k==4)
-  { /* yes! */
+  { /* таки да! */
     if ((i<=8) && (i>=4) && (j<2))
       sscanf(str, "%lx", msgid);
     else if ((i<=10) && (j==0))
@@ -280,7 +244,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   domainid[MAXADDR-1]='\0';
   p=strchr(domainid, '>');
   if (p) *p=0;
-  /* calculate msgid */
+  /* считаем msgid */
   if (domainmsgid==2)
   { if (str[0]=='<')
     { strncpy(domainid, str, MAXADDR);
@@ -302,7 +266,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   }
   else
     *msgid=crc32(str);
-  /* check for fsc-style */
+  /* проверяем на fsc-шность */
   p=str;
   if (!isdigit(*p)) return 0;
   zz=atoi(p);
@@ -525,7 +489,7 @@ static int shortdate(char *full, char *small)
   sprintf(small, "@%4u%02u%02u.%02u%02u%02u.UTC", year, mon+1, day,
           hour, min, sec);
   if (tz)
-    sprintf(small+strlen(small), "%c%02u", (tz>=0) ? '+' : '-',
+    sprintf(small+strlen(small),"%c%02u",(tz>=0) ? '+' : '-',
             (tz>0) ? tz : -tz);
 #else
   tz++; /* to satisfy compiler */
@@ -543,7 +507,7 @@ static char *recvdate(char *recv, char *date)
   p1=strrchr(recv, ';');
   if (p1)
   { if (strnicmp(p1, "; id ", 5)==0)
-      /* uupc bug */
+      /* бага uupc */
       p1=strrchr(p1, ',');
     if (p1)
     { p1++;
@@ -551,7 +515,7 @@ static char *recvdate(char *recv, char *date)
     }
   }
   if (p1==NULL)
-  { /* malformed received, find date */
+  { /* кривое received, ищем дату */
     for (p1=recv; *p1; p1++)
     { if (!isdigit(*p1)) continue;
       np=atoi(p1);
@@ -565,7 +529,7 @@ static char *recvdate(char *recv, char *date)
       if (np==12) continue;
       p2+=3;
       if ((*p2!=' ') && (*p2!='\t')) continue;
-      /* fuck! */
+      /* надоело */
       break;
     }
     if (*p1==0) p1=NULL;
@@ -616,10 +580,10 @@ static char *recvdate(char *recv, char *date)
 static int ftndomain(char *str, ftnaddr *addr, char *domain)
 { char *p;
   int i;
-  /* check for ftn-style */
+  /* проверяем на фидошность */
   if ((tolower(str[0])=='p') && isdigit(str[1]))
   { addr->point=atoi(str+1);
-    for (p=str+1; isdigit(*p); p++);
+    for (p=str+1;isdigit(*p);p++);
     if (*p!='.')
       return 1;
     p++;
@@ -668,7 +632,7 @@ char *rcvfrom(char *recv) /* save string recv */
   char *from, *p, *p1;
   int  incomment, wasspace;
 
-  /* find " from " section */
+  /* ищем секцию " from " */
   incomment=0;
   wasspace=1;
   from=NULL;
@@ -693,11 +657,11 @@ char *rcvfrom(char *recv) /* save string recv */
       continue;
     }
     if (!from) continue;
-    if ((strncmp(p, "for",  3)==0 && isspace(p[3])) ||
-        (strncmp(p, "with", 4)==0 && isspace(p[4])) ||
-        (strncmp(p, "via",  3)==0 && isspace(p[3])) ||
-        (strncmp(p, "id",   2)==0 && isspace(p[2])) ||
-        (strncmp(p, "by",   2)==0 && isspace(p[2])))
+    if ((strncmp(p, "for", 3)==0 && isspace(p[3])) ||
+        (strncmp(p, "with",4)==0 && isspace(p[4])) ||
+        (strncmp(p, "via", 3)==0 && isspace(p[3])) ||
+        (strncmp(p, "id",  2)==0 && isspace(p[2])) ||
+        (strncmp(p, "by",  2)==0 && isspace(p[2])))
       break;
   }
   if (from==NULL) return NULL;
@@ -709,9 +673,9 @@ char *rcvfrom(char *recv) /* save string recv */
   strncpy(p1, from, (unsigned)(p-from));
   p1[(unsigned)(p-from)]='\0';
   from=p1;
-  /* remove trailing spaces */
+  /* отсекаем пробелы в конце */
   for (p=from+strlen(from)-1; isspace(*p); *p--='\0');
-  /* remove double comments */
+  /* убираем двойные комментарии */
   p1=NULL;
   for (p=from; *p; p++)
   { if (*p=='(')
@@ -729,7 +693,7 @@ char *rcvfrom(char *recv) /* save string recv */
       continue;
     }
   }
-  /* look into last brackets */
+  /* смотрим, что в последних скобках */
 rcvagain:
   p=strrchr(from, '(');
   if (p)
@@ -738,7 +702,7 @@ rcvagain:
       goto rcvagain;
     }
     else
-    { /* simple get first word */
+    { /* просто берем первое слово */
       if (isdigit(p[1]) && strstr(p, "bytes"))
       { for (*p--='\0'; isspace(*p) && p>=from; *p--='\0');
         goto rcvagain;
@@ -768,7 +732,7 @@ rcvagain:
       goto makerecv;
     }
   }
-  /* nothing in the brackets - simple get first word */
+  /* в скобках ничего - просто берем первое слово */
   for (p=from+4; isspace(*p); p++);
   if (strncmp(p, "helo=", 5)==0)
     p+=5;
@@ -788,7 +752,7 @@ makerecv:
     free(from);
     return NULL;
   }
-  /* in from - name, that must be in the "Recd from" */
+  /* в from - имя, которое должно быть в "Recd from" */
   if (strnicmp(from, "root@", 5)==0)
     strcpy(from, from+5);
   p=strchr(from, '@');
@@ -821,12 +785,12 @@ void rcvconv(char *recv)
   ftnaddr addr;
   static char product[80], date[80];
 
-  /* leave only "by" section and date */
-  /* parse domain, if ftn-style and (...) - to start */
+  /* оставляем только секцию "by" и дату */
+  /* раскручиваем домен, если фидошный, и (...) - в начало */
   debug(8, "RcvConv('%s')", recv);
   s[0]=0;
   product[0]=0;
-  /* find " by " section */
+  /* ищем секцию " by " */
   incomment=0;
   wasspace=1;
   by=NULL;
@@ -851,11 +815,11 @@ void rcvconv(char *recv)
       continue;
     }
     if (!by) continue;
-    if ((strncmp(p, "for",  3)==0 && isspace(p[3])) ||
-        (strncmp(p, "with", 4)==0 && isspace(p[4])) ||
-        (strncmp(p, "via",  3)==0 && isspace(p[3])) ||
-        (strncmp(p, "id",   2)==0 && isspace(p[2])) ||
-        (strncmp(p, "from", 4)==0 && isspace(p[4])))
+    if ((strncmp(p, "for", 3)==0 && isspace(p[3])) ||
+        (strncmp(p, "with",4)==0 && isspace(p[4])) ||
+        (strncmp(p, "via", 3)==0 && isspace(p[3])) ||
+        (strncmp(p, "id",  2)==0 && isspace(p[2])) ||
+        (strncmp(p, "from",4)==0 && isspace(p[4])))
       break;
   }
   p1=recvdate(recv, date);
@@ -881,7 +845,7 @@ void rcvconv(char *recv)
   { logwrite('!', "rcvconv: not enough memory!\n");
     return;
   }
-  /* All from brackets to product */
+  /* Все, что в скобках - в product */
   incomment=0;
   for (p=by; *p; p++)
   { 
@@ -913,7 +877,7 @@ nextprod:
   for (p=by; isspace(*p); p++);
   if (p!=by) strcpy(by, p);
   if (*by=='\0')
-    strcpy(by, "?");
+    strcpy(by,"?");
   for (p=by+strlen(by)-1; isspace(*p); *p--='\0');
   if (strlen(by)>60 || ftndomain(by, &addr, domain))
   { strcpy(recv+5, by);
@@ -932,7 +896,7 @@ nextprod:
   debug(20, "free(%p)", by);
   free(by);
   debug(20, "free(%p) done", by);
-  /* ftn-style */
+  /* таки фидошный адрес */
   if (date[0]==';')
   { strcpy(s, product);
     if (s[0]) strcat(s, " ");
@@ -1068,7 +1032,7 @@ static void setvars(char *realname, char *fromaddr, char *subj)
   else
     setvar("subject", "Too large message held");
   debug(12, "SetVars: set Subject to '%s'", getvar("Subject"));
-  setvar("fromname", realname);
+  setvar("fromname",realname);
   debug(12, "SetVars: set FromName to '%s'", getvar("FromName"));
   setvar("fromaddr", fromaddr);
   debug(12, "SetVars: set FromAddr to '%s'", getvar("FromAddr"));
@@ -1174,7 +1138,7 @@ int createattach(char *fname)
 
   curtime = time(NULL);
   curtm = localtime(&curtime);
-  /* write attach */
+  /* пишем аттач */
   for (i=0; i<nuplinks; i++)
     if ((zone==uplink[i].zone) &&
         (net==uplink[i].net) &&
@@ -1182,7 +1146,7 @@ int createattach(char *fname)
         (point==uplink[i].point))
       break;
   if (i!=nuplinks)
-    /* do not create attach for uplink */
+    /* на аплинка аттач не создаем */
     return 0;
   debug(4, "CreateAttach(%s)", fname);
   strcpy(msghdr.subj, fname);
@@ -1211,7 +1175,7 @@ int createattach(char *fname)
   {
 createatt:
     msghdr.attr=msgPRIVATE | msgLOCAL | msgHOLD | msgKILLSENT | msgFILEATT;
-    /* create .msg not by nextmsg() for packmail case */
+    /* создаем .msg в обход nextmsg() на случай packmail */
     i=0;
     removeslash(netmaildir);
     dd=opendir(netmaildir);
@@ -1278,7 +1242,7 @@ writeattbody:
     }
   }
   else if (binkout[0])
-  { /* create .hlo */
+  { /* делаем .hlo */
     ftnaddr fnode;
     char *bsyname;
     fnode.zone=zone, fnode.net=net, fnode.node=node, fnode.point=point;
@@ -1309,7 +1273,7 @@ writeattbody:
   }
 #ifndef __MSDOS__
   else if (lbso[0])
-  { /* create .Hold.List */
+  { /* делаем .Hold.List */
     ftnaddr fnode;
     char *bsyname;
     fnode.zone=zone, fnode.net=net, fnode.node=node, fnode.point=point;
@@ -1372,10 +1336,10 @@ writeattbody:
 #endif
   else if (tboxes[0])
   { sprintf(str, "%s%c%c%c%c%c%c%c%c.%c%ch", tboxes,
-            dhex(zone/32),   dhex(zone%32),
-            dhex(net/1024),  dhex((net/32)%32),  dhex(net%32),
-            dhex(node/1024), dhex((node/32)%32), dhex(node%32),
-            dhex(point/32),  dhex(point%32));
+            dhex(zone/32),  dhex(zone%32),
+            dhex(net/1024), dhex((net/32)%32), dhex(net%32),
+            dhex(node/1024),dhex((node/32)%32),dhex(node%32),
+            dhex(point/32), dhex(point%32));
     mkdir(str);
     strcat(str, PATHSTR);
     p=strrchr(msghdr.subj, PATHSEP);
@@ -1436,8 +1400,8 @@ static int holdnotify(char *realname, char *fromaddr, char *subj)
 { int tpl;
   char *p;
 
-  /* create notify */
-  /* first pass by template - get subj, gatename etc. */
+  /* пишем извещение */
+  /* первый проход по template - выясняем subj, gatename и пр. */
   debug(6, "HoldNotify");
   reset_text=voidfunc;
   gettextline=voidgets;
@@ -1465,10 +1429,10 @@ static int holdnotify(char *realname, char *fromaddr, char *subj)
       debug(6, "HoldNotify ends (nothing to do, dontsend set)");
       return 1;
     }
-    /* put header */
+    /* пишем заголовок */
     writekludges();
     close_tpl();
-    /* body */
+    /* Сам текст */
     if (tpl==0)
       tpl=init_tpl(held_tpl);
     if (tpl)
@@ -1540,7 +1504,7 @@ int holdmsg(char *realname, char *fromaddr, char *subj)
   { logwrite('?', "Can't create %s: %s!\n", msghdr.subj, strerror(errno));
     return 1;
   }
-  /* copy */
+  /* копируем */
   debug(6, "HoldMsg: copy message to %s", msghdr.subj);
   while ((i=hread(s, sizeof(s)))>0)
   { if (write(fhold, s, i)!=i)
@@ -1553,7 +1517,7 @@ int holdmsg(char *realname, char *fromaddr, char *subj)
   tsize=filelength(fhold);
   close(fhold);
   strcpy(s, msghdr.date);
-  /* attach this */
+  /* аттачим */
   if (createattach(msghdr.subj))
     return 1;
   return holdnotify(realname, fromaddr, subj);
@@ -1575,7 +1539,7 @@ int holdatt(char *realname, char *fromaddr, char *subj)
   stat(attname, &st);
   tsize=st.st_size;
   strcpy(s, msghdr.date);
-  /* attach */
+  /* аттачим */
   if (createattach(msghdr.subj))
     return 1;
   return holdnotify(realname, fromaddr, subj);
@@ -1897,7 +1861,7 @@ int params(int argc, char *argv[])
     PTIB tib;
     DosGetInfoBlocks(&tib, &pib);
     if (pib)
-    { if (pib->pib_pchcmd && (strnicmp(pib->pib_pchcmd, "rnews", 5)==0))
+    { if (pib->pib_pchcmd && (strnicmp(pib->pib_pchcmd,"rnews",5)==0))
       { bypipe=1;
         cnews=1;
       }
@@ -2044,12 +2008,12 @@ int params(int argc, char *argv[])
     puts("-?, -h          - this help");
   }
   if (help && (!tossbad) && (!nonet) && (!noecho) && (nconf[0]==0))
-  { /* /? only */
+  { /* только /? */
     return 1;
   }
-#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
+#if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
   if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
-  { puts("You do not allowed to use -c switch");
+  { puts("You do not allowed to use -c switch\n");
     return RET_ERR;
   }
 #endif
@@ -2077,7 +2041,7 @@ int params(int argc, char *argv[])
       return 5;
     }
     if (i+1==argc)
-      strcpy(addr, argv[i]);
+      strcpy(addr,argv[i]);
     else if (strpbrk(argv[i], "@!"))
     { strcpy(addr, argv[i]);
       strcat(addr, "!");
@@ -2185,53 +2149,41 @@ void copybad(void)
   unlink(badmail);
 }
 
-static char smon[8];
+static char smon[16];
 
 int parsedate(char *p)
-{ int k;
+{ int i, k;
   int day, year, hour, min, sec;
 
   debug(14, "ParseDate('%s')", p);
   while (*p && (!isdigit(*p))) p++;
-  day = atoi(p);
-  if (day<1 || day>31) return 1;
-  while (*p && (isdigit(*p) || isspace(*p))) p++;
-  if (strlen(p)<4) return 1;
-  strncpy(smon, p, 4);
-  smon[3]='\0';
-  p+=3;
-  if (!isspace(*p)) return 1;
-  while (*p && isspace(*p)) p++;
-  if (!isdigit(*p)) return 1;
-  year = atoi(p);
-  while (*p && isdigit(*p)) p++;
-  if (!isspace(*p)) return 1;
-  while (isspace(*p)) p++;
-  if (!isdigit(*p)) return 1;
-  hour=atoi(p);
-  while (*p && isdigit(*p)) p++;
-  if (*p!=':' || !isdigit(p[1])) return 1;
-  min=atoi(++p);
-  while (*p && isdigit(*p)) p++;
-  if (*p==':' && isdigit(p[1]))
-  { sec = atoi(++p);
-    while (*p && isdigit(*p)) p++;
-  } else
-    sec = 0;
+  i=sscanf(p, "%u %s %u %u:%u:%u", &day, smon, &year,
+             &hour, &min, &sec);
+  if (i<5)
+    return 1;
+  if (i==5)
+    sec=0;
+  if (strlen(smon)!=3)
+    smon[3]=0;
+  if (year>1900) year-=1900;
+  else if (year<50) year+=100; /* >1999 */
+  /* смотрим TZ */
+  p=strchr(p, ':');
+  if ((i==6) && p)
+    p=strchr (p+1, ':');
   for (k=0; k<12; k++)
     if (stricmp(smon, montable[k])==0)
       break;
-  if (k==12) return 1;
-  /* look TZ */
-  p=strpbrk(p, " \t");
+  if (p) p=strpbrk(p, " \t");
   msgtz=0; /* his TZ */
   if (p)
-  { while (*p && isspace(*p)) p++;
+  { while ((*p==' ') || (*p=='\t'))
+      p++;
     msgtz=gettz(p);
   }
-  /* make shift */
-  /* my tz=-2, i=+2 */
-  if (msgtz==0) /* else put TZUTC kludge */
+  /* делаем поправку */
+  /* моя tz=-2, i=+2 */
+  if (msgtz==0)
   {
     hour-=(msgtz+tz);
     if (hour<0)
@@ -2271,7 +2223,7 @@ int parsedate(char *p)
     if (k<12)
       strcpy(smon, montable[k]);
   }
-  /* paranoid checking... */
+  /* на всякий случай */
   if (day<1) day=1;
   if (day>31) day=31;
   if (year>=100) year%=100;
@@ -2304,7 +2256,7 @@ void putvia(char *str)
   sprintf(str+strlen(str), "; %s, %2u %s %u %02u:%02u:%02u %c%02u00\r",
     weekday[curtm->tm_wday],
     curtm->tm_mday, montable[curtm->tm_mon], curtm->tm_year+1900,
-    curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
+    curtm->tm_hour, curtm->tm_min,curtm->tm_sec,
     (tz<=0) ? '+' : '-', (tz<0) ? -tz : tz);
   debug(14, "PutVia: %s", str);
 }
@@ -2375,13 +2327,13 @@ externtype extcheck(char *to, char *from, char **news
 #endif
                     )
 {
-/* 0 - default for stdout,
+/* 0 - default для stdout,
    1 - default,
-   2 - send for stdout,
-   3 - send,
+   2 - слать для stdout,
+   3 - слать,
    4 - /dev/null,
-   5 - bounce,
-   6 - hold for stdout,
+   5 - отлуп,
+   6 - hold для stdout,
    7 - hold.
 */
 
@@ -2406,10 +2358,7 @@ externtype extcheck(char *to, char *from, char **news
 #ifdef DO_PERL
   SV *svfrom, *svto, *svsize, *svarea, *svattname, *svtext, *svsubj;
   SV *svintsetname;
-  HV *hdr;
   STRLEN n_a;
-  int psize;
-  char *hstr;
 #endif
   static char cmdline[CMDLINELEN+128];
   FILE *f;
@@ -2516,64 +2465,6 @@ chk_fork:
     if (subj)
       sv_setpv(svsubj, subj);
     sv_setpv(svintsetname, intsetname);
-    /* Create %hdr */
-    hdr = perl_get_hv("hdr", 1);
-    hrewind();
-    hstr=NULL;
-    psize=0;
-    if (!textline(str, sizeof(str))) str[0]='\0';
-    while (str[0])
-    { int plen, slen;
-      char *p;
-      plen=0;
-      p1=hstr;
-      for (;;)
-      {
-        slen=strlen(str);
-        if (plen+slen>=psize)
-        { if (psize)
-            p=realloc(hstr, psize*=2);
-          else
-            p=malloc(psize=sizeof(str)*2);
-          if (p==NULL)
-          { if (hstr) free(hstr);
-            logwrite('!', "Not enough memory (needed %d bytes)\n", psize);
-            p1=hstr=NULL;
-            break;
-          }
-          hstr=p;
-        }
-        p1=hstr;
-        strcpy(p1+plen, str);
-        plen+=slen;
-        if (slen && str[slen-1]!='\n')
-        { if (textline(str, sizeof(str))) continue;
-          str[0]='\0';
-          break;
-        }
-        if (!textline(str, sizeof(str))) str[0]='\0';
-        if (str[0]!=' ' && str[0]!='\t') break;
-        /* unfolding */
-        hstr[plen-1]=' ';
-        for (p=str; *p==' ' || *p=='\t'; p++);
-        if (*p=='\0') p--;
-        strcpy(str, p);
-      }
-      if (p1==NULL) break;
-      if (plen) p1[--plen]='\0'; /* remove last '\n' */
-      if (strnicmp(p1, "From ", 5)==0)
-        hv_store(hdr, p1, 5, newSVpv(p1+5, 0), 0);
-      else if ((p=strchr(p1, ':')) != NULL)
-      { plen=p-p1;
-        *p++='\0';
-        while (isspace(*p)) p++;
-        strlwr(p1);
-        *p1=toupper(*p1);
-        hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
-      }
-    }
-    if (hstr) free(hstr);
-
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
@@ -2584,7 +2475,7 @@ chk_fork:
     PUTBACK;
     FREETMPS;
     LEAVE;
-    strncpy(extstr, SvPV(perl_get_sv("to", FALSE), n_a), sizeof(extstr));
+    strncpy(extstr, SvPV(perl_get_sv("to", FALSE),n_a), sizeof(extstr));
     strncpy(tmpaddr, SvPV(perl_get_sv("from", FALSE), n_a), sizeof(tmpaddr));
     strncpy(conflist, SvPV(perl_get_sv("area", FALSE), n_a), sizeof(conflist));
     newintsetname=SvPV(perl_get_sv("intsetname", FALSE), n_a);
@@ -2602,12 +2493,12 @@ chk_fork:
 ext_noperl:
 #endif  /* DO_PERL */
 
-  /* form command line */
+  /* формируем command line */
   strcpy(cmdline, checker[i].cmdline);
   chsubstr(cmdline, "%from", from);
   chsubstr(cmdline, "%to", to);
   if (conf && !cnews)
-    sprintf(tmpaddr, "%lu", fsize-1); /* last line */
+    sprintf(tmpaddr, "%lu", fsize-1); /* последняя строка */
   else
     sprintf(tmpaddr, "%lu", fsize);
   chsubstr(cmdline, "%size", tmpaddr);
