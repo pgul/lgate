@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/07/20 17:58:32  gul
+ * \r\n -> \n
+ *
  * Revision 2.1  2001/07/09 10:58:32  gul
  * copyfile() fails if source is r/o
  *

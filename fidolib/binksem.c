@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2004/07/20 17:58:32  gul
+ * \r\n -> \n
+ *
  * Revision 2.1  2001/01/24 14:34:05  gul
  * bugfix: mode 750 -> 0750
  *
