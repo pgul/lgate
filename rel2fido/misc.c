@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.15  2004/07/20 18:35:25  gul
+ * Work with perl 5.8
+ *
  * Revision 2.14  2004/03/24 19:22:12  gul
  * Fix syntax error (thx to Andrey Slusar)
  *
@@ -2352,7 +2355,7 @@ void rexx_extchk(void *param)
 #include <EXTERN.h>
 #include <perl.h>
 
-static PerlInterpreter *perl;
+static PerlInterpreter *my_perl;
 static int do_perl=1;
 extern char perlfile[];
 static char *perlargs[]={"", perlfile, NULL};
@@ -2368,10 +2371,10 @@ void xs_init(void)
 
 static void exitperl(void)
 {
-  if (perl)
-  { perl_destruct(perl);
-    perl_free(perl);
-    perl=NULL;
+  if (my_perl)
+  { perl_destruct(my_perl);
+    perl_free(my_perl);
+    my_perl=NULL;
   }
 }
 #endif
@@ -2445,7 +2448,7 @@ externtype extcheck(char *to, char *from, char **news
     goto ext_noperl;
   if (!do_perl)
     return 3;
-  if (perl==NULL)
+  if (my_perl==NULL)
   { int saveerr, perlpipe[2];
     if (access(perlfile, R_OK))
     { logwrite('!', "Can't read %s: %s, perl filtering disabled\n",
@@ -2453,8 +2456,8 @@ externtype extcheck(char *to, char *from, char **news
       do_perl=0;
       return EXT_DEFAULT;
     }
-    perl = perl_alloc();
-    perl_construct(perl);
+    my_perl = perl_alloc();
+    perl_construct(my_perl);
 #ifdef HAVE_FORK
     pipe(perlpipe);
 chk_fork:
@@ -2464,7 +2467,7 @@ chk_fork:
       dup2(perlpipe[1], fileno(stderr));
       close(perlpipe[0]);
       close(perlpipe[1]);
-      h=perl_parse(perl, xs_init, 2, perlargs, NULL);
+      h=perl_parse(my_perl, xs_init, 2, perlargs, NULL);
       dup2(saveerr, fileno(stderr));
       close(saveerr);
       waitpid(pid, perlpipe, 0);
@@ -2491,7 +2494,7 @@ chk_fork:
     { dup2(perlpipe[0], fileno(stderr));
       close(perlpipe[0]);
     }
-    h=perl_parse(perl, xs_init, 2, perlargs, NULL);
+    h=perl_parse(my_perl, xs_init, 2, perlargs, NULL);
     dup2(saveerr, fileno(stderr));
     close(saveerr);
 #endif
