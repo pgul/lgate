@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/25 16:35:46  gul
+ * Translate comments and cosmetic changes
+ *
  * Revision 2.0  2001/01/10 20:42:26  gul
  * We are under CVS for now
  *
@@ -39,30 +42,30 @@
 #endif
 
 char gotstr[MAXLINE];
-char * newsgroups=NULL;
-static char * bound;
+char *newsgroups=NULL;
+static char *bound;
 static int  was_eof, was_eol, was_empty, inreport;
-static char * xtable;
+static char *xtable;
 static char cont_type[128];
 static char encoding[64];
 static char charset[256];
 static int  is_utf8;
 static short int *inttable;
-static char * ext;
-static FILE * fatt;
+static char *ext;
+static FILE *fatt;
 int  split_report, subj1line=1;
-static int  (*func_decode)(int (*getbyte)(void),int (*putbyte)(char));
-static char * lastword;
-static char _Huge * cur_hdr, _Huge * pcur_hdr;
+static int  (*func_decode)(int (*getbyte)(void), int (*putbyte)(char));
+static char *lastword;
+static char _Huge *cur_hdr, _Huge *pcur_hdr;
 msgloctype msgloc;
 static int  wasCR;
 static char namemsg[FNAME_MAX];
 static long mbufsize;
 int  known_charset, nottext;
 int  kill_vcard, do_alternate;
-long msgsize,omsgsize, begsrcpos;
+long msgsize, omsgsize, begsrcpos;
 unsigned potoloksrc;
-char * bufsrc;
+char *bufsrc;
 unsigned ibufsrc;
 char attname[FNAME_MAX];
 char destname[256];
@@ -90,9 +93,9 @@ static void get_uniq(char * attname)
   debug(7, "UnMime: result filename is %s", attname);
 }
 
-static void set_path(char * fname)
+static void set_path(char *fname)
 {
-  char * p, * p1;
+  char *p, *p1;
   static char tstr[FNAME_MAX];
 
   p=strrchr(fname, '\\');
@@ -158,7 +161,7 @@ static int unqp(int (*getbyte)(void), int (*putbyte)(char))
 {
   int  c;
   char s[3];
-  char * p;
+  char *p;
 
   for (;;)
   {
@@ -220,7 +223,7 @@ static int unbase64(int (*getbyte)(void), int (*putbyte)(char))
   int  ret=0;
   int  i;
   char s[4];
-  int  c;
+  int  c=-1;
 
   for (;;)
   {
@@ -248,7 +251,7 @@ static int unbase64(int (*getbyte)(void), int (*putbyte)(char))
     { ret=1;
       break;
     }
-    if (putbyte((s[0]<<2)|(s[1]>>4))) return -1;
+    if (putbyte((s[0]<<2) | (s[1]>>4))) return -1;
     if (s[2]==64)
     { if (s[3]!=64) ret=1;
       break;
@@ -258,7 +261,7 @@ static int unbase64(int (*getbyte)(void), int (*putbyte)(char))
       break;
     if (putbyte(((s[2]<<6)|s[3]) & 0xff)) return -1;
   }
-  /* ждем конца файла */
+  /* waiting for end of file */
   if (ret==0) c=getbyte();
   for(; c!=-1; c=getbyte())
   { if (!isspace(c))
@@ -340,7 +343,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
     n=DEC(uustr[0]);
     if (n<=0)
       break;
-    /* Calculate expected # of chars and pad if necessary */
+    /* Calculate expected number of chars and pad if necessary */
     expected = ((n+2)/3)<<2;
     if (expected>=sizeof(uustr))
     { expected=sizeof(uustr)-1;
@@ -398,7 +401,7 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
     while (getline(uustr, sizeof(uustr), getbyte))
     { if (strncmp(uustr, "sum -r/size ", 12)) continue;
       if (strstr(uustr, " entire input file")==NULL) continue;
-      if (sscanf(uustr+12,"%hu/%lu", &fsum, &flen)!=2) continue;
+      if (sscanf(uustr+12, "%hu/%lu", &fsum, &flen)!=2) continue;
       if ((fsum!=sum) || (flen!=len))
       { logwrite('!', "warning: uudecode crc error!\n");
         while (getbyte()!=-1);
@@ -422,7 +425,7 @@ static int raw_func(int (*getbyte)(void), int (*putbyte)(char))
   return 0;
 }
 
-static char * pstrgetbyte, * pstrputbyte;
+static char *pstrgetbyte, *pstrputbyte;
 
 static int strgetbyte(void)
 { char c;
@@ -439,7 +442,7 @@ static int strputbyte(char c)
 }
 
 static int fgetbyte(void)
-{ /* убираем пустую строку перед bound */
+{ /* remove empty line before bound */
   if (was_eol & 2)
   { was_eol &= ~2;
     return '\n';
@@ -470,7 +473,7 @@ gbagain:
   if (was_empty && (isbeg(gotstr)==0) && bound && (strcmp(bound, "From ")==0))
   { was_eof=1;
     was_empty=0;
-    return -1; /* а иначе это не граница */
+    return -1; /* it's not boundary in another case */
   }
   pstrgetbyte=gotstr;
   if ((strcmp(gotstr, CRLF)==0) && was_eol)
@@ -508,7 +511,7 @@ static int fputbyte(char c)
   if (c & 0x80)
     c=xtable[c & 0x7f];
   if ((imsgbuf==0) && (msgloc==LOC_MEMORY))
-  { /* первый раз */
+  { /* first time */
     wasCR=0;
   }
   /* "\r\n" -> "\n" */
@@ -526,7 +529,7 @@ static int fputbyte(char c)
   bufcopy(msgbuf, imsgbuf++, &c, 1);
   if (imsgbuf<mbufsize) return 0;
   if (msgloc==LOC_MEMORY)
-  { /* не вписались - создаем файл */
+  { /* not enough memory - create file */
 #ifdef DO_PERL
     char *newmsgbuf;
     if ((newmsgbuf=bufrealloc(msgbuf, mbufsize+maxpart*1024l)) != NULL)
@@ -536,7 +539,7 @@ static int fputbyte(char c)
     }
 #endif
     debug(7, "fputbyte: create temp file");
-    mktempname(TMPIN,namemsg);
+    mktempname(TMPIN, namemsg);
     f=open(namemsg, O_BINARY|O_EXCL|O_RDWR|O_CREAT, S_IREAD|S_IWRITE);
     if (f==-1)
     { logwrite('?', "Can't create temp file: %s!\n", strerror(errno));
@@ -717,7 +720,7 @@ static void decode_utf8_string(char *str)
 
 static int eomessage(void)
 { int r;
-  char _Huge * p;
+  char _Huge *p;
 
   if (wasCR) fputbyte('\r');
   if (msgloc==LOC_FILE)
@@ -747,8 +750,8 @@ static int eomessage(void)
   return 0;
 }
 
-static void strunqp(char * src, char * dest)
-{ char * p;
+static void strunqp(char *src, char *dest)
+{ char *p;
   pstrgetbyte=src;
   pstrputbyte=dest;
   /* only header! */
@@ -784,7 +787,7 @@ static char *set_table(char *charset, char *def_charset)
     return raw_table;
   if ((xtable=findtable(charset, charsetsdir)) == NULL)
   {
-    if (charset[0]!='\0') /* указан неизвестный charset */
+    if (charset[0]!='\0') /* unknown charset */
     { known_charset=0;
       debug(6, "Set_table: unknown charset %s, don't recode", charset);
       return raw_table;
@@ -818,7 +821,7 @@ static char *set_table(char *charset, char *def_charset)
   return tmpxtable;
 }
 
-void altkoi8(char * s)
+void altkoi8(char *s)
 { int i;
   xtable=set_table(extsetname, extsetname);
   for(; *s; s=(char *)((char _Huge *)s+1))
@@ -840,15 +843,15 @@ static void strxlat(char *s, char *charset)
   { decode_utf8_string(s);
     return;
   }
-  xtable=set_table(charset, extsetname); /* только для header-а */
-  for(;*s;s=(char *)((char _Huge *)s+1))
+  xtable=set_table(charset, extsetname); /* only for header */
+  for(; *s; s=(char *)((char _Huge *)s+1))
     if (*s & 0x80)
       *s=xtable[*s & 0x7f];
 }
 
-static char * unmime_header(char * header)
-{ char * pch,* pp;
-  char * p, * cword;
+static char * unmime_header(char *header)
+{ char *pch, *pp;
+  char *p, *cword;
   int  nq, i;
   char charset[256];
 
@@ -872,7 +875,7 @@ static char * unmime_header(char * header)
         }
     if (*p=='\0')
       return p;
-    if (strncmp(p,"=?",2))
+    if (strncmp(p, "=?", 2))
     { lastword=NULL;
       /* p++; */ p=(char *)((char _Huge *)p+1);
       continue;
@@ -887,7 +890,7 @@ static char * unmime_header(char * header)
     }
     *p='\0';
     debug(7, "Unmime_Header: found '%s?='", cword);
-    /* таки замаймленное слово - размаймиваем */
+    /* mimed word - unmime it */
     for (pp=cword+2, pch=charset; *pp!='?' && *pp!='*'; *pch++=*pp++);
     *pch++='\0';
     for (; *pp!='?'; pp++);
@@ -913,9 +916,9 @@ static char * unmime_header(char * header)
     debug(7, "Unmime_Header: result is '%s'", cword);
     pp=(char *)((char _Huge *)cword+hstrlen(cword));
     if (lastword)
-    { /* убираем пробелы */
+    { /* remove spaces */
       i=(int)(cword-lastword);
-      hstrcpy(lastword,cword);
+      hstrcpy(lastword, cword);
       cword=(char *)((char _Huge *)pp-i);
     }
     else
@@ -926,7 +929,7 @@ static char * unmime_header(char * header)
   }
 }
 
-static char * getfield(char _Huge * header, char * field)
+static char *getfield(char _Huge *header, char *field)
 {
   while (*header)
   {
@@ -938,8 +941,8 @@ static char * getfield(char _Huge * header, char * field)
   return NULL;
 }
 
-void getvalue(char * field, char * value, unsigned valsize)
-{ char * p;
+void getvalue(char *field, char *value, unsigned valsize)
+{ char *p;
 
   if (valsize==0) return;
   value[0]='\0';
@@ -956,8 +959,8 @@ void getvalue(char * field, char * value, unsigned valsize)
   *value='\0';
 }
 
-static void getparam1(char * field, char * argname, char * value, unsigned valsize)
-{ char * p;
+static void getparam1(char *field, char *argname, char *value, unsigned valsize)
+{ char *p;
 
   if (valsize==0) return;
   value[0]='\0';
@@ -981,7 +984,7 @@ static void getparam1(char * field, char * argname, char * value, unsigned valsi
     while (isspace(*p)) p++;
     if (*p++!='=') continue;
     while (isspace(*p)) p++;
-    /* нашли */
+    /* found */
     if (*p!='"')
     { for (; *p && !isspace(*p) && (*p!=';'); *value++=*p++)
         if (valsize--==1) break;
@@ -1036,7 +1039,7 @@ static char *decode2231(char *str, char *charset)
   return charset;
 }
 
-static void getparam(char * field, char * argname, char * value, unsigned valsize)
+static void getparam(char *field, char *argname, char *value, unsigned valsize)
 { int i;
   char *p, *charset=NULL;
 
@@ -1081,7 +1084,7 @@ static void getparam(char * field, char * argname, char * value, unsigned valsiz
   if (charset) free(charset);
 }
 
-static void delmimehdr(char _Huge * header, int savecontenttype, msg_type mtype)
+static void delmimehdr(char _Huge *header, int savecontenttype, msg_type mtype)
 {
   char _Huge *p, *pconttype=NULL;
   char _Huge *p1, _Huge *p2;
@@ -1175,7 +1178,7 @@ begdelhdr:
   strcpy(pconttype, val);
 }
 
-static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * up_header)
+static int unmime(char *boundary, msg_type mtype, int alternate, char _Huge *up_header)
 { int  inhdr;
   char _Huge *header, _Huge *pheader, _Huge *oldheader=NULL;
   char _Huge *save_cur_hdr=NULL;
@@ -1204,7 +1207,7 @@ static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * u
     return -1;
   }
   pheader=header;
-  /* копируем up_header в header */
+  /* copy up_header to header */
   if (up_header && (mtype!=MSG_ENTITY))
   { for (p=(char *)up_header; *p; p=(char *)((char _Huge *)p+hstrlen(p)+1))
     { if ((strnicmp(p, "Content-", 8)==0) ||
@@ -1307,7 +1310,7 @@ static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * u
       { p=unmime_header(lastfield);
         if (p)
         { p++;
-          hstrcpy(p,(char *)pheader);
+          hstrcpy(p, (char *)pheader);
           pheader=p;
         }
         else
@@ -1327,7 +1330,7 @@ static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * u
       pheader=p+1;
   }
 #endif
-  *pheader='\0'; /* два '\0' - признак конца заголовка */
+  *pheader='\0'; /* to '\0' - end of header */
   if (inhdr)
   { if (header==NULL)
     { header=oldheader;
@@ -1383,7 +1386,7 @@ static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * u
     else
       newsgroups=NULL;
   }
-  /* header в памяти, начинаем его разбор */
+  /* header in memory, now parse it */
   p=getfield(header, "Content-Type");
   if (p)
   { getvalue(p, cont_type, sizeof(cont_type));
@@ -1456,7 +1459,7 @@ static int unmime(char * boundary, msg_type mtype, int alternate, char _Huge * u
 #endif
 
   if (mtype==MSG_RFC)
-  { p=getfield(header,"Message-Id");
+  { p=getfield(header, "Message-Id");
     if (p) origmsgid=p;
   }
 
@@ -1508,7 +1511,7 @@ devnull:
       }
       delmimehdr(header, 1, mtype);
       if (newmtype==MSG_ENTITY)
-      { /* пишем заголовок */
+      { /* write header */
         if (mtype!=MSG_ENTITY)
         { cur_hdr=pcur_hdr=header;
           imsgbuf=0;
@@ -1525,7 +1528,7 @@ devnull:
           fputbyte('\n');
         }
       }
-      /* читаем части и запускаем для каждой unmime */
+      /* read parts and run unmime for each of them */
       while (myfgets(gotstr, sizeof(gotstr)))
       { if (boundary)
           if (strncmp(gotstr, boundary, strlen(boundary))==0)
@@ -1599,7 +1602,7 @@ devnull:
         { logwrite('!', "End-boundary missed in multipart message!\n");
           if (newmtype==MSG_ENTITY)
             goto eomultipart;
-          /* после последней boundary все скипаем */
+          /* skip all after end-boundary */
           free(new_bound);
           farfree((char *)header);
           if (newsgroups && (mtype==MSG_RFC))
@@ -1612,7 +1615,7 @@ devnull:
           for (p=CRLF; *p; fputbyte(*p++));
         if (r) break;
       }
-      /* остальную часть письма просто скипаем */
+      /* skip rest of body */
       bound=boundary;
       if (r==0)
       { pstrgetbyte=NULL;
@@ -1639,7 +1642,7 @@ eomultipart:
   }
   destname[0]='\0';
   longname=NULL;
-  if (stricmp(encoding,"base64")==0)
+  if (stricmp(encoding, "base64")==0)
     func_decode=unbase64;
   else if (stricmp(encoding, "quoted-printable")==0)
     func_decode=unqp;
@@ -1654,7 +1657,7 @@ eomultipart:
       goto nomime;
     delmimehdr(header, 1, mtype);
     if (nosplit || (mtype==MSG_ENTITY))
-    { /* пишем заголовок */
+    { /* write header */
       if (mtype!=MSG_ENTITY)
       { cur_hdr=pcur_hdr=header;
         imsgbuf=0;
@@ -1676,10 +1679,10 @@ eomultipart:
       r=-1;
     else
     { if (strncmp((char *)header, "From ", 5)==0)
-        strcpy(p,(char *)header);
+        strcpy(p, (char *)header);
       else
         *p='\0';
-      p[strlen(p)+1]='\0'; /* оставляем только "From " */
+      p[strlen(p)+1]='\0'; /* leave only "From " */
       r=unmime(boundary,
                (nosplit || (mtype==MSG_ENTITY)) ? MSG_ENTITY : MSG_SPLITTED, 0, p);
       if (nosplit && (r!=-1) && (mtype!=MSG_ENTITY))
@@ -1715,7 +1718,7 @@ attach:
       }
     }
     if (destname[0]=='\0')
-    { /* придумываем свое имя */
+    { /* make filename */
       if (strnicmp(cont_type, "image", 5)==0)
       { if (stricmp(cont_type, "image/gif")==0)
           ext="gif";
@@ -1726,7 +1729,7 @@ attach:
       }
       else if (strnicmp(cont_type, "message", 7)==0)
         ext="txt";
-      else if (strnicmp(cont_type, "application",11)==0)
+      else if (strnicmp(cont_type, "application", 11)==0)
       { if (stricmp(cont_type, "application/postscript")==0)
           ext="ps";
         else
@@ -1803,21 +1806,21 @@ nomime:
           strcat(sheader, origmsgid);
       }
 #endif
-      delmimehdr(header, 0, mtype); /* у аттачей удаляем все */
+      delmimehdr(header, 0, mtype); /* remove all in fileattaches */
     }
     else
       delmimehdr(header, 1, mtype);
   }
   else
     delmimehdr(header, 0, mtype);
-  /* пишем заголовок */
+  /* write header */
   if (mtype!=MSG_ENTITY)
   { cur_hdr=pcur_hdr=header;
     imsgbuf=0;
     msgloc=LOC_MEMORY;
   }
   else
-  { char _Huge * p;
+  { char _Huge *p;
     for (p=header; ; p++)
     { if (*p==0)
         if (*++p==0)
@@ -1834,7 +1837,7 @@ nomime:
     save_msgloc=msgloc;
     pcur_hdr=header;
     
-    /* копируем up_header в header */
+    /* copy up_header to header */
     hdrsize=MAXHEADER;
     header=farmalloc(hdrsize);
     if (header==NULL)
@@ -1857,7 +1860,7 @@ nomime:
           pheader+=(header-oldheader);
         }
         if (header==NULL) break;
-        hstrcpy((char *)pheader,p);
+        hstrcpy((char *)pheader, p);
         pheader+=hstrlen(pheader)+1;
       }
       if (*p)
@@ -1905,7 +1908,7 @@ nomime:
         pheader+=(header-oldheader);
       }
       if (header==NULL) break;
-      hstrcpy((char *)pheader,p);
+      hstrcpy((char *)pheader, p);
       pheader+=hstrlen(pheader)+1;
     }
     if (*p)
@@ -1925,14 +1928,14 @@ nomime:
     imsgbuf=0;
     msgloc=LOC_MEMORY;
   }
-  /* пишем сам файл */
+  /* write the file */
   was_eof=0;
   was_eol=1;
   was_empty=0;
   pstrgetbyte=NULL;
   bound=boundary;
   if (destname[0] && !keepatt && !conf && !inreport)
-  { /* определяем полное имя аттача */
+  { /* get fileattach pathname */
     strcpy(attname, destname);
     set_path(attname);
     get_uniq(attname);
@@ -2001,7 +2004,7 @@ nomime:
     }
   }
   else if (destname[0] && !keepatt && !conf && !inreport && mtype==MSG_ENTITY)
-  { char * s;
+  { char *s;
 
     debug(7, "UnMime: call eomessage");
     if (eomessage())
@@ -2034,11 +2037,11 @@ nomime:
 
 int msg_unmime(long msize)
 { int r;
-  char * up_header;
+  char *up_header;
 
-  /* если msgsize=-1 - целый файл,
-     если msgsize=0  - одно письмо из бокса
-     иначе читать только msgsize
+  /* if msgsize=-1 - whole file,
+     if msgsize=0  - single message from mailbox
+     if msgsize>0  - read only msgsize bytes
   */
 
   msgsize=msize;
@@ -2056,8 +2059,8 @@ int msg_unmime(long msize)
     mbufsize=maxpart*1024l;
 #endif
 #ifdef __MSDOS__
-  /* mbufsize еще понадобится на буффер в one-message */
-  /* лучше уменьшить буфер unmime, чем уменьшать size разбивки на части */
+  /* mbufsize will be needed for buffer in one-message */
+  /* so, we decrease unmime buffer and not decrease split size */
   { long freemem=getfreemem();
     debug(6, "msg_unmime: farcoreleft=%ld", freemem);
     if (mbufsize+maxpart*1024l+RESPART>freemem)
