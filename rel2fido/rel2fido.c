@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2001/08/16 14:20:39  gul
+ * coredumped if malformed X-FTN-MSGID
+ *
  * Revision 2.8  2001/04/20 16:23:21  gul
  * minor bugfix
  *
@@ -1814,8 +1817,15 @@ errspace:
     for (j=1; j<cheader; j++)
       if (strncmp(pheader[j], "\x01MSGID: ", 8)==0)
         break;
-    p=strrchr(pheader[j]+8, ' ');
-    sprintf(p, " %08lx\r", msgid);
+    if (j<cheader)
+    { if (wasmsgid & 2)
+        pheader[j][0]='\0';
+      else
+      { p=strrchr(pheader[j]+8, ' ');
+        if (p)
+          sprintf(p, " %08lx\r", msgid);
+      }
+    }
     if (fout)
       if (fflush(fout)==EOF)
         goto errspace;

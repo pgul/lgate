@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/08/16 14:20:39  gul
+ * coredumped if malformed X-FTN-MSGID
+ *
  * Revision 2.0  2001/01/10 20:42:25  gul
  * We are under CVS for now
  *
@@ -589,12 +592,14 @@ path:
       { if (wasmsgid & 2)
           continue; /* уже был */
         wasmsgid|=2;
+#if 0
         if (str[13]=='<')
         { p=strchr(str+14,'>');
           if (p) *p=0;
           p=str+14;
         }
         else
+#endif
           p=str+13;
         sprintf(pheader[cheader],"\x01MSGID: %s\r",p);
       }
