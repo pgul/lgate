@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2001/07/09 11:14:59  gul
+ * "File attached to nobody" warning fixed
+ *
  * Revision 2.8  2001/01/25 18:41:38  gul
  * myname moved to debug.c
  *
@@ -1185,6 +1188,7 @@ int moveatt(char *fname, unsigned long attr)
   }
   p=strrchr(str, PATHSEP);
   if (p==NULL) p=str;
+  else p++;
   if (attr & msgKFS)
     if (rename(fname, str)==0)
     { debug(5, "moveatt: %s renamed to %s", fname, str);
