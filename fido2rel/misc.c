@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.11  2002/03/21 13:43:26  gul
+ * Remove dest addr list length limitation
+ *
  * Revision 2.10  2002/01/15 18:48:37  gul
  * Remove nkillattfiles=32 limitation
  *
@@ -139,7 +142,8 @@ int  xcomment;
 struct caddrtype *caddr;
 struct addrtype *paddr, *twit, *notwit, *attfrom;
 struct message msghdr;
-char to[128], gw_to[128], from[128];
+char *to, *gw_to, from[128];
+int  sizeto, sizegw_to;
 char pktpwd[9];
 char packed;
 char str[2048];

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2002/03/21 13:43:26  gul
+ * Remove dest addr list length limitation
+ *
  * Revision 2.6  2002/03/21 11:19:15  gul
  * Added support of msgid style <newsgroup|123@domain>
  *
@@ -223,7 +226,8 @@ extern addrstr *sfree;
 extern modertype *moderator;
 extern aliastype *alias;
 extern checktype *checker;
-extern char to[128], gw_to[128], from[128];
+extern char *to, *gw_to, from[128];
+extern int sizeto, sizegw_to;
 extern char gatemaster[128];
 extern char badmail[FNAME_MAX];
 extern char master[80], organization[80];

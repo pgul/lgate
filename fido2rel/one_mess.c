@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2002/03/21 13:43:25  gul
+ * Remove dest addr list length limitation
+ *
  * Revision 2.5  2002/03/21 11:19:14  gul
  * Added support of msgid style <newsgroup|123@domain>
  *
@@ -114,31 +117,34 @@ static int  msgtz;
 static void *msgidregbuf1, *msgidregbuf2;
 #endif
 
-static void tofield(char *str, char *to)
+static void tofield(char *str, char **to, int *sizeto)
 {
   char *p;
+  int lento, lenstr, newsize;
 
   getaddr(str);
-  if (strlen(str)+strlen(to)+2>sizeof(gw_to))
-  { p=strpbrk(str, " \t,");
+  lenstr=strlen(str);
+  lento=strlen(*to);
+  if (lenstr+lento+2>*sizeto)
+  { newsize=*sizeto;
+    while (lenstr+lento+2>newsize)
+      newsize+=128;
+    p=realloc(*to, newsize);
     if (p==NULL)
+    { logwrite('!', "Not enough memory for dest addr list, truncated\n");
       return;
-    *p=0;
-    if (strlen(str)+strlen(to)+2<=sizeof(to))
-    { if (to[0]) strcat(to, " ");
-      strcat(to, str);
-      p=strchr(to, '\n');
-      if (p) *p=0;
-        stripspc(to);
     }
-    *p=' ';
-    return;
+    *sizeto=newsize;
+    *to=p;
   }
-  if (to[0]) strcat(to, " ");
-  strcat(to, str);
-  str=strchr(to, '\n');
+  if (**to)
+  { strcat(*to, " ");
+    lento++;
+  }
+  strcpy(to[0]+lento, str);
+  str=strchr(to[0]+lento, '\n');
   if (str) *str=0;
-  stripspc(to);
+  stripspc(to[0]+lento);
 }
 
 int one_message(char *msgname)
@@ -634,8 +640,8 @@ lbadmsg:
             /* is newsgroup exists twice in the msgid? */
             if (area!=-1 && group[echoes[area].group].extmsgid)
             { p=strstr(p2, echoes[area].usenet);
-              if (p && *(p-1)=='|' && p[echoes[area].usenet]=='|')
-                strcpy(strcpy(pheader[cheader]+13, p2);
+              if (p && *(p-1)=='|' && p[strlen(echoes[area].usenet)]=='|')
+                strcpy(pheader[cheader]+13, p2);
             }
             nextline;
             continue;
@@ -660,10 +666,10 @@ lbadmsg:
             if (getfidoaddr(&u1, &u2, &u3, &u4, klopt))
               continue;
             if (u4)
-              sprintf(pheader[cheader]+strlen(pheader[cheader],
+              sprintf(pheader[cheader]+strlen(pheader[cheader]),
                       "%s@p%u.f%u.n%u.z%u.", p, u4, u3, u2, u1);
             else
-              sprintf(pheader[cheader]+strlen(pheader[cheader],
+              sprintf(pheader[cheader]+strlen(pheader[cheader]),
                       "%s@f%u.n%u.z%u.", p, u3, u2, u1);
           }
           /* try to get domain */
@@ -741,7 +747,7 @@ lbadmsg:
         if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
             (strnicmp(str+1, "To:", 3)==0) && strchr(str, '@'))
           if ((!touucp) || stricmp(msghdr.to, "uucp")==0)
-          { tofield(str+4, to);
+          { tofield(str+4, &to, &sizeto);
             continue;
           }
         if (stricmp(klname, "Newsgroups")==0)
@@ -882,20 +888,20 @@ lbadmsg:
           (fromtext || !fromtop) &&
           (strnicmp(str, "To:", 3)==0) && strchr(str, '@') && gw_to[0]=='\0' &&
           ((!touucp) || stricmp(msghdr.to, "uucp")==0))
-      { tofield(str+3, to);
+      { tofield(str+3, &to, &sizeto);
         continue;
       }
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
           (fromtext || !fromtop) &&
           (strnicmp(str, "GW-To:", 6)==0) && strchr(str, '@'))
       { to[0]='\0'; /* replace "To:" field */
-        tofield(str+6, gw_to);
+        tofield(str+6, &gw_to, &sizegw_to);
         continue;
       }
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
           (fromtext || !fromtop) &&
           (strnicmp(str, "GW-Cc:", 6)==0) && strchr(str, '@'))
-      { tofield(str+6, gw_to);
+      { tofield(str+6, &gw_to, &sizegw_to);
         if (cont) cont=2; /* put to header */
         chkkludges;
         strcat(pheader[cheader-1], str+3);
@@ -905,7 +911,7 @@ lbadmsg:
       else if ((area==-1) && (strchr(msghdr.to, '@')==NULL) &&
           (fromtext || !fromtop) &&
           (strnicmp(str, "GW-Bcc:", 7)==0) && strchr(str, '@'))
-      { tofield(str+7, gw_to);
+      { tofield(str+7, &gw_to, &sizegw_to);
         if (cont) cont=1; /* don't put to header */
         continue;
       }

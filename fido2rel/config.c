@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/03/21 13:43:26  gul
+ * Remove dest addr list length limitation
+ *
  * Revision 2.3  2001/01/21 10:20:00  gul
  * new cfg param 'fromtop'
  *
@@ -389,6 +392,9 @@ int config(void)
   p1=getenv("TZ");
   if (p1)
     getmytz(p1, &tz);
+  to=malloc(sizeto=128);
+  gw_to=malloc(sizegw_to=128);
+  if (to==NULL || gw_to==NULL) goto memory;
 
   /***** first pass - count ncaddr, nechoes etc. *****/
   tplout=0;
