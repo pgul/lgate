@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/03/21 11:28:43  gul
+ * Minor compilation fix
+ *
  * Revision 2.4  2001/04/23 09:02:47  gul
  * create savefiles in homedir
  *
@@ -112,11 +115,11 @@ int saveargs(int argc, char *argv[])
   }
   f=fopen(namebat, "w");
   if (f==NULL) return 3;
-#ifdef __OS2__
+#if defined(__OS2__)
   if ((!isatty(fileno(stdin))) && (!isfile(fileno(stdin))))
     /* pipe */
     fprintf(f, "type %s|", nametxt);
-#elif UNIX
+#elif defined(UNIX)
   fchmod(fileno(f), 0755);
   if ((!isatty(fileno(stdin))) && (!isfile(fileno(stdin))))
     fprintf(f, "cat %s|", nametxt);

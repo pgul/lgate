@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2002/03/21 11:31:46  gul
+ * Minor compilation fix
+ *
  * Revision 2.0  2001/01/10 20:42:18  gul
  * We are under CVS for now
  *
@@ -479,7 +482,9 @@ int msend(char *cmd, VIRT_FILE *f)
       kill(sendmail_pid, SIGINT);
       waitpid(sendmail_pid, &r, 0);
 #else
+#ifdef WNOHANG
       if (waitpid(sendmail_pid, &r, WNOHANG)==0)
+#endif
       { kill(sendmail_pid, SIGINT);
         waitpid(sendmail_pid, &r, 0);
       }
