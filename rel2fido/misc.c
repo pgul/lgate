@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.14  2004/03/24 19:22:12  gul
+ * Fix syntax error (thx to Andrey Slusar)
+ *
  * Revision 2.13  2002/10/29 19:46:36  gul
  * fix msgid conversion
  *
@@ -551,7 +554,7 @@ static char *recvdate(char *recv, char *date)
       p1=strrchr(p1, ',');
     if (p1)
     { p1++;
-      while isspace(*p1) p1++;
+      while (isspace(*p1)) p1++;
     }
   }
   if (p1==NULL)
