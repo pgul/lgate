@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2002/09/11 14:07:51  gul
+ * fix compiler warning
+ *
  * Revision 2.1  2002/03/21 11:30:52  gul
  * Added strsignal() check
  *
@@ -58,7 +61,7 @@ static char *sendmailerr[] = {
 "configuration error"
 };
 
-#ifndef HAVE_SYS_SIGNAME
+#if !defined(HAVE_SYS_SIGNAME) && !defined(HAVE_STRSIGNAL)
 #define sys_signame _flib_sys_signame /* avoid exists but undeclared */
 static char *sys_signame[] = {
 "0",
