@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2003/02/03 13:27:53  gul
+ * Fix previous patch
+ *
  * Revision 2.7  2003/02/03 13:16:22  gul
  * Creanup source
  *
@@ -376,7 +379,7 @@ void genlett(int reason, char *toname,
     { fclose(frej);
       frej=NULL;
       unlink(rejmsgname);
-      log('?', "Can't lock %s: %s!\n", rejmsgname, strerror(errno));
+      logwrite('?', "Can't lock %s: %s!\n", rejmsgname, strerror(errno));
     }
     else
       writepkthdr(frej);
