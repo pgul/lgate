@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/25 18:41:38  gul
+ * myname moved to debug.c
+ *
  * Revision 2.2  2001/01/21 10:20:00  gul
  * new cfg param 'fromtop'
  *
@@ -277,7 +280,6 @@ extern int  area;
 extern int  seqf;
 extern int  hdr8bit;
 extern char *header;
-extern char *myname;
 extern int  writereason, bangfrom, env_chaddr, fromtop;
 extern struct attfiletype
        { char *name;

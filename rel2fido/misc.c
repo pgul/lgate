@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/01/25 18:41:39  gul
+ * myname moved to debug.c
+ *
  * Revision 2.2  2001/01/25 13:14:09  gul
  * quiet var moved to logwrite.c
  *
@@ -131,7 +134,6 @@ int  tossbad, nonet, noecho, bypipe, tabsize;
 int  myorigin, notfile, fake, holdhuge;
 unsigned long pipetype;
 char *msgbuf;
-char *myname;
 long imsgbuf;
 long maxmsgbuf;
 char waseof;

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 18:41:38  gul
+ * myname moved to debug.c
+ *
  * Revision 2.1  2001/01/21 10:20:00  gul
  * new cfg param 'fromtop'
  *
@@ -57,7 +60,6 @@
 #endif
 
 char uupcdir[FNAME_MAX];
-char *myname;
 char remote[80],local[80];
 char rmail[FNAME_MAX];
 char postmaster[80];

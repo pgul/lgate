@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 18:41:39  gul
+ * myname moved to debug.c
+ *
  * Revision 2.1  2001/01/24 01:59:18  gul
  * Bugfix: sometimes put msg into pktin dir with 'pkt' extension
  *
@@ -229,7 +232,6 @@ extern char cmdline[CMDLINELEN];
 extern char *pc2ext;
 extern int  msgtz;
 extern char envelope_from[MAXADDR];
-extern char *myname;
 extern char *origmsgid;
 typedef enum {REPLY_EMPTY, REPLY_UUCP, REPLY_ADDR} replytype;
 extern replytype replyform;

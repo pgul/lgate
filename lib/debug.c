@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/25 18:41:39  gul
+ * myname moved to debug.c
+ *
  * Revision 2.0  2001/01/10 20:42:22  gul
  * We are under CVS for now
  *
@@ -26,6 +29,7 @@
 
 int  debuglevel=-1;
 int  debuglog=0;
+char *myname;
 
 void debug(int level, char *format,...)
 { va_list arg;

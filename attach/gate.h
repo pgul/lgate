@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/25 18:41:38  gul
+ * myname moved to debug.c
+ *
  * Revision 2.0  2001/01/10 20:42:16  gul
  * We are under CVS for now
  *
@@ -72,7 +75,6 @@ extern char rmail[FNAME_MAX], netdir[FNAME_MAX];
 extern char domain[64];
 extern char local[80], remote[80], fidosystem[80];
 extern char uupcdir[FNAME_MAX];
-extern char *myname;
 extern char filebox[FNAME_MAX];
 extern char user[80];
 extern char rescan[FNAME_MAX];

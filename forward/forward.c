@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/25 18:41:39  gul
+ * myname moved to debug.c
+ *
  * Revision 2.1  2001/01/20 01:47:41  gul
  * fromname-field in forward.cfg is wildcard now
  *
@@ -119,25 +122,26 @@ int getfidoaddr(char *s, uword *zone, uword *net, uword *node, uword *point)
 
 int config(char *argv[])
 {
+  myname=argv[0];
 #ifdef UNIX
   strcpy(str, SYSCONFDIR);
   addslash(str);
   strcat(str, "forward.cfg");
 #else
-  strcpy(str, argv[0]);
 #ifdef __OS2__
   { PPIB pib;
     PTIB tib;
-    char *myname=NULL;
+    myname=NULL;
     DosGetInfoBlocks(&tib, &pib);
     if (pib)
     { for (myname=pib->pib_pchenv; myname[0] || myname[1]; myname++);
       myname+=2;
     }
-    if (!myname || !*myname)
-      strcpy(str, myname);
+    if (myname==NULL || *myname=='\0')
+      myname=argv[0];
   }
 #endif
+  strcpy(str, myname);
   p=strrchr(str, PATHSEP);
   if (p==NULL) p=str;
   p=strchr(p, '.');

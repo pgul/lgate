@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2001/01/25 18:41:38  gul
+ * myname moved to debug.c
+ *
  * Revision 2.7  2001/01/25 13:14:09  gul
  * quiet var moved to logwrite.c
  *
@@ -148,7 +151,6 @@ ftnaddress pktdest;
 int  ourpkt;
 int  hidetear, hideorigin;
 int  fsp1004, bangfrom, env_chaddr, fromtop;
-char *myname;
 int  writereason=0;
 char inb_dir[FNAME_MAX], charsetsdir[FNAME_MAX], charsetalias[FNAME_MAX];
 #ifdef __MSDOS__
