@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2001/07/20 16:35:35  gul
+ * folded Content-Disposition header held
+ *
  * Revision 2.2  2001/07/20 14:55:22  gul
  * Decode quoted-printable attaches
  *
@@ -206,9 +209,18 @@ gotline:
         break;
       }
       if (strnicmp(str, "Content-Disposition:", 20)==0)
-      { getparam(str, "filename", inname, sizeof(inname));
-        if (inname[0]=='\0')
-          getvalue(str, inname, sizeof(inname));
+      { strcpy(sstr, str);
+        while (fgets(str, sizeof(str), fin))
+        { if ((str[0]==' ') || (str[0]=='\t'))
+            strncat(sstr, str, sizeof(sstr));
+          else
+          { getparam(sstr, "filename", inname, sizeof(inname));
+            if (inname[0]=='\0')
+              getvalue(sstr, inname, sizeof(inname));
+            goto gotline;
+          }
+        }
+        break;
       }
     }
     fclose(fin);
@@ -543,9 +555,18 @@ errfputs:
                 last->enc=ENC_PGP;
             }
             else if (strnicmp(str, "Content-Disposition:", 20)==0)
-            { getparam(str, "filename", inname, sizeof(inname));
-              if (inname[0])
-                strncpy(last->arcname, inname, sizeof(last->arcname));
+            { strcpy(sstr, str);
+              while (fgets(str, sizeof(str), fin))
+              { if ((str[0]==' ') || (str[0]=='\t'))
+                  strncat(sstr, str, sizeof(sstr));
+                else
+                { getparam(sstr, "filename", inname, sizeof(inname));
+                  if (inname[0])
+                    strncpy(last->arcname, inname, sizeof(last->arcname));
+                  goto gotline1;
+                }
+              }
+              break;
             }
           }
           else

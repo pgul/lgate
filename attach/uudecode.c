@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/07/20 16:35:35  gul
+ * folded Content-Disposition header held
+ *
  * Revision 2.1  2001/07/20 14:55:22  gul
  * Decode quoted-printable attaches
  *
@@ -311,9 +314,27 @@ newmess:
         }
       }
       if (strnicmp(sstr, "Content-Disposition:", 20)==0)
-      { getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
+      { int  gotnextline=0;
+        p=sstr+strlen(sstr);
+        while (p-sstr<sizeof(sstr)-1)
+        { if (!fgets(p, sizeof(sstr)-(int)(p-sstr), fin))
+            break;
+          if (!isspace(*p) || *p=='\n')
+          { gotnextline=1;
+            *--p='\0';
+            break;
+          }
+          if (fout!=stdin)
+            fputs(p, fout);
+          p+=strlen(p);
+        }
+        getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
         if (tmp_arc[0]=='\0')
           getvalue(sstr, tmp_arc, sizeof(tmp_arc));
+        if (gotnextline)
+        { strcpy(sstr, sstr+strlen(sstr)+1);
+          goto nextline;
+        }
       }
     }
     else if (((passwd==RESEND) || (passwd==UNSECURE)) && inhdr)
