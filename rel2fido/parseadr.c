@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/03/27 11:57:40  gul
+ * Translate comments
+ *
  * Revision 2.0  2001/01/10 20:42:25  gul
  * We are under CVS for now
  *
@@ -21,7 +24,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
   if (maxaddr<1)
     return;
   realname[SSIZE-1]=0;
-  /* разделяем адрес и real name */
+  /* split address and real name */
   for(p=str, i=0; *p; p++, i++)
   { if (*p=='(')
     { for (j=0;;)
@@ -52,7 +55,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
   if (i<maxaddr)
     addr[i]=0;
   if (*p=='<')
-  { /* первый формат адреса */
+  { /* first format of address */
     *p=0;
     for (i=0; (str[i]==' ') || (str[i]=='\t'); i++);
     strncpy(realname, str+i, SSIZE-1);
@@ -72,7 +75,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
     }
   }
   else
-  { /* в круглых скобках realname, остальное - адрес */
+  { /* realname is in the parenthesis, the rest is address */
     p=strchr(str, '(');
     if (p==NULL)
       realname[0]=0;
@@ -107,7 +110,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
   debug(6, "ParseAddr: address '%s', realname '%s'", addr, realname);
   if (chaddr==-1)
     return;
-  /* отрабатываем chdomain */
+  /* process chdomain */
   for (i=0; i<ncdomain; i++)
   { if (strlen(addr)<=strlen(cdomain[i].relcom))
       continue;
@@ -115,7 +118,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
     if (stricmp(p, cdomain[i].relcom))
       continue;
     strncpy(p, cdomain[i].fido, maxaddr-strlen(addr)+strlen(cdomain[i].relcom));
-    /* появилось/пропало '@' */
+    /* added or removed '@' */
     if (strchr(cdomain[i].fido, '@'))
     { p=strrchr(addr, '@');
       for(p1=addr; p1!=p; p1=strchr(p1, '@'))
@@ -128,7 +131,7 @@ static void parseoneaddr(char *str, char *addr, int maxaddr,
       }
     break;
   }
-  /* отрабатываем chaddr */
+  /* process chaddr */
   curmatch=0; /* 1 - nothing, 2 - fido, 3 - zone, 4 - region, 5 - net, 6 - node */
   curchaddr=-1;
   for (i=0; i<ncaddr; i++)
