@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2002/10/29 19:05:30  gul
+ * Format text, translate comments
+ *
  * Revision 2.1  2001/08/16 14:20:39  gul
  * coredumped if malformed X-FTN-MSGID
  *
@@ -22,23 +25,23 @@ long curhdrsize;
 unsigned curnpheader;
 char freply[SSIZE], freplydomain[MAXADDR];
 
-static int cont,toheader;
-static char * p,* p1;
+static int cont, toheader;
+static char *p, *p1;
 static int r;
-static uword pp,i,j,k;
+static uword pp, i, j, k;
 static char realname[SSIZE];
 static int  wasreply;
 
-int  chkhdrsize(char * str)
+int chkhdrsize(char *str)
 { long offset;
-  char * newheader;
+  char *newheader;
   int  i;
 
   while ((char _Huge *)pheader[cheader]+strlen(str)+ZAPAS>=(char _Huge *)header+curhdrsize)
   {
-    newheader=myrealloc(header,curhdrsize,curhdrsize+MAXHEADER);
+    newheader=myrealloc(header, curhdrsize, curhdrsize+MAXHEADER);
     if (newheader==NULL)
-    { logwrite('?',"Too large header, message renamed to *.bad!\n");
+    { logwrite('?', "Too large header, message renamed to *.bad!\n");
       return 2;
     }
     curhdrsize+=MAXHEADER;
@@ -48,7 +51,7 @@ int  chkhdrsize(char * str)
     header=newheader;
   }
   if (cheader+NZAPAS>=curnpheader)
-  { newheader=myrealloc((char *)pheader,curnpheader*sizeof(pheader[0]),
+  { newheader=myrealloc((char *)pheader, curnpheader*sizeof(pheader[0]),
               (curnpheader+MAXNHEADER)*sizeof(pheader[0]));
     if (newheader==NULL)
     { logwrite('?', "Too large header, message renamed to *.bad!\n");
@@ -262,7 +265,7 @@ int readhdr(void)
       continue;
     }
     if (strnicmp(str, "Content-", 8)==0)
-    { /* Mime - если unmime нам его оставил, значит, так надо */
+    { /* Mime - if unmime left it for us, then it was right ;-) */
       sprintf(pheader[cheader], "%s\r", str);
       nline;
       toheader=1;
@@ -280,7 +283,7 @@ int readhdr(void)
     if (strnicmp(str, "X-FTN-Flags: ", 13)==0)
     { strupr(str);
       if (strstr(str+13, "CFM"))
-      { attrib&=~msgRETRECREQ; /* сделанное из return-receipt-to */
+      { attrib&=~msgRETRECREQ; /* made from return-receipt-to */
         attrib|=msgCFM;
       }
       if (strstr(str+13, "RRQ")) attrib|=msgRETRECREQ;
@@ -347,7 +350,7 @@ int readhdr(void)
     { if (!cnews)
         continue;
 path:
-      /* меняем порядок и выкидываем все не-ftn домены */
+      /* change order and remove all non-ftn domains */
       lastzone=0;
       for (p=strchr(str, ' ')+1; *p; p=p1+1)
       { p1=strpbrk(p, "! \t");
@@ -365,7 +368,7 @@ path:
         if (r<3)
           continue;
         if (pp!=0)
-          continue; /* нефиг поинтов в path писать! */
+          continue; /* points should not occure in the path! */
         if ((r==4) && (k!=lastzone))
         { if (lastzone==0)
           { lastzone=k;
@@ -375,7 +378,7 @@ path:
             continue;
         }
         if (xftnpath) continue;
-        /* дописываем в path */
+        /* add to path */
         for (k=npath; k>0; k--)
           memcpy(path+k, path+k-1, sizeof(path[0]));
         if (npath<MAX_PATH)
@@ -390,7 +393,7 @@ path:
     if (strnicmp(str, "X-FTN-SEEN-BY: ", 15)==0)
     {
       p=str+15;
-      i=-1; /* сетка */
+      i=-1; /* network */
       for (;*p;)
       { if (nseenby==MAXSEENBY)
           break;
@@ -421,8 +424,8 @@ path:
     {
       if (!xftnpath) npath=0;
       p=str+12;
-      i=-1; /* сетка */
-      for (;*p;)
+      i=-1; /* network */
+      while (*p)
       { if (npath==MAX_PATH)
           break;
         while (*p==' ') p++;
@@ -498,15 +501,15 @@ path:
       continue;
     }
     if (strnicmp(str, "Message-Id:", 11)==0)
-    { if (wasmsgid & 1) continue; /* уже был */
+    { if (wasmsgid & 1) continue; /* already was */
       for (p=str+11; (*p==' ') || (*p=='\t'); p++);
       if (*p=='\0') continue;
       wasmsgid|=1;
       if (! (wasmsgid & 2))
-      { /* не было X-FTN-MSGID */
-        /* смотрим, не фидошный ли он -
-          <z_n/f[_p]_xxxxxxxx@domain> или
-          <z-n-f[-p]-xxxxxxxx[-domain]@domain> или
+      { /* no X-FTN-MSGID */
+        /* check, if it's FTN-style -
+          <z_n/f[_p]_xxxxxxxx@domain> or
+          <z-n-f[-p]-xxxxxxxx[-domain]@domain> or
           <xxxxxxxx@[pP.]fF.nN.zZ.domain> */
         fidomsgid(str+12, fmsgid, domainid, &msgid);
       }
@@ -524,73 +527,73 @@ path:
     }
     if (strnicmp(str, "Date: ", 6)==0)
     { if (parsedate(str+6))
-      { sprintf(pheader[cheader],"\x01%s\r",str);
+      { sprintf(pheader[cheader], "\x01%s\r", str);
         nline;
         toheader=1;
       }
       continue;
     }
-    if (strnicmp(str,"Return-Receipt-To: ",19)==0)
+    if (strnicmp(str, "Return-Receipt-To: ", 19)==0)
     { if ((attrib & msgCFM)==0)
         attrib|=msgRETRECREQ;
       continue;
     }
-    if ((strnicmp(str,"Newsgroups: ",12)==0) && conf)
+    if ((strnicmp(str, "Newsgroups: ", 12)==0) && conf)
     {
-      for (p=str+12;(*p==' ')||(*p=='\t');p++);
-      sprintf(pheader[cheader],"\x01RFC-Newsgroups: %s\r",p);
+      for (p=str+12; (*p==' ') || (*p=='\t'); p++);
+      sprintf(pheader[cheader], "\x01RFC-Newsgroups: %s\r", p);
       nline;
       toheader=1;
       continue;
     }
-    if (((strnicmp(str,"Comment-To: ",12)==0) ||
-         (strnicmp(str,"X-To: ", 6)==0) ||
-         (strnicmp(str,"X-Comment-To: ",14)==0)) && conf)
+    if (((strnicmp(str, "Comment-To: ", 12)==0) ||
+         (strnicmp(str, "X-To: ", 6)==0) ||
+         (strnicmp(str, "X-Comment-To: ",14)==0)) && conf)
     {
-      sprintf(pheader[cheader],"\x01RFC-%s\r",str);
+      sprintf(pheader[cheader], "\x01RFC-%s\r", str);
       nline;
       toheader=1;
       continue;
     }
-    if (strnicmp(str,"References: ",12)==0)
+    if (strnicmp(str, "References: ", 12)==0)
     {
       if (wasreply & 7) /* was "FTN-Reply:", "In-Reply-To:" or "References:" */
         continue;
-      sprintf(pheader[cheader],"\x01RFC-%s\r",str);
+      sprintf(pheader[cheader], "\x01RFC-%s\r", str);
       nline;
       toheader=1;
       wasreply|=1;
       continue;
     }
-    if (strnicmp(str,"In-Reply-To: ",13)==0)
+    if (strnicmp(str, "In-Reply-To: ", 13)==0)
     {
       if (wasreply & 6) /* was "FTN-Reply:" or "In-Reply-To:" */
         continue;
-      sprintf(pheader[cheader],"\x01RFC-%s\r",str);
+      sprintf(pheader[cheader], "\x01RFC-%s\r", str);
       nline;
       toheader=1;
       wasreply|=2;
       continue;
     }
-    if (strnicmp(str,"X-FTN-Kludge: ",14)==0)
-    { sprintf(pheader[cheader],"\x01%s\r",str+14);
+    if (strnicmp(str, "X-FTN-Kludge: ", 14)==0)
+    { sprintf(pheader[cheader], "\x01%s\r", str+14);
       nline;
       toheader=1;
       continue;
     }
-    if (strnicmp(str,"X-FTN-To: ",10)==0)
+    if (strnicmp(str, "X-FTN-To: ", 10)==0)
     { if (conf)
-      { strncpy(msghdr.to,str+10,sizeof(msghdr.to)-1);
+      { strncpy(msghdr.to, str+10, sizeof(msghdr.to)-1);
         msghdr.to[sizeof(msghdr.to)-1]='\0';
         toheader=0;
         continue;
       }
     }
-    if ((strnicmp(str,"X-FTN-",6)==0) ||
-        (strnicmp(str,"X-FSC-",6)==0))
-    { if (strnicmp(str+6,"MsgId: ",7)==0)
+    if ((strnicmp(str, "X-FTN-", 6)==0) ||
+        (strnicmp(str, "X-FSC-", 6)==0))
+    { if (strnicmp(str+6, "MsgId: ", 7)==0)
       { if (wasmsgid & 2)
-          continue; /* уже был */
+          continue; /* already was */
         wasmsgid|=2;
 #if 0
         if (str[13]=='<')
@@ -601,72 +604,72 @@ path:
         else
 #endif
           p=str+13;
-        sprintf(pheader[cheader],"\x01MSGID: %s\r",p);
+        sprintf(pheader[cheader], "\x01MSGID: %s\r", p);
       }
-      else if (strnicmp(str+6, "Reply: ",7)==0)
+      else if (strnicmp(str+6, "Reply: ", 7)==0)
       { if (wasreply & 4)
-          continue; /* уже был */
+          continue; /* already was */
         wasreply|=4;
-        sprintf(pheader[cheader],"\x01REPLY: %s\r",str+13);
+        sprintf(pheader[cheader], "\x01REPLY: %s\r", str+13);
       }
       else
-      { if (strnicmp(str+6,"Flags:",6)==0)
+      { if (strnicmp(str+6, "Flags:", 6)==0)
           continue;
-        if (strnicmp(str+6,"Intl:",5)==0)
+        if (strnicmp(str+6, "Intl:", 5)==0)
           continue;
-        if (strnicmp(str+6,"Topt:",5)==0)
+        if (strnicmp(str+6, "Topt:", 5)==0)
           continue;
-        if (strnicmp(str+6,"Fmpt:",5)==0)
+        if (strnicmp(str+6, "Fmpt:", 5)==0)
           continue;
-        if (strnicmp(str+6,"RFCID:",6)==0)
+        if (strnicmp(str+6, "RFCID:", 6)==0)
           continue;
-        if (strnicmp(str+6,"AREA:",5)==0)
+        if (strnicmp(str+6, "AREA:", 5)==0)
           continue;
-        if (strnicmp(str+6,"Replyaddr:",10)==0)
+        if (strnicmp(str+6, "Replyaddr:", 10)==0)
           continue;
-        if (strnicmp(str+6,"Replyto:",8)==0)
+        if (strnicmp(str+6, "Replyto:", 8)==0)
           continue;
-        if (strnicmp(str+6,"Tearline:",9)==0)
-        { strcpy(tearline,str+16);
+        if (strnicmp(str+6, "Tearline:", 9)==0)
+        { strcpy(tearline, str+16);
           continue;
         }
-        if ((strnicmp(str+6,"Addr:",5)==0) || (strnicmp(str+6,"Address:",8)==0))
+        if ((strnicmp(str+6, "Addr:", 5)==0) || (strnicmp(str+6, "Address:", 8)==0))
         { for (p=str; *p!=':'; p++);
-          for (p++;(*p==' ') || (*p=='\t');p++);
-          if (getfidoaddr(&xftnaddr.zone,&xftnaddr.net,&xftnaddr.node,
-                          &xftnaddr.point,p))
+          for (p++; (*p==' ') || (*p=='\t'); p++);
+          if (getfidoaddr(&xftnaddr.zone, &xftnaddr.net, &xftnaddr.node,
+                          &xftnaddr.point, p))
             xftnaddr.zone=-1;
           continue;
         }
-        if (strnicmp(str+6,"From:",5)==0)
-        { for (p=str+11;(*p==' ') || (*p=='\t');p++);
-          strcpy(xftnfrom,p);
+        if (strnicmp(str+6, "From:", 5)==0)
+        { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
+          strcpy(xftnfrom, p);
           continue;
         }
-        if (strnicmp(str+6,"Via:",4)==0)
+        if (strnicmp(str+6, "Via:", 4)==0)
         { curhops++;
-          sprintf(pheader[cheader],"\x01Via %s\r",str+11);
+          sprintf(pheader[cheader], "\x01Via %s\r", str+11);
           continue;
         }
-        if (strnicmp(str+6,"Recd:",5)==0)
+        if (strnicmp(str+6, "Recd:", 5)==0)
         { curhops++;
-          sprintf(pheader[cheader],"\x01Recd %s\r",str+12);
+          sprintf(pheader[cheader], "\x01Recd %s\r", str+12);
           continue;
         }
-        sprintf(pheader[cheader],"\x01%s\r",str+6);
+        sprintf(pheader[cheader], "\x01%s\r", str+6);
       }
       nline;
       toheader=1;
       continue;
     }
-    /* остальные поля header просто переносим как скрытые */
+    /* other header fields simple copy as hiddens */
     if (!savehdr)
       continue;
-    sprintf(pheader[cheader],"\x01RFC-%s\r",str);
+    sprintf(pheader[cheader], "\x01RFC-%s\r", str);
     nline;
     toheader=1;
   }
-  logwrite('?',"Bad message header\n");
+  logwrite('?', "Bad message header\n");
   retcode|=RET_ERR;
   return 1;
 }
