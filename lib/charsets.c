@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/09/10 15:13:19  gul
+ * avoid warning
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -25,6 +28,7 @@
 #endif
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "libgate.h"
 #include "koi8-u.h"
