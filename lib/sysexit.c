@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2002/03/21 11:30:52  gul
+ * Added strsignal() check
+ *
  * Revision 2.0  2001/01/10 20:42:23  gul
  * We are under CVS for now
  *
@@ -94,7 +97,7 @@ static char *sys_signame[] = {
 };
 #endif
 
-char * strsysexit(int retcode)
+char *strsysexit(int retcode)
 {
   static char unknownerr[128];
 
@@ -105,7 +108,8 @@ char * strsysexit(int retcode)
   return unknownerr;
 }
 
-char * strsignal(int signo)
+#ifndef HAVE_STRSIGNAL
+char *strsignal(int signo)
 {
   static char sigstr[20];
 
@@ -118,3 +122,4 @@ char * strsignal(int signo)
     sprintf(sigstr, "%u", signo);
   return sigstr;
 }
+#endif

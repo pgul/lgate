@@ -25,7 +25,7 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 dnl Checks for library functions.
 AC_CHECK_FUNCS(snprintf ftruncate strnicmp strncasecmp pipe)
 AC_CHECK_FUNCS(strcasecmp stricmp strncasecmp strnicmp filelength basename)
-AC_CHECK_FUNCS(mktime sopen strupr utime flock)
+AC_CHECK_FUNCS(strsignal mktime sopen strupr utime flock)
 AC_CHECK_FUNCS(getuid geteuid getgid getegid getpwuid setuid)
 case $ac_cv_func_flock in
  no) AC_CHECK_FUNCS(lockf) ;;
