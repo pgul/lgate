@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/01/07 09:57:24  gul
+ * Added init_textline() for hrewind()
+ *
  * Revision 2.4  2002/01/07 09:39:32  gul
  * Public textline()
  *
@@ -96,6 +99,10 @@ static void reset_badaddr(void)
   do
     r=hgets();
   while (r && (strpbrk(str, "\n\r")==NULL));
+}
+
+void init_textline(void)
+{ tpl_cont = 0;
 }
 
 int textline(char *s, unsigned size)

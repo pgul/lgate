@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/01/07 09:57:24  gul
+ * Added init_textline() for hrewind()
+ *
  * Revision 2.3  2001/02/27 10:18:11  gul
  * "Memory allocation failed" fixed
  *
@@ -2222,6 +2225,7 @@ int hgetc(void)
 
 void hrewind(void)
 {
+  init_textline();
   if (pcur_hdr)
   { pcur_hdr=cur_hdr;
     return;

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.10  2002/01/07 09:57:24  gul
+ * Added init_textline() for hrewind()
+ *
  * Revision 2.9  2001/08/16 14:20:39  gul
  * coredumped if malformed X-FTN-MSGID
  *
@@ -1244,6 +1247,9 @@ todevnull:
   }
   spart=fsize/parts-30 /* maxline/2 */;
   str[0]=0;
+  /* seek to begin of msgbody */
+  hrewind();
+  while (textline(str, sizeof(str)));
   for (part=0; part<parts; part++)
   { /* put the part to buffer */
     debug(9, "One_Message: process part %d", part+1);

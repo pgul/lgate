@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2002/01/07 09:57:24  gul
+ * Added init_textline() for hrewind()
+ *
  * Revision 2.6  2002/01/07 08:52:35  gul
  * Bugfix for yesterday changes
  *
@@ -2499,7 +2502,7 @@ chk_fork:
     hrewind();
     hstr=NULL;
     psize=0;
-    while (hgets())
+    while (textline(str, sizeof(str)))
     { int plen, slen;
       char *p;
       plen=0;
@@ -2524,7 +2527,7 @@ chk_fork:
           strcpy(p1+plen, str);
           plen+=slen;
           if (slen<sizeof(str)-1 || str[sizeof(str)-1]=='\r') break;
-          if (!hgets())
+          if (!textline(str, sizeof(str)))
           { p1=NULL;
             break;
           }
@@ -2561,7 +2564,6 @@ chk_fork:
       hv_store(hdr, p1, plen, newSVpv(p, 0), 0);
     }
     if (hstr) free(hstr);
-    hrewind();
 
     ENTER;
     SAVETMPS;
