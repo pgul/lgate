@@ -1,3 +1,5 @@
+- lgate/win32
+- работа через pop/imap/nnrp/smtp/nntp
 - fido2rel: разобраться с Gw-To, Gw-Cc, Gw-Bcc. Что в каком случае попадает
   в поле "To:" заголовка? Если нет ни To, ни Gw-To, а есть только Gw-Bcc?
   Если при этом есть клудж RFC-To:?
@@ -31,12 +33,11 @@
 - rel2fido: преобразовывать адрес обратно в ftn только при совпадении
   зоны с текущим aka
 - review all sources for possible buffer overflow (getvalue, chsubstr, ...)
-- работа через pop/imap/nnrp/smtp/nntp
 - soup
 - rel2fido: сделать 'split-subject="(%d/%d) %s"'
 - attuucp: freq
 - xms/dpmi support.
-- lgate/win32
+- переписать парсер конфига, сделать его общим в fidolib
 - fido2rel: разбивать аттачи на части.
 - lgate/dos: int24 handler (autofail).
 - attuucp: confirmations according to rfc3798.txt
