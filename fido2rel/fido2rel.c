@@ -12,6 +12,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2001/01/19 17:55:17  gul
+ * Cosmetic changes
+ *
  * Revision 2.1  2001/01/15 03:37:09  gul
  * Stack overflow in dos-version fixed.
  * Some cosmetic changes.
@@ -95,8 +98,8 @@ int main(int argc, char * argv[])
   { puts("Not enough memory!");
     return RET_ERR;
   }
-  strcpy(copyright,NAZVA);
-  strcat(copyright," (Fido2Rel)");
+  strcpy(copyright, NAZVA);
+  strcat(copyright, " (Fido2Rel)");
   if (params(argc, argv))
     return 0;
   if (fake)
