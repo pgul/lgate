@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.16  2004/07/20 18:45:43  gul
+ * Fixed reject reasons logic
+ *
  * Revision 2.15  2002/11/17 20:56:16  gul
  * gcc/glibc workaround, buggy memmove
  *
@@ -1346,7 +1349,7 @@ plaintext:
       /* external checking */
       if (nagate) nagate[0]=0;
       if (nafig)  nafig[0]=0;
-      rejreason=DEST;
+      rejreason=NOADDR;
       for (p=to,p1=NULL; p; p=p1)
       {
         if (p1) *p1=' ';
@@ -1386,7 +1389,7 @@ plaintext:
         debug(6, "Main: run external checker");
         r=extcheck(curto, &area);
         debug(6, "Main: external checker retcode %d", r);
-        if (r==0) /* it's not address */
+        if (r==0) /* drop */
         { if (area==-1)
           { if (point)
               logwrite('?', "Message from %s %u:%u/%u.%u to %s moved to /dev/null\n",
@@ -1398,11 +1401,12 @@ plaintext:
           else
           { if (point)
               logwrite('?', "Message from %s %u:%u/%u.%u to %s in area %s moved to /dev/null\n",
-                    msghdr.from, zone, net, node, point, echoes[area].fido, curto);
+                    msghdr.from, zone, net, node, point, curto, echoes[area].fido);
             else
               logwrite('?', "Message from %s %u:%u/%u to %s in area %s moved to /dev/null\n",
-                    msghdr.from, zone, net, node, echoes[area].fido, curto);
+                    msghdr.from, zone, net, node, curto, echoes[area].fido);
           }
+          rejreason=EXTERNAL;
           continue;
         }
         if ((r==1) && (area==-1)) /* reject */
@@ -1505,8 +1509,8 @@ plaintext:
       debug(3, "Main: nagate='%s', nafig='%s'",
             nagate ? nagate : "", nafig ? nafig : "");
       if ((nafig && nafig[0]) || nagate==NULL || nagate[0]==0)
-      { if (!nafig || nafig[0]=='\0') rejreason=NOADDR;
-        reject(rejreason, nafig ? nafig : "");
+      { if ((nafig && nafig[0]) || rejreason==NOADDR)
+          reject(rejreason, nafig ? nafig : "");
       }
       else
         rejreason=0;
