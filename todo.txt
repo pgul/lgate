@@ -39,6 +39,9 @@
 - lgate/win32
 - fido2rel: разбивать аттачи на части.
 - lgate/dos: int24 handler (autofail).
+- attuucp: confirmations according to rfc3798.txt
+- attuucp: rfc3335.txt - secure peer to peer
+- attuucp: rfc3156.txt - MIME Security with OpenPGP
 ? сначала проверять itwit*, а потом уже валидность "To:"
 
    Не уверен, надо ли и если надо, то как именно, поэтому далеко
@@ -53,15 +56,15 @@
 ? hook на конвертацию имени конференции и ее параметры (autocreate)
 ? разрешить неполные пути в gate.cfg
 ? dll
-? однопроходное чтение конфига (в буфер)
+? однопроходное чтение конфига (в буфер или через realloc при vm)
 ? precompiled config
 ? X-Mailer (X-Newsreader) -> tearline; LuckyGate -> PID
 ? split <-> message/partial
 ? ^aSPLIT kludge - собирать из кусков при fido2rel.com. 
    To:, CC:, Subject:, Real-Name:, tearline, origin из частей удалять.
 ? rel2fido: "To:" -> "\1RFC-To:", если golded=yes
-? rel2fido: Gate new echoes (autocreate); ┐  Пишется на Itrack или MixFix,
-? areafix 2:46/128, uplink manager.       ┘  у меня работает на Itrack
+? rel2fido: Gate new echoes (autocreate);  -- Пишется на Itrack или MixFix,
+? areafix 2:46/128, uplink manager.        -- у меня работает на Itrack
 ? пакованый arcmail
 ? адреса типа sysop@f68.n463.r46.z2.fidonet.org (задание региона в адресе) -
   делается через rel2fido-chk.
