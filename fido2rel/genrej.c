@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.5  2002/11/11 09:53:09  gul
  * Improve diagnostics
  *
@@ -408,6 +411,8 @@ errwrite:
   if (mpoint)
     fprintf(frej, ".%u", mpoint);
   fprintf(frej, " %08lx\r", curtime*100+getpid()%100+seqf++);
+  if (!notid)
+    fprintf(frej, "%s: %s\r", packmail ? "TID" : "PID", NAZVA);
   tplout=1;
   r=init_tpl(tpl_name);
   setvars(reason);

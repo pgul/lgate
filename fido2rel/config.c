@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.4  2002/03/21 13:43:26  gul
  * Remove dest addr list length limitation
  *
@@ -89,6 +92,7 @@ int  uupcver;
 #endif
 char nconf[FNAME_MAX], tpl_name[FNAME_MAX];
 char extsetname[128], intsetname[128];
+int  notid;
 static char s[64];
 static char localdom[80];
 #ifndef UNIX
@@ -389,6 +393,7 @@ int config(void)
   compress[0]=uux[0]=rnews[0]=inb_dir[0]='\0';
   hidetear=hideorigin=fsp1004=0;
   charsetsdir[0]=charsetalias[0]='\0';
+  notid=0;
   p1=getenv("TZ");
   if (p1)
     getmytz(p1, &tz);
@@ -1661,6 +1666,15 @@ notfull:
     }
     if (strnicmp(str, "logstyle=", 9) == 0)
     { if (stricmp(str+9, "fd") && stricmp(str+9, "bink"))
+        goto invparam;
+      continue;
+    }
+    if (strnicmp(str, "tid=", 4)==0)
+    { if (tolower(str[4])=='y')
+        notid=0;
+      else if (tolower(str[4])=='n')
+        notid=1;
+      else
         goto invparam;
       continue;
     }

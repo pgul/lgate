@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.2  2001/01/25 18:41:38  gul
  * myname moved to debug.c
  *
@@ -186,7 +189,8 @@ static char *ignore[]={
 "fido2rel-chk-pl=",
 "rel2fido-chk-pl=",
 "inb-dir=",
-"fromtop="
+"fromtop=",
+"tid="
 };
 
 static void canondir(char *dir)

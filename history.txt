@@ -1231,3 +1231,5 @@ ver 7.02 -
   * fido2rel: при /extmsgid имя конференции теперь пишется в начале
     message-id, т.е. <newsgroup|123@domain>, а не <123@domain|newsgroup>,
     как раньше.
+  + новый параметр gate.cfg tid={yes|no} - ставить ли на гейтуемых
+    письмах кладж TID.

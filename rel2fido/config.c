@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.3  2001/12/09 12:28:47  gul
  * Translate comments
  *
@@ -73,7 +76,7 @@ extern char charset[];
 extern int  validlen;
 
 int  tz;
-int  rcv2via, savehdr;
+int  rcv2via, savehdr, notid;
 char checksb, echolog, forgolded, domainmsgid;
 char dirnews[FNAME_MAX], nconf[FNAME_MAX];
 char localdom[MAXDOM];
@@ -83,7 +86,7 @@ int  use_swap;
 #endif
 errtotype errorsto;
 
-char extsetname[128], intsetname[128]; 
+char extsetname[128], intsetname[128];
 static int  hout, noxc, checksubj;
 static char extcharset[FNAME_MAX];
 static uword z, nt, nd, pt;
@@ -364,6 +367,7 @@ int config(void)
   split_report=0;
   putchrs=0;
   charsetsdir[0]='\0';
+  notid=0;
   p=getenv("TEMP");
   if (p==NULL)
     p=getenv("TMP");
@@ -1516,6 +1520,15 @@ invparam:
         goto invparam;
       }
       addftncharset(str+13, p);
+      continue;
+    }
+    if (strnicmp(str, "tid=", 4)==0)
+    { if (tolower(str[4])=='y')
+        notid=0;
+      else if (tolower(str[4])=='n')
+        notid=1;
+      else
+        goto invparam;
       continue;
     }
     for (i=0; i<sizeof(ignore)/sizeof(ignore[0]); i++)

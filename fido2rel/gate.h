@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.7  2002/03/21 13:43:26  gul
  * Remove dest addr list length limitation
  *
@@ -310,6 +313,7 @@ extern struct message msghdr;
 extern char *myintsetname, *myextsetname;
 extern char extsetname[128], intsetname[128];
 extern char inb_dir[FNAME_MAX], charsetsdir[FNAME_MAX], charsetalias[FNAME_MAX];
+extern int  notid;
 #ifdef _IOFBF  /* stdio.h included */
 void putfiles(VIRT_FILE *fout, char *subj, char *bound);
 int  writemsghdr(struct message * msghdr,FILE * fout);

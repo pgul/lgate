@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.5  2002/01/07 09:57:24  gul
  * Added init_textline() for hrewind()
  *
@@ -261,6 +264,7 @@ extern char charsetsdir[FNAME_MAX];
 extern char charsetalias[FNAME_MAX];
 extern int  putchrs;
 extern char freply[SSIZE], freplydomain[MAXADDR];
+extern int  notid;
 
 int  fromuupcspool(void);
 int  getfidoaddr(uword *zone, uword *net, uword *node,

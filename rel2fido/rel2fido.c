@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.13  2002/11/17 20:55:26  gul
+ * New option "tid" in gate.cfg
+ *
  * Revision 2.12  2002/11/17 20:23:18  gul
  * Remove obsolete code
  *
@@ -848,6 +851,16 @@ wasreject:
       nline;
     }
   }
+  if (!notid)
+  { for(i=0; i<cheader; i++)
+      if (strnicmp(pheader[i], "\x01TID:", 5)==0)
+        break;
+    if (i==cheader)
+    { chkheader(NAZVA);
+      sprintf(pheader[cheader], "\x01TID: %s\r", NAZVA);
+      nline;
+    }
+  }
 
   if (conf==0)
     null=0;
@@ -1192,7 +1205,6 @@ todevnull:
   { /* remove intl, fmpt, topt, via */
     pheader[0][0]=0;
     msghdr.attr=0;
-    /* change RFC-X-MAILER to PID */
     for (i=0; i<cheader; i++)
     {
       if (strncmp(pheader[i], "\x01Via", 4)==0)
