@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:09  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:17  gul
  * We are under CVS for now
  *
@@ -37,10 +41,8 @@
 #define MAXUNFOLD   200
 #define MAX_PATH    80
 #define NKILLATTFILES 32
-#ifndef __MSDOS__
-#define PIPESIZE       4096
+#ifdef __OS2__
 #define STACK_SIZE     32768
-#define RSENDBUFSIZE   16384
 #endif
 
 #undef  FIDOUNKNWN
@@ -51,25 +53,25 @@
 #define PRODCODE  0xEFF
 #endif
 
-#define DEST        1
-#define SIZE        2
-#define BINARY      3
-#define TWITADDR    4
-#define NOADDR      5
-#define EXTERNAL    6
-#define FILEATT     7
+#define DEST         1
+#define SIZE         2
+#define BINARY       3
+#define TWITADDR     4
+#define NOADDR       5
+#define EXTERNAL     6
+#define FILEATT      7
 
-#define LRD_CREATE  1
-#define LRD_CHECK   2
+#define LRD_CREATE   1
+#define LRD_CHECK    2
 
 #define RET_ECHOMAIL 1
 #define RET_NETMAIL  2
 #define RET_ERR      4
 
-#define KENDRA      112
+#define KENDRA     112
 #define SENDMAIL    86 /* for uupcver */
 
-#define ZAPAS     40
+#define ZAPAS       40
 
 #define nextline pheader[cheader+1]=pheader[cheader]+strlen(pheader[cheader])+1, cheader++;
 #define chkkludges if ((strlen(str)+pheader[cheader]+ZAPAS>header+MAXHEADER) || (cheader>=MAXFIELDS)) { logwrite('?',"Too many kludges, messages moved to badmail!\n"); goto lbadmsg; }
@@ -121,23 +123,23 @@ void badmsg(char *reason);
 int  hread(int handle, void *buffer, unsigned size);
 int  hgetc(int h);
 void findlet(void);
-int  isfield(char * line);
-int  checkaddr(char * addr);
-int  extcheck(char * addr,int * area);
-int  mktempname(char * sample,char * dest);
-void chsubstr(char * dest,char * from,char * to);
+int  isfield(char *line);
+int  checkaddr(char *addr);
+int  extcheck(char *addr, int *area);
+int  mktempname(char *sample, char *dest);
+void chsubstr(char *dest, char *from, char *to);
 void closepkt(void);
-char * qphdr(char * str);
-void parsekludge(char * str,char * klname,char * klopt);
-void dateftn2rfc(char * ftndate, char * rfcdate, int tz);
-int  adduserline(char * str);
-int  moveatt(char * fname, unsigned long attr);
-void mkusername(char * str);
-int  one_message(char * msgname);
-void getaddr(char * str);
+char *qphdr(char *str);
+void parsekludge(char *str, char *klname, char *klopt);
+void dateftn2rfc(char *ftndate, char *rfcdate, int tz);
+int  adduserline(char *str);
+int  moveatt(char *fname, unsigned long attr);
+void mkusername(char *str);
+int  one_message(char *msgname);
+void getaddr(char *str);
 char *strreason(int reason, int whatfor);
 void delsentfiles(unsigned long attr, char *subj);
-int  gettextline_(char * str,unsigned size);
+int  gettextline_(char *str, unsigned size);
 void reset_text_(void);
 void set_table(char *charset);
 

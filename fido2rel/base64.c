@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:08  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:17  gul
  * We are under CVS for now
  *
@@ -33,7 +37,7 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
   char c, *p, *p1, *p2, *ext, *codedname;
   char oct[3];
   int  bytes, n, name8bit;
-  FILE * f;
+  FILE *f;
   long filelen;
 
   debug(6, "PutFiles('%s')", subj);
@@ -91,12 +95,12 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
       sprintf(stype, "image/jpeg");
     else if ((stricmp(ext, "mpg")==0) || (stricmp(ext, "mpeg")==0))
       sprintf(stype, "video/mpeg");
-    /* и разные другие ;-) */
+    /* and some others ;-) */
     else
       sprintf(stype,"application/octet-stream");
     codedname=NULL;
     if (name8bit)
-    { if (hdr8bit)
+    { if (!hdr8bit)
         codedname=malloc(strlen(p2)*3+strlen(myextsetname)+4);
       else
         int2ext(p2);
@@ -131,36 +135,36 @@ void putfiles(VIRT_FILE *fout, char *subj, char *bound)
     fseek(f, 0, SEEK_SET);
     virt_fprintf(fout, "Content-Length: %lu\n", ((filelen+2)/3)*4+(filelen+44)/45);
     virt_fprintf(fout, "Lines: %lu\n", (filelen+44)/45);
-    virt_fputs("\n",fout);
+    virt_fputs("\n", fout);
     *p1=c;
     
     /* base64 encoding */
     bytes=0;
     for (;;)
-    { n=fread(oct,1,3,f);
+    { n=fread(oct, 1, 3, f);
       if (n<=0) break;
       bytes+=4;
       if (n<3) oct[n]=0;
-      virt_putc(arr_base64[oct[0]>>2],fout);
-      virt_putc(arr_base64[((oct[0] & 0x3)<<4) | (oct[1]>>4)],fout);
+      virt_putc(arr_base64[oct[0]>>2], fout);
+      virt_putc(arr_base64[((oct[0] & 0x3)<<4) | (oct[1]>>4)], fout);
       if (n==1)
-      { virt_putc('=',fout);
-        virt_putc('=',fout);
+      { virt_putc('=', fout);
+        virt_putc('=', fout);
         break;
       }
-      virt_putc(arr_base64[((oct[1] & 0xf)<<2) | (oct[2]>>6)],fout);
+      virt_putc(arr_base64[((oct[1] & 0xf)<<2) | (oct[2]>>6)], fout);
       if (n==2)
-      { virt_putc('=',fout);
+      { virt_putc('=', fout);
         break;
       }
-      virt_putc(arr_base64[oct[2] & 0x3f],fout);
+      virt_putc(arr_base64[oct[2] & 0x3f], fout);
       if (bytes==60)
-      { virt_putc('\n',fout);
+      { virt_putc('\n', fout);
         bytes=0;
       }
     }
     if (bytes)
-      virt_putc('\n',fout);
+      virt_putc('\n', fout);
     fclose(f);
   }
   debug(6, "PutFiles: done", subj);
@@ -177,7 +181,7 @@ void delsentfiles(unsigned long attr, char *subj)
   if ((attr & (msgKFS | msgTFS)) == 0)
     if (((attr & msgFORWD) == 0) || (!deltransfiles))
       return;
-  for (p=subj;*p;p++)
+  for (p=subj; *p; p++)
   {
     while (isspace(*p)) p++;
     if (*p=='\0') break;
@@ -186,7 +190,7 @@ void delsentfiles(unsigned long attr, char *subj)
     *p1='\0';
     if (packed)
     { /* remove path */
-      for (p2=p1-1;p2>p;p2--)
+      for (p2=p1-1; p2>p; p2--)
         if ((*p2=='/') || (*p2=='\\') || (*p2==':'))
         { p2++;
           break;
@@ -221,7 +225,7 @@ void delsentfiles(unsigned long attr, char *subj)
       }
       else
       { if (unlink(sfile))
-          logwrite('?',"Can't delete sent file %s: %s!\n",sfile,strerror(errno));
+          logwrite('?', "Can't delete sent file %s: %s!\n", sfile, strerror(errno));
         else
           debug(4, "DelSentFiles: file %s deleted", sfile);
       }
@@ -239,7 +243,7 @@ void delsentfiles(unsigned long attr, char *subj)
           debug(4, "DelSentFiles: file %s truncated", sfile);
         }
         else
-          logwrite('?',"Can't truncate sent file %s: %s!\n",sfile,strerror(errno));
+          logwrite('?', "Can't truncate sent file %s: %s!\n", sfile, strerror(errno));
       }
     }
     *p1=c;

@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:10  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:23  gul
  * We are under CVS for now
  *
@@ -836,10 +840,10 @@ void closeall(void)
 }
 
 static int unspace(char *str)
-{ char * p, *p1;
+{ char *p, *p1;
   int  r=0;
 
-  while ((*str==' ') || (*str=='\t')) strcpy(str,str+1);
+  while ((*str==' ') || (*str=='\t')) strcpy(str, str+1);
   for (p=str; *p && (!isspace(*p)) && (*p!='='); p++);
   for (p1=p; isspace(*p1); p1++);
   if (*p1!='=') p++;
@@ -1089,42 +1093,42 @@ int configline(char *str, unsigned size)
           continue;
         }
         *p1=0;
-        for (p=p1-1;isspace(*p);*p--='\0');
-        for (p=str+4;isspace(*p);p++);
+        for (p=p1-1; isspace(*p); *p--='\0');
+        for (p=str+4; isspace(*p); p++);
         /* теперь p - имя var */
-        for (p1++;isspace(*p1);p1++);
+        for (p1++; isspace(*p1); p1++);
         if (*p1=='\"')
         { /* убираем кавычки */
-          for (p2=p1;(p2=strchr(p2+1,'\"'))!=NULL;)
+          for (p2=p1; (p2=strchr(p2+1, '\"'))!=NULL;)
             if (*(p2-1)!='\\')
               *p2--='\0';
           p1++;
         }
-        setvar(p,p1);
+        setvar(p, p1);
         continue;
       }
     }
 #endif
     if ((inconfig==1) ?
-        (strnicmp(str,"include",7)==0) :
-        (strnicmp(str,"source",6)==0))
+        (strnicmp(str, "include", 7)==0) :
+        (strnicmp(str, "source", 6)==0))
     { if (sp==MAXINCL)
       { if (tplout)
-          fputs("Too many nested include in config!\n",stderr);
+          fputs("Too many nested include in config!\n", stderr);
         continue;
       }
-      for (p=str+7;(*p==' ') || (*p=='\t');p++);
-      strcpy(str,p);
+      for (p=str+7; (*p==' ') || (*p=='\t'); p++);
+      strcpy(str, p);
       setpath(str);
       strcpy(curtplname, str);
       farr[sp]=htpl;
       curlines[sp]=curline;
       sp++;
-      htpl=myfopen(str,"r");
+      htpl=myfopen(str, "r");
       if (htpl==NULL)
       { sp--;
         if (tplout)
-          fprintf(stderr,"Can't open include file %s: %s!\n",str,strerror(errno));
+          fprintf(stderr, "Can't open include file %s: %s!\n", str, strerror(errno));
         htpl=farr[sp];
       }
       curtplfname=strrchr(curtplname, PATHSEP);

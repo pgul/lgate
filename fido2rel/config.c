@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:08  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:17  gul
  * We are under CVS for now
  *
@@ -253,7 +257,7 @@ static void *galloc(long bytes)
 int gettwitstr(char *str, struct addrtype *twit)
 { char *p, *p1;
 
-  p=strchr(str,'=')+1;
+  p=strchr(str, '=')+1;
   while ((*p==' ') || (*p=='\t')) p++;
   if ((*p==0) || (*p=='\n'))
   {
@@ -287,7 +291,7 @@ errtwit:
 static void setswap(char *str)
 {
   use_swap=USE_FILE;
-  for (;*str;str++)
+  for (; *str; str++)
     switch(tolower(*str))
     { case 'f':  use_swap|=USE_FILE; continue;
       case 'e':  use_swap|=USE_EMS;
@@ -379,7 +383,7 @@ int config(void)
   if (p1)
     getmytz(p1, &tz);
 
-  /***** первый проход - считаем ncaddr, nechoes etc. *****/
+  /***** first pass - count ncaddr, nechoes etc. *****/
   tplout=0;
   if (init_tpl(nconf))
     return 2;
@@ -870,8 +874,8 @@ notfull:
       maxcnews=i;
       continue;
     }
-    if (strnicmp(str,"group",5)==0)
-    { /* формат:  "group <distribution> <remote> [<switches>]" */
+    if (strnicmp(str, "group", 5)==0)
+    { /* format:  "group <distribution> <remote> [<switches>]" */
       /* switches: /feed, /cnews, /dir /noseenby, /nosubj, /net=fidonet.org,
                    /extmsgid, /aka=2:463/68.128@fidonet.carrier.kiev.ua
       */
@@ -924,7 +928,7 @@ notfull:
           if (p1) *p1=' ';
           continue;
         }
-        if (stricmp(p,"dir")==0)
+        if (stricmp(p, "dir")==0)
         { group[ngroups].type=G_DIR;
           if (p1) *p1=' ';
           continue;
@@ -967,13 +971,13 @@ notfull:
           s[0]=0;
         if (p1) *p1=' ';
         /* ищем это aka */
-        for (i=0;i<naka;i++)
+        for (i=0; i<naka; i++)
         { if ((z!=myaka[i].zone) || (nt!=myaka[i].net) ||
              (nd!=myaka[i].node) || (pt!=myaka[i].point))
             continue;
           if (s[0]==0)
             break;
-          if (stricmp(s,myaka[i].domain)==0)
+          if (stricmp(s, myaka[i].domain)==0)
             break;
         }
         if (i<naka)
@@ -991,7 +995,7 @@ notfull:
         myaka[naka].net=nt;
         myaka[naka].node=nd;
         myaka[naka].point=pt;
-        strncpy(myaka[naka].domain,s,sizeof(myaka[0].domain)-1);
+        strncpy(myaka[naka].domain, s, sizeof(myaka[0].domain)-1);
         group[ngroups].aka=naka;
         naka++;
         continue;
@@ -1015,7 +1019,7 @@ notfull:
         else
           p1++;
         mkdir(group[ngroups].newsserv);
-        strcpy(p1,PATHSTR);
+        strcpy(p1, PATHSTR);
       }
       ngroups++;
       continue;
@@ -1037,7 +1041,7 @@ notfull:
       lechonames+=strlen(p)+1;
       *p1=' ';
       for (p=p1+1; (*p==' ') || (*p=='\t'); p++);
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1)
         goto invparam;
       echoes[nechoes].usenet=(char _Far *)((char _Huge *)echonames+lechonames);
@@ -1048,7 +1052,7 @@ notfull:
       continue;
     }
     if (strnicmp(str, "fidosystem=", 11)==0)
-    { strcpy(fidosystem,str+11);
+    { strcpy(fidosystem, str+11);
       /* fidosystem[8]=0; */
       continue;
     }
@@ -1074,10 +1078,10 @@ notfull:
       gates[ngates].pktfor.ftndomain[0]=0;
       for (p++;(*p!=' ')&&(*p!='\t')&&*p;p++); /* skip mask */
       if (*p)
-        for (p++;(*p==' ')||(*p=='\t');p++);
-      if (strnicmp(p,"/for=",5)==0)
-      { if (getfidoaddr(&(gates[ngates].pktfor.zone),&(gates[ngates].pktfor.net),
-                        &(gates[ngates].pktfor.node),&(gates[ngates].pktfor.point),
+        for (p++; (*p==' ') || (*p=='\t'); p++);
+      if (strnicmp(p, "/for=", 5)==0)
+      { if (getfidoaddr(&(gates[ngates].pktfor.zone), &(gates[ngates].pktfor.net),
+                        &(gates[ngates].pktfor.node), &(gates[ngates].pktfor.point),
                         p+5))
           goto invparam;
         else if (gates[ngates].pktfor.zone==0)
@@ -1094,31 +1098,31 @@ notfull:
         goto invparam;
 /* Красиво, но могут быть разные /for=  :-(
       if (gates[ngates].zone==(unsigned)-1)
-      { memcpy(gates,gates+ngates,sizeof(gates[0]));
+      { memcpy(gates, gates+ngates, sizeof(gates[0]));
         ngates=0;
       }
 */
-      if (strnicmp(str,"route-to",8)==0)
+      if (strnicmp(str, "route-to", 8)==0)
         gates[ngates].yes=1;
       else
         gates[ngates].yes=2; /* to-ifmail */
       ngates++;
       continue;
     }
-    if (strnicmp(str,"no-route",8)==0)
+    if (strnicmp(str, "no-route", 8)==0)
     {
-      for (p=str+8;(*p==' ')||(*p=='\t');p++);
-      if (getfidomask(p,(ftnaddr *)(gates+ngates),myaka[0].zone))
+      for (p=str+8; (*p==' ') || (*p=='\t'); p++);
+      if (getfidomask(p, (ftnaddr *)(gates+ngates), myaka[0].zone))
         goto invparam;
       gates[ngates].pktfor.zone=gates[ngates].pktfor.net=
         gates[ngates].pktfor.node=gates[ngates].pktfor.point=0;
       gates[ngates].domain[sizeof(gates[0].domain)-1]=0;
-      for (p++;(*p!=' ')&&(*p!='\t')&&*p;p++); /* skip mask */
+      for (p++; (*p!=' ') && (*p!='\t') && *p; p++); /* skip mask */
       if (*p)
-        for (p++;(*p==' ')||(*p=='\t');p++);
-      if (strnicmp(p,"/for=",5)==0)
-      { if (getfidoaddr(&(gates[ngates].pktfor.zone),&(gates[ngates].pktfor.net),
-                        &(gates[ngates].pktfor.node),&(gates[ngates].pktfor.point),
+        for (p++; (*p==' ') || (*p=='\t'); p++);
+      if (strnicmp(p, "/for=",5)==0)
+      { if (getfidoaddr(&(gates[ngates].pktfor.zone), &(gates[ngates].pktfor.net),
+                        &(gates[ngates].pktfor.node), &(gates[ngates].pktfor.point),
                         p+5))
           goto invparam;
         else if (gates[ngates].pktfor.zone==0)
@@ -1144,137 +1148,137 @@ notfull:
       ngates++;
       continue;
     }
-    if (strnicmp(str,"chdomain",8)==0)
-    { p=strpbrk(str," \t");
+    if (strnicmp(str, "chdomain", 8)==0)
+    { p=strpbrk(str, " \t");
       if (p==NULL)
         goto invparam;
       if (p!=str+8)
         goto invparam;
       while ((*p==' ') || (*p=='\t')) p++;
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL)
         goto invparam;
       if (p1-p>=sizeof(cdomain[0].relcom))
-      { strncpy(cdomain[ncdomain].relcom,p,sizeof(cdomain[0].relcom)-1);
+      { strncpy(cdomain[ncdomain].relcom, p, sizeof(cdomain[0].relcom)-1);
         cdomain[ncdomain].relcom[sizeof(cdomain[0].relcom)-1]=0;
       }
       else
-      { strncpy(cdomain[ncdomain].relcom,p,(unsigned)(p1-p));
+      { strncpy(cdomain[ncdomain].relcom, p, (unsigned)(p1-p));
         cdomain[ncdomain].relcom[(unsigned)(p1-p)]=0;
       }
-      for (p=p1;(*p==' ')||(*p=='\t');p++);
-      if (strpbrk(p," \t"))
+      for (p=p1; (*p==' ') || (*p=='\t'); p++);
+      if (strpbrk(p, " \t"))
       if (p1==NULL)
         goto invparam;
       if (strlen(p)>=sizeof(cdomain[0].fido))
-      { strncpy(cdomain[ncdomain].fido,p,sizeof(cdomain[0].fido)-1);
+      { strncpy(cdomain[ncdomain].fido, p, sizeof(cdomain[0].fido)-1);
         cdomain[ncdomain].fido[sizeof(cdomain[0].fido)-1]=0;
       }
       else
-        strcpy(cdomain[ncdomain].fido,p);
+        strcpy(cdomain[ncdomain].fido, p);
       ncdomain++;
       continue;
     }
-    if (strnicmp(str,"alias",5)==0)
-    { p=strpbrk(str," \t");
+    if (strnicmp(str, "alias", 5)==0)
+    { p=strpbrk(str, " \t");
       if (p==NULL)
         goto invparam;
       if (p!=str+5)
         goto invparam;
       while ((*p==' ') || (*p=='\t')) p++;
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL)
         goto invparam;
       if (p1-p>=sizeof(alias[0].from))
-      { strncpy(alias[nalias].from,p,sizeof(alias[0].from)-1);
+      { strncpy(alias[nalias].from, p, sizeof(alias[0].from)-1);
         alias[nalias].from[sizeof(alias[0].from)-1]=0;
       }
       else
-      { strncpy(alias[nalias].from,p,(unsigned)(p1-p));
+      { strncpy(alias[nalias].from, p, (unsigned)(p1-p));
         alias[nalias].from[(unsigned)(p1-p)]=0;
       }
-      for (p=p1;(*p==' ')||(*p=='\t');p++);
-      if (strpbrk(p," \t"))
+      for (p=p1; (*p==' ') || (*p=='\t'); p++);
+      if (strpbrk(p, " \t"))
       if (p1==NULL)
         goto invparam;
       if (strlen(p)>=sizeof(alias[0].to))
-      { strncpy(alias[nalias].to,p,sizeof(alias[0].to)-1);
+      { strncpy(alias[nalias].to, p, sizeof(alias[0].to)-1);
         alias[nalias].to[sizeof(alias[0].to)-1]=0;
       }
       else
-        strcpy(alias[nalias].to,p);
+        strcpy(alias[nalias].to, p);
       nalias++;
       continue;
     }
-    if (strnicmp(str,"moderator",9)==0)
-    { p=strpbrk(str," \t");
+    if (strnicmp(str, "moderator", 9)==0)
+    { p=strpbrk(str, " \t");
       if (p==NULL)
         goto invparam;
       if (p!=str+9)
         goto invparam;
       while ((*p==' ') || (*p=='\t')) p++;
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL)
         goto invparam;
       *p1=0;
-      for (i=0;i<nechoes;i++)
-        if (stricmp(p,echoes[i].usenet)==0)
+      for (i=0; i<nechoes; i++)
+        if (stricmp(p, echoes[i].usenet)==0)
           break;
       if (i==nechoes)
       { *p1=' ';
-        logwrite('!',"Unknown echo \"%s\" in string %s!\n",p,str);
+        logwrite('!', "Unknown echo \"%s\" in string %s!\n", p, str);
         continue;
       }
       *p1=' ';
       moderator[nmoder].echo=i;
-      for (p=p1;(*p==' ')||(*p=='\t');p++);
-      if (strpbrk(p," \t"))
+      for (p=p1; (*p==' ') || (*p=='\t'); p++);
+      if (strpbrk(p, " \t"))
       if (p1==NULL)
         goto invparam;
       *p1=0;
       if (strlen(p)>=sizeof(moderator[0].moderator))
-      { strncpy(moderator[nmoder].moderator,p,sizeof(moderator[0].moderator)-1);
+      { strncpy(moderator[nmoder].moderator, p, sizeof(moderator[0].moderator)-1);
         moderator[nmoder].moderator[sizeof(moderator[0].moderator)-1]=0;
       }
       else
-        strcpy(moderator[nmoder].moderator,p);
+        strcpy(moderator[nmoder].moderator, p);
       nmoder++;
       continue;
     }
-    if (strnicmp(str,"send-to=",8)==0)
+    if (strnicmp(str, "send-to=", 8)==0)
     {
-      strcpy(send_to[nsend],str+8);
+      strcpy(send_to[nsend], str+8);
       nsend++;
       continue;
     }
-    if (strnicmp(str,"free=",5)==0)
+    if (strnicmp(str, "free=", 5)==0)
     {
-      strcpy(sfree[nfree],str+5);
+      strcpy(sfree[nfree], str+5);
       nfree++;
       continue;
     }
-    if (strnicmp(str,"no-send=",8)==0)
+    if (strnicmp(str, "no-send=", 8)==0)
     {
-      strcpy(rej[nrej],str+8);
+      strcpy(rej[nrej], str+8);
       nrej++;
       continue;
     }
-    if ((strnicmp(str,"address=",8)==0) ||
-        (strnicmp(str,"aka=",4)==0))
+    if ((strnicmp(str, "address=", 8)==0) ||
+        (strnicmp(str, "aka=", 4)==0))
     {
-      p=strchr(str,'=');
-      if (getfidoaddr(&myaka[naka].zone,&myaka[naka].net,
-                      &myaka[naka].node,&myaka[naka].point,p+1))
-      { logwrite('!',"%s is incorrect fido address!\n",p+1);
+      p=strchr(str, '=');
+      if (getfidoaddr(&myaka[naka].zone, &myaka[naka].net,
+                      &myaka[naka].node, &myaka[naka].point, p+1))
+      { logwrite('!', "%s is incorrect fido address!\n", p+1);
         continue;
       }
-      p1=strchr(p,'@');
+      p1=strchr(p, '@');
       if (p==NULL)
-      { logwrite('?',"You must specify domain at ADDR/AKA string!\n");
+      { logwrite('?', "You must specify domain at ADDR/AKA string!\n");
         return 9;
       }
-      p=strpbrk(p,"%@");
-      strncpy(myaka[naka].domain,p+1,sizeof(myaka[0].domain)-1);
+      p=strpbrk(p, "%@");
+      strncpy(myaka[naka].domain, p+1, sizeof(myaka[0].domain)-1);
       myaka[naka].domain[sizeof(myaka[0].domain)-1]=0;
       while (*p && !isspace(*p)) p++;
       if (isspace(*p))
@@ -1293,49 +1297,47 @@ notfull:
       naka++;
       continue;
     }
-    if (strnicmp(str,"uplink=",7)==0)
+    if (strnicmp(str, "uplink=", 7)==0)
     {
-      if (getfidoaddr(&uplink[nuplink].zone,&uplink[nuplink].net,
-                      &uplink[nuplink].node,&uplink[nuplink].point,str+7))
-      { logwrite('!',"%s is incorrect fido address!\n",str+7);
+      if (getfidoaddr(&uplink[nuplink].zone, &uplink[nuplink].net,
+                      &uplink[nuplink].node, &uplink[nuplink].point, str+7))
+      { logwrite('!', "%s is incorrect fido address!\n", str+7);
         continue;
       }
       nuplink++;
       continue;
     }
-    if (strnicmp(str,"rescan=",7)==0)
-    { strcpy(rescan,str+7);
+    if (strnicmp(str, "rescan=", 7)==0)
+    { strcpy(rescan, str+7);
       continue;
     }
-    if (strnicmp(str,"swap=",5)==0)
+    if (strnicmp(str, "swap=", 5)==0)
     {
 #ifdef __MSDOS__
       setswap(str+5);
 #endif
       continue;
     }
-    if (strnicmp(str,"chaddr=",7)==0)
+    if (strnicmp(str, "chaddr=", 7)==0)
     { p=str+7;
       while ((*p==' ') || (*p=='\t')) p++;
       if (*p==0)
         goto invparam;
-      /* формат так и не продумал */
-      /* пока действует */
 /* chaddr="Pavel Gulchouck" 2:463/68 gul@mercury.kiev.ua (Pavel Gulchouck) */
 /* chaddr=SysOp 2:463/68 postmaster@mercury.kiev.ua (System Administrator) */
       if (*p=='\"')
-      { p1=strchr(p+1,'\"');
+      { p1=strchr(p+1, '\"');
         if (p1==NULL) goto invparam;
         *p1=0;
-        strcpy(caddr[ncaddr].from,p+1);
+        strcpy(caddr[ncaddr].from, p+1);
         *p1='\"';
         p=p1+1;
       }
       else
-      { p1=strpbrk(p," \t");
+      { p1=strpbrk(p, " \t");
         if (p1==NULL) goto invparam;
         *p1=0;
-        strcpy(caddr[ncaddr].from,p);
+        strcpy(caddr[ncaddr].from, p);
         *p1=' ';
         p=p1+1;
       }
@@ -1343,11 +1345,11 @@ notfull:
         p++;
       if ((*p==0) || (*p=='\n'))
         goto invparam;
-      p1=strpbrk(p," \t");
+      p1=strpbrk(p, " \t");
       if (p1==NULL) goto invparam;
       *p1=0;
-      if (getfidoaddr(&(caddr[ncaddr].zone),&(caddr[ncaddr].net),
-                      &(caddr[ncaddr].node),&(caddr[ncaddr].point),p))
+      if (getfidoaddr(&(caddr[ncaddr].zone), &(caddr[ncaddr].net),
+                      &(caddr[ncaddr].node), &(caddr[ncaddr].point), p))
       { *p1=' ';
         goto invparam;
       }
@@ -1363,88 +1365,88 @@ notfull:
       ncaddr++;
       continue;
     }
-    if (strnicmp(str,"sysop=",6)==0)
-    { if (getfidoaddr(&mastzone,&mastnet,&mastnode,&mastpoint,str+6))
+    if (strnicmp(str, "sysop=", 6)==0)
+    { if (getfidoaddr(&mastzone, &mastnet, &mastnode, &mastpoint, str+6))
       { puts("Incorrect fido address in string:");
         puts(str);
         continue;
       }
       p=str+6;
       while ((*p==' ') || (*p=='\t')) p++;
-      p=strpbrk(p," \t");
+      p=strpbrk(p, " \t");
       if (p==NULL)
-        strcpy(master,"SysOp");
+        strcpy(master, "SysOp");
       while ((*p==' ') || (*p=='\t')) p++;
       if (*p==0)
-        strcpy(master,"SysOp");
+        strcpy(master, "SysOp");
       else
-        strcpy(master,p);
+        strcpy(master, p);
       continue;
     }
-    if (strnicmp(str,"privel=",7)==0)
-    { if (gettwitstr(str,paddr+npaddr))
+    if (strnicmp(str, "privel=", 7)==0)
+    { if (gettwitstr(str, paddr+npaddr))
         return 3;
       npaddr++;
       continue;
     }
-    if (strnicmp(str,"twit=",5)==0)
-    { if (gettwitstr(str,twit+ntwit))
+    if (strnicmp(str, "twit=", 5)==0)
+    { if (gettwitstr(str, twit+ntwit))
         return 3;
       ntwit++;
       continue;
     }
-    if (strnicmp(str,"no-twit=",8)==0)
-    { if (gettwitstr(str,notwit+nnotwit))
+    if (strnicmp(str, "no-twit=", 8)==0)
+    { if (gettwitstr(str, notwit+nnotwit))
         return 3;
       nnotwit++;
       continue;
     }
-    if (strnicmp(str,"attach-from=",12)==0)
-    { if (gettwitstr(str,attfrom+nattfrom))
+    if (strnicmp(str, "attach-from=", 12)==0)
+    { if (gettwitstr(str, attfrom+nattfrom))
         return 3;
       nattfrom++;
       continue;
     }
-    if (strnicmp(str,"pktpwd=",7)==0)
-    { strncpy(pktpwd,str+7,8);
+    if (strnicmp(str, "pktpwd=", 7)==0)
+    { strncpy(pktpwd, str+7, 8);
       pktpwd[8]=0;
       strupr(pktpwd);
       continue;
     }
-    if (strnicmp(str,"maxsize=",8)==0)
+    if (strnicmp(str, "maxsize=", 8)==0)
     { if (!isdigit(str[8]))
-      { logwrite('!',"Incorrect string in config: %s\n",str);
-        logwrite('!',"Max message size set to default (%u Kb)\n",maxsize);
+      { logwrite('!', "Incorrect string in config: %s\n", str);
+        logwrite('!', "Max message size set to default (%u Kb)\n", maxsize);
         continue;
       }
       maxsize=atoi(str+8);
       continue;
     }
-    if (strnicmp(str,"max-received=",13)==0)
+    if (strnicmp(str, "max-received=", 13)==0)
     { i=atoi(str+13);
       if (i<0)
         goto invparam;
       maxrcv=i;
       continue;
     }
-    if (strnicmp(str,"maxline=",8)==0)
+    if (strnicmp(str, "maxline=", 8)==0)
     { i=atoi(str+8);
       if ((i<30) || (i>160))
         goto invparam;
       maxline=i;
       continue;
     }
-    if (strnicmp(str,"compress=",9)==0)
-    { strcpy(compress,str+9);
+    if (strnicmp(str, "compress=", 9)==0)
+    { strcpy(compress, str+9);
       if (compress[0]==0)
-        strcpy(compress,"nul");
+        strcpy(compress, "nul");
       continue;
     }
-    if (strnicmp(str,"rnews=",6)==0)
-    { strcpy(rnews,str+6);
+    if (strnicmp(str, "rnews=", 6)==0)
+    { strcpy(rnews, str+6);
       continue;
     }
-    if (strnicmp(str,"fido2rel-chk-pl=",16)==0)
+    if (strnicmp(str, "fido2rel-chk-pl=", 16)==0)
     {
 #ifdef DO_PERL
       if (!fullpath(str+16))
@@ -1453,8 +1455,8 @@ notfull:
 #endif
       continue;
     }
-    if (strnicmp(str,"fido2rel-chk",12)==0)
-    { p=strpbrk(str," \t");
+    if (strnicmp(str, "fido2rel-chk", 12)==0)
+    { p=strpbrk(str, " \t");
       if (p==NULL)
         goto invparam;
       if (p!=str+12)
@@ -1464,11 +1466,11 @@ notfull:
       if (p1==NULL)
         goto invparam;
       *p1=0;
-      strncpy(checker[nchecker].mask,p,sizeof(checker[0].mask));
-      if ((stricmp(p,"any")==0) || (stricmp(p,"all")==0))
-        strcpy(checker[nchecker].mask,"any");
+      strncpy(checker[nchecker].mask, p, sizeof(checker[0].mask));
+      if ((stricmp(p, "any")==0) || (stricmp(p, "all")==0))
+        strcpy(checker[nchecker].mask, "any");
       *p1=' ';
-      while ((*p1==' ')||(*p1=='\t'))
+      while ((*p1==' ') || (*p1=='\t'))
         p1++;
       if (*p1==0)
         checker[nchecker].cmdline[0]='\0';
@@ -1477,12 +1479,12 @@ notfull:
       nchecker++;
       continue;
     }
-    if (strnicmp(str,"reject-tpl=",11)==0)
-    { strcpy(tpl_name,str+11);
+    if (strnicmp(str, "reject-tpl=", 11)==0)
+    { strcpy(tpl_name, str+11);
       setpath(tpl_name);
       continue;
     }
-    if (strnicmp(str,"8bit-header=",12)==0)
+    if (strnicmp(str, "8bit-header=", 12)==0)
     { if (tolower(str[12])=='y')
         hdr8bit=1;
       else if (tolower(str[12])=='n')
@@ -1491,7 +1493,7 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"x-comment-to=",13)==0)
+    if (strnicmp(str, "x-comment-to=", 13)==0)
     { if (tolower(str[13])=='y')
         xcomment=1;
       else if (tolower(str[13])=='n')
@@ -1500,7 +1502,7 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"del-transit-files=",18)==0)
+    if (strnicmp(str, "del-transit-files=", 18)==0)
     { if (tolower(str[18])=='y')
         deltransfiles=1;
       else if (tolower(str[18])=='n')
@@ -1509,64 +1511,64 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"postmaster=",11)==0)
-    { strcpy(gatemaster,str+11);
+    if (strnicmp(str, "postmaster=", 11)==0)
+    { strcpy(gatemaster, str+11);
       continue;
     }
-    if (strnicmp(str,"domain=",7)==0)
-    { strcpy(localdom,str+7);
+    if (strnicmp(str, "domain=", 7)==0)
+    { strcpy(localdom, str+7);
       continue;
     }
-    if (strnicmp(str,"local=",6)==0)
-    { strcpy(local,str+6);
+    if (strnicmp(str, "local=", 6)==0)
+    { strcpy(local, str+6);
       continue;
     }
-    if (strnicmp(str,"extcharset=",11)==0)
+    if (strnicmp(str, "extcharset=", 11)==0)
     { if (charsetsdir[0])
         logwrite('!', "charsets-dir defined, extcharset ignored\n");
       else
-        strcpy(extcharset,str+11);
+        strcpy(extcharset, str+11);
       continue;
     }
-    if (strnicmp(str,"extsetname=",11)==0)
-    { strcpy(extsetname,str+11);
+    if (strnicmp(str, "extsetname=", 11)==0)
+    { strcpy(extsetname, str+11);
       continue;
     }
-    if (strnicmp(str,"intsetname=",11)==0)
-    { strcpy(intsetname,str+11);
+    if (strnicmp(str, "intsetname=", 11)==0)
+    { strcpy(intsetname, str+11);
       continue;
     }
-    if (strnicmp(str,"charsets-dir=",13)==0)
+    if (strnicmp(str, "charsets-dir=", 13)==0)
     { if (!fullpath(str+13))
         goto notfull;
-      strcpy(charsetsdir,str+13);
+      strcpy(charsetsdir, str+13);
       addslash(charsetsdir);
       continue;
     }
-    if (strnicmp(str,"charsets-alias=",15)==0)
+    if (strnicmp(str, "charsets-alias=", 15)==0)
     { if (!fullpath(str+15))
         goto notfull;
       strcpy(charsetalias, str+15);
       continue;
     }
-    if (strnicmp(str,"charset=",8)==0)
+    if (strnicmp(str, "charset=", 8)==0)
     { if (charsetsdir[0])
       { logwrite('!', "charsets-dir defined, charset ignored\n");
         continue;
       }
-      p=strpbrk(str+8," \t");
+      p=strpbrk(str+8, " \t");
       if (p==NULL)
-      { logwrite('!',"Incorrect \"charset\" param ignored in " GATECFG ": %s\n",str);
+      { logwrite('!', "Incorrect \"charset\" param ignored in " GATECFG ": %s\n", str);
         continue;
       }
       *p++='\0';
-      for (;(*p==' ')||(*p=='\t');p++);
+      for (; (*p==' ') || (*p=='\t'); p++);
       if (*p=='\0')
       { str[strlen(str)]=' ';
-        logwrite('!',"Incorrect \"charset\" param ignored in " GATECFG ": %s\n",str);
+        logwrite('!', "Incorrect \"charset\" param ignored in " GATECFG ": %s\n", str);
         continue;
       }
-      setcharset(str+8,p);
+      setcharset(str+8, p);
       continue;
     }
     if (strnicmp(str, "charset-alias=", 14)==0)
@@ -1599,7 +1601,7 @@ notfull:
       addftncharset(str+13, p);
       continue;
     }
-    if (strnicmp(str,"write-reason=",13)==0)
+    if (strnicmp(str, "write-reason=", 13)==0)
     { if (tolower(str[13])=='y')
         writereason=1;
       else if (tolower(str[13])=='n')
@@ -1608,7 +1610,7 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"fsp-1004=",9)==0)
+    if (strnicmp(str, "fsp-1004=", 9)==0)
     { if (tolower(str[9])=='y')
         fsp1004=1;
       else if (tolower(str[9])=='n')
@@ -1617,7 +1619,7 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"bangfrom=",9)==0)
+    if (strnicmp(str, "bangfrom=", 9)==0)
     { if (tolower(str[9])=='y')
         bangfrom=1;
       else if (tolower(str[9])=='n')
@@ -1626,7 +1628,7 @@ notfull:
         goto invparam;
       continue;
     }
-    if (strnicmp(str,"env-chaddr=",11)==0)
+    if (strnicmp(str, "env-chaddr=", 11)==0)
     { if (tolower(str[11])=='y')
         env_chaddr=1;
       else if (tolower(str[11])=='n')
@@ -1645,16 +1647,16 @@ notfull:
         break;
     if (i<sizeof(ignore)/sizeof(ignore[0]))
       continue;
-    logwrite('!',"Unknown line in %s ignored: %s\n",curtplname,str);
+    logwrite('!', "Unknown line in %s ignored: %s\n",curtplname, str);
   }
   close_tpl();
   /* разбираемся, чего не хватает */
   if (netmaildir[0]==0)
-  { logwrite('?',"Parameter NETMAIL not specified!\n");
+  { logwrite('?', "Parameter NETMAIL not specified!\n");
     return 3;
   }
   if (nuplink==0)
-  { logwrite('?',"Parameter UPLINK not specified!\n");
+  { logwrite('?', "Parameter UPLINK not specified!\n");
     return 3;
   }
   if ((pktin[0]==0) && (binkout[0]==0) &&
@@ -1662,29 +1664,29 @@ notfull:
       (lbso[0]==0) && (longboxes[0]==0) && (tlboxes[0]==0) &&
 #endif
       (tboxes[0]==0))
-  { logwrite('?',"Parameter PKTIN or any outbound not specified!\n");
+  { logwrite('?', "Parameter PKTIN or any outbound not specified!\n");
     return 3;
   }
   if (pktout[0]==0)
-  { logwrite('?',"Parameter PKTOUT not specified!\n");
+  { logwrite('?', "Parameter PKTOUT not specified!\n");
     return 3;
   }
 #ifndef UNIX
   if ((uupcdir[0]==0) && (uupcver!=SENDMAIL))
-  { logwrite('?',"Parameter UUPC not specified!\n");
+  { logwrite('?', "Parameter UUPC not specified!\n");
     return 3;
   }
 #endif
   if (organization[0]==0)
-  { logwrite('?',"Parameter ORGANIZATION not specified!\n");
+  { logwrite('?', "Parameter ORGANIZATION not specified!\n");
     return 3;
   }
   if (naka==0)
-  { logwrite('?',"Parameter ADDRESS not specified!\n");
+  { logwrite('?', "Parameter ADDRESS not specified!\n");
     return 3;
   }
   if (master[0]==0)
-  { logwrite('?',"Parameter SYSOP not specified!\n");
+  { logwrite('?', "Parameter SYSOP not specified!\n");
     return 3;
   }
   if (rmail[0]==0)
@@ -1693,41 +1695,41 @@ notfull:
     strcpy(rmail, "sendmail -i");
 #else
     if (uupcver==SENDMAIL)
-      strcpy(rmail,"sendmail.exe -i");
+      strcpy(rmail, "sendmail.exe -i");
     else
-      strcpy(rmail,"rmail.exe");
+      strcpy(rmail, "rmail.exe");
 #endif
   }
 #ifndef UNIX
   if ((rmail[1]!=':') || (rmail[2]!='\\')) 
     if (uupcver!=SENDMAIL)
-    { p=strrchr(rmail,PATHSEP);
+    { p=strrchr(rmail, PATHSEP);
       if (p==NULL)
-      { p=strrchr(rmail,':');
+      { p=strrchr(rmail, ':');
         if (p==NULL)
           p=rmail;
         else p++;
       }
       else p++;
-      strcpy(str,p);
-      strcpy(rmail,uupcdir);
+      strcpy(str, p);
+      strcpy(rmail, uupcdir);
       if (rmail[3])
-        strcat(rmail,PATHSTR);
-      strcat(rmail,str);
+        strcat(rmail, PATHSTR);
+      strcat(rmail, str);
     }
 #if 0
     else
-    { p=strrchr(rmail,'\\');
+    { p=strrchr(rmail, '\\');
       if (p==NULL)
-      { p=strrchr(rmail,':');
+      { p=strrchr(rmail, ':');
         if (p==NULL)
           p=rmail;
         else p++;
       }
       else p++;
-      strcpy(str,p);
+      strcpy(str, p);
 #ifdef __OS2__
-      expand_path(str,rmail);
+      expand_path(str, rmail);
 #endif
     }
 #ifdef __MSDOS__
@@ -1735,8 +1737,8 @@ notfull:
 #endif
   { p=strpbrk(rmail," \t");
     if (p) *p='\0';
-    if (access(rmail,0))
-    { logwrite('?',"Can't find %s!\n",rmail);
+    if (access(rmail, 0))
+    { logwrite('?', "Can't find %s!\n", rmail);
       return 3;
     }
     if (p) *p=' ';
@@ -1744,33 +1746,33 @@ notfull:
 #endif
   debug(6, "Config: rmail is '%s'", rmail);
   if (uupcdir[0])
-  { /* выясняем имена local и remote */
-    strcpy(str,uupcdir);
+  { /* get names local and remote */
+    strcpy(str, uupcdir);
     addslash(str);
-    strcpy(spool_dir,str);
-    strcat(spool_dir,"spool" PATHSTR);
+    strcpy(spool_dir, str);
+    strcat(spool_dir, "spool" PATHSTR);
     if (uupcver==KENDRA)
-    { char * p=getenv("UUPCSYSRC");
+    { char *p=getenv("UUPCSYSRC");
       if (p==NULL)
-      { logwrite('?',"Environment variable UUPCSYSRC must be specified!\n");
+      { logwrite('?', "Environment variable UUPCSYSRC must be specified!\n");
         return 1;
       }
       postmast[0]='\0';
-      strcpy(str,p);
-      strcpy(conf_dir,p);
-      p=strrchr(conf_dir,PATHSEP);
+      strcpy(str, p);
+      strcpy(conf_dir, p);
+      p=strrchr(conf_dir, PATHSEP);
       if (p) p[1]='\0';
       else *conf_dir='\0';
     }
     else
-      strcat(str,"conf" PATHSTR "uupc.rc");
+      strcat(str, "conf" PATHSTR "uupc.rc");
     debug(6, "Config: uupc sys rc is %s", str);
     if ((p=getenv("nodename"))!=NULL && local[0]==0) 
       strcpy(local, p);
     if ((p=getenv("compress"))!=NULL && compress[0]==0)
     { strcpy(compress, p);
       if (compress[0]==0)
-        strcpy(compress,"nul");
+        strcpy(compress, "nul");
     }
     if ((p=getenv("extcharset"))!=NULL && (extcharset[0]==0) && charsetsdir[0]=='\0')
       strcpy(extcharset,p);
@@ -1785,101 +1787,101 @@ notfull:
     inconfig=2;
     if (init_tpl(str))
       return 3;
-    /* читаем uupc.rc */
-    while (configline(str,sizeof(str)))
-    { if ((strnicmp(str,"nodename=",9)==0) && (local[0]==0))
-      { for (p=str+9;(*p==' ') || (*p=='\t');p++);
-        strcpy(local,p);
-        p=strchr(local,'\n');
+    /* read uupc.rc */
+    while (configline(str, sizeof(str)))
+    { if ((strnicmp(str, "nodename=", 9)==0) && (local[0]==0))
+      { for (p=str+9; (*p==' ') || (*p=='\t'); p++);
+        strcpy(local, p);
+        p=strchr(local, '\n');
         if (p) *p=0;
         stripspc(local);
       }
-      if (strnicmp(str,"mailserv=",9)==0)
-      { for (p=str+9;(*p==' ') || (*p=='\t');p++);
-        strcpy(remote,p);
-        p=strchr(remote,'\n');
+      if (strnicmp(str, "mailserv=", 9)==0)
+      { for (p=str+9; (*p==' ') || (*p=='\t'); p++);
+        strcpy(remote, p);
+        p=strchr(remote, '\n');
         if (p) *p=0;
         stripspc(remote);
       }
-      if (strnicmp(str,"spooldir=",9)==0)
-      { for (p=str+9;(*p==' ') || (*p=='\t');p++);
-        strcpy(spool_dir,p);
-        p=strchr(spool_dir,'\n');
+      if (strnicmp(str, "spooldir=", 9)==0)
+      { for (p=str+9; (*p==' ') || (*p=='\t'); p++);
+        strcpy(spool_dir, p);
+        p=strchr(spool_dir, '\n');
         if (p) *p=0;
         stripspc(spool_dir);
         removeslash(spool_dir);
       }
-      if ((strnicmp(str,"compress=",9)==0) && (compress[0]==0))
-      { for (p=str+9;(*p==' ') || (*p=='\t');p++);
-        strcpy(compress,p);
-        p=strchr(compress,'\n');
+      if ((strnicmp(str, "compress=", 9)==0) && (compress[0]==0))
+      { for (p=str+9; (*p==' ') || (*p=='\t'); p++);
+        strcpy(compress, p);
+        p=strchr(compress, '\n');
         if (p) *p=0;
         stripspc(compress);
         if (compress[0]==0)
-          strcpy(compress,"nul");
+          strcpy(compress, "nul");
       }
-      if (strnicmp(str,"batchmail=",10)==0)
-      { for (p=str+10;(*p==' ') || (*p=='\t');p++);
-        strcpy(uux,p);
-        p=strchr(uux,'\n');
+      if (strnicmp(str, "batchmail=", 10)==0)
+      { for (p=str+10; (*p==' ') || (*p=='\t'); p++);
+        strcpy(uux, p);
+        p=strchr(uux, '\n');
         if (p) *p=0;
         stripspc(uux);
       }
-      if ((strnicmp(str,"extcharset=",11)==0) && (extcharset[0]==0) && charsetsdir[0]=='\0')
-      { for (p=str+11;(*p==' ') || (*p=='\t');p++);
-        strcpy(extcharset,p);
-        p=strchr(extcharset,'\n');
+      if ((strnicmp(str, "extcharset=", 11)==0) && (extcharset[0]==0) && charsetsdir[0]=='\0')
+      { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
+        strcpy(extcharset, p);
+        p=strchr(extcharset, '\n');
         if (p) *p=0;
         stripspc(extcharset);
         canonuucpdir(extcharset);
         extcharset[strlen(extcharset)-1]='\0'; /* last '\\' */
         continue;
       }
-      if ((strnicmp(str,"extsetname=",11)==0) && (extsetname[0]==0))
-      { for (p=str+11;(*p==' ') || (*p=='\t');p++);
-        strcpy(extsetname,p);
-        p=strchr(extsetname,'\n');
+      if ((strnicmp(str, "extsetname=", 11)==0) && (extsetname[0]==0))
+      { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
+        strcpy(extsetname, p);
+        p=strchr(extsetname, '\n');
         if (p) *p=0;
         stripspc(extsetname);
         continue;
       }
-      if ((strnicmp(str,"intsetname=",11)==0) && (intsetname[0]==0))
-      { for (p=str+11;(*p==' ') || (*p=='\t');p++);
-        strcpy(intsetname,p);
-        p=strchr(intsetname,'\n');
+      if ((strnicmp(str, "intsetname=", 11)==0) && (intsetname[0]==0))
+      { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
+        strcpy(intsetname, p);
+        p=strchr(intsetname, '\n');
         if (p) *p=0;
         stripspc(intsetname);
         continue;
       }
-      if (strnicmp(str,"charset=",8)==0 && charsetsdir[0]=='\0')
-      { for (p=str+8;(*p==' ') || (*p=='\t');p++);
-        p1=strpbrk(p," \t");
+      if (strnicmp(str, "charset=", 8)==0 && charsetsdir[0]=='\0')
+      { for (p=str+8; (*p==' ') || (*p=='\t'); p++);
+        p1=strpbrk(p, " \t");
         if (p1==NULL) goto incorrcharset;
         *p1++='\0';
-        for (;(*p1==' ')||(*p1=='\t');p1++);
+        for (; (*p1==' ') || (*p1=='\t'); p1++);
         stripspc(p1);
         if (*p1=='\0')
         { str[strlen(str)]=' ';
 incorrcharset:
-          logwrite('!',"Incorrect \"charset\" param ignored in uupc.rc: %s\n",str);
+          logwrite('!', "Incorrect \"charset\" param ignored in uupc.rc: %s\n", str);
           continue;
         }
-        setcharset(p,p1);
+        setcharset(p, p1);
         continue;
       }
-      if ((strnicmp(str,"tz=",3)==0) && (tz==0))
-      { if (getmytz(str+3,&tz))
+      if ((strnicmp(str, "tz=", 3)==0) && (tz==0))
+      { if (getmytz(str+3, &tz))
           goto invparam;
         debug(6,"Config: GetTZ('%s') is %d", str+9, tz);
         continue;
       }
-      if (strnicmp(str,"domain=",7)==0)
-      { for (p=str+7;(*p==' ') || (*p=='\t');p++);
+      if (strnicmp(str, "domain=",7)==0)
+      { for (p=str+7; (*p==' ') || (*p=='\t'); p++);
         strcpy(localdom, p);
-        p=strchr(localdom,'\n');
+        p=strchr(localdom, '\n');
         if (p) *p='\0';
       }
-      if (strnicmp(str,"bangfrom=",9)==0)
+      if (strnicmp(str, "bangfrom=",9)==0)
       { if (tolower(str[9])=='y' || tolower(str[9])=='t')
           bangfrom=1;
         else if (tolower(str[9])=='n' || tolower(str[9])=='f')
@@ -1889,18 +1891,18 @@ incorrcharset:
         continue;
       }
       if (uupcver==KENDRA)
-      { if (strnicmp(str,"postmaster=",11)==0)
-        { for (p=str+11;(*p==' ') || (*p=='\t');p++);
-          strcpy(postmast,p);
-          p=strchr(postmast,'\n');
+      { if (strnicmp(str, "postmaster=",11)==0)
+        { for (p=str+11; (*p==' ') || (*p=='\t'); p++);
+          strcpy(postmast, p);
+          p=strchr(postmast, '\n');
           if (p) *p=0;
           stripspc(postmast);
         }
       }
-      if (strnicmp(str,"confdir=",8)==0)
-      { for (p=str+8;(*p==' ') || (*p=='\t');p++);
-        strcpy(conf_dir,p);
-        p=strchr(conf_dir,'\n');
+      if (strnicmp(str, "confdir=",8)==0)
+      { for (p=str+8; (*p==' ') || (*p=='\t'); p++);
+        strcpy(conf_dir, p);
+        p=strchr(conf_dir, '\n');
         if (p) *p=0;
         stripspc(conf_dir);
         addslash(conf_dir);
@@ -1952,22 +1954,22 @@ incorrcharset:
       if (init_tpl(str))
         return 3;
       /* ищем строки "charset?=" */
-      while (configline(str,sizeof(str)))
+      while (configline(str, sizeof(str)))
       { if (strlen(str)<9) continue;
-        if ((strnicmp(str,"charset",7)==0) && (str[8]=='=' || str[9]=='=') && charsetsdir[0]=='\0')
-        { for (p=strchr(str,'=')+1;(*p==' ') || (*p=='\t');p++);
-          p1=strpbrk(p," \t");
+        if ((strnicmp(str, "charset", 7)==0) && (str[8]=='=' || str[9]=='=') && charsetsdir[0]=='\0')
+        { for (p=strchr(str, '=')+1; (*p==' ') || (*p=='\t'); p++);
+          p1=strpbrk(p, " \t");
           if (p1==NULL) goto in1corrcharset;
           *p1++='\0';
-          for (;(*p1==' ')||(*p1=='\t');p1++);
+          for (; (*p1==' ') || (*p1=='\t'); p1++);
           stripspc(p1);
           if (*p1=='\0')
           { str[strlen(str)]=' ';
 in1corrcharset:
-            logwrite('!',"Incorrect \"charset\" param ignored in sendmail.cf: %s\n",str);
+            logwrite('!', "Incorrect \"charset\" param ignored in sendmail.cf: %s\n", str);
             continue;
           }
-          setcharset(p,p1);
+          setcharset(p, p1);
           continue;
         }
       }
@@ -1977,16 +1979,16 @@ in1corrcharset:
 #endif
 
   if (localdom[0]==0)
-  { logwrite('?',"Parameter DOMAIN not specified!\n");
+  { logwrite('?', "Parameter DOMAIN not specified!\n");
     return 3;
   }
-  if (strchr(gatemaster,'@')==NULL)
-  { strcat(gatemaster,"@");
-    strcat(gatemaster,localdom);
+  if (strchr(gatemaster, '@')==NULL)
+  { strcat(gatemaster, "@");
+    strcat(gatemaster, localdom);
   }
 #ifndef UNIX
   if ((local==0) && uupcdir[0])
-  { logwrite('?',"Can't find string \"NodeName=\" in your UUPC.RC!\n");
+  { logwrite('?', "Can't find string \"NodeName=\" in your UUPC.RC!\n");
     return 3;
   }
 #endif
@@ -2031,12 +2033,12 @@ in1corrcharset:
       fclose(f);
     }
   }
-  addchsalias("x-koi8-u", "koi8-u");
-  addchsalias("cp866", "x-cp866");
-  addchsalias("x-cp866-u", "x-cp1125");
-  addchsalias("ruscii", "x-cp1125");
-  addchsalias("cp866-u", "x-cp1125");
-  addchsalias("cp1251", "x-cp1251");
+  addchsalias("x-koi8-u",     "koi8-u");
+  addchsalias("cp866",        "x-cp866");
+  addchsalias("x-cp866-u",    "x-cp1125");
+  addchsalias("ruscii",       "x-cp1125");
+  addchsalias("cp866-u",      "x-cp1125");
+  addchsalias("cp1251",       "x-cp1251");
   addchsalias("windows-1251", "x-cp1251");
 #if 0
   extsetname=canoncharset(extsetname);
@@ -2051,11 +2053,11 @@ in1corrcharset:
     addtable(extsetname, tmptable);
   }
   /* add builtin tables */
-  addmytable("x-cp866",  cp866_table, charsetsdir);
-  addmytable("ruscii",   cp1125_table,charsetsdir);
-  addmytable("x-cp1251", cp1251_table,charsetsdir);
-  addmytable("koi8-r",   koi8r_table, charsetsdir);
-  addmytable("koi8-u",   koi8u_table, charsetsdir);
+  addmytable("x-cp866",  cp866_table,  charsetsdir);
+  addmytable("ruscii",   cp1125_table, charsetsdir);
+  addmytable("x-cp1251", cp1251_table, charsetsdir);
+  addmytable("koi8-r",   koi8r_table,  charsetsdir);
+  addmytable("koi8-u",   koi8u_table,  charsetsdir);
   if (findtable(extsetname, charsetsdir)==NULL) 
   { logwrite('?', "Can't find charset for extsetname %s!\n", extsetname);
     return 3;
@@ -2071,24 +2073,24 @@ in1corrcharset:
   }
 
   if (pktin[0]==0)
-    strcpy(pktin,tmpdir); /* для tossbad */
+    strcpy(pktin, tmpdir); /* для tossbad */
 #ifndef UNIX
   if ((uux[0]==0) && uupcdir)
-  { strcpy(uux,uupcdir);
-    if (uux[3]) strcat(uux,PATHSTR);
-    strcat(uux,"uux.exe");
+  { strcpy(uux, uupcdir);
+    if (uux[3]) strcat(uux, PATHSTR);
+    strcat(uux, "uux.exe");
   }
 #endif
   if ((rnews[0]==0) && uux[0])
-    sprintf(rnews,"%s -x1 -gN -r -p %%s!rnews",uux);
+    sprintf(rnews, "%s -x1 -gN -r -p %%s!rnews", uux);
 
 #ifndef UNIX
-  p=strpbrk(rnews," \t");
+  p=strpbrk(rnews, " \t");
   if (p) *p='\0';
   if ((rnews[0]==0) || access(rnews,0))
   { if (uupcver!=SENDMAIL)
     { if (byuux)
-        logwrite('!',"Can't find %s, by-uux changed to No.\n",rnews);
+        logwrite('!', "Can't find %s, by-uux changed to No.\n", rnews);
       byuux=0;
     }
     else
@@ -2114,26 +2116,26 @@ in1corrcharset:
 
   if (compress[0]==0)
 #ifdef UNIX
-    strcpy(compress,"gzip -9");
+    strcpy(compress, "gzip -9");
 #else
-    strcpy(compress,"gzip.exe -9");
+    strcpy(compress, "gzip.exe -9");
 #endif
-  else if (strcmp(compress,"nul")==0)
+  else if (strcmp(compress, "nul")==0)
     compress[0]=0;
   debug(6, "Config: compress is '%s'", compress);
 #ifndef UNIX
   if ((uupcver==KENDRA) && (getenv("UUPCUSRRC")==NULL))
   { if (postmast[0]=='\0')
-    { logwrite('?',"Didn't find \"postmaster=\" keyword in your %s!\n",
+    { logwrite('?', "Didn't find \"postmaster=\" keyword in your %s!\n",
              getenv("UUPCSYSRC"));
       return 1;
     }
     strcpy(str,"UUPCUSRRC=");
     p=str+strlen(str);
-    strcpy(p,conf_dir);
-    strcat(p,postmast);
-    strcat(p,".rc");
-    if (access(p,0))
+    strcpy(p, conf_dir);
+    strcat(p, postmast);
+    strcat(p, ".rc");
+    if (access(p, 0))
     { logwrite('?', "Can't find %s!\n", p);
       return 1;
     }

@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:09  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:18  gul
  * We are under CVS for now
  *
@@ -1201,7 +1205,7 @@ plaintext:
       /* external checking */
       nagate[0]=nafig[0]=0;
       rejreason=DEST;
-      for (p=to,p1=NULL;p;p=p1)
+      for (p=to,p1=NULL; p; p=p1)
       {
         if (p1) *p1=' ';
         while (isspace(*p) || (*p==',')) p++;

@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:09  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:22  gul
  * We are under CVS for now
  *
@@ -28,7 +32,7 @@ extern int share;
 #undef O_EXCL
 #define O_EXCL (share ? 0x0400 : 0)
 #endif
-#define METACHARS	"<>|"
+#define METACHARS	"<>|%\"\'"
 #elif defined(__OS2__)
 #define SYSTEM "OS/2"
 #define HALF "/2"
@@ -40,7 +44,7 @@ extern int share;
 #define GATECFG		"gate.cfg"
 #define farmalloc	malloc
 #define farfree		free
-#define METACHARS	"<>|&"
+#define METACHARS	"<>|%\"\'&"
 #else
 #define SYSTEM "UNIX"
 #define HALF "/Unix"
@@ -52,7 +56,7 @@ extern int share;
 #define GATECFG		"gate.conf"
 #define farmalloc	malloc
 #define farfree		free
-#define METACHARS	"<>|\"\'\\$*!?[]~`;()&"
+#define METACHARS	"<>|\"\'\\$*!?[]~`;()&^"
 #endif
 
 #ifdef HAVE_FTRUNCATE

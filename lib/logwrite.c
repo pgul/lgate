@@ -2,6 +2,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/15 03:37:09  gul
+ * Stack overflow in dos-version fixed.
+ * Some cosmetic changes.
+ *
  * Revision 2.0  2001/01/10 20:42:22  gul
  * We are under CVS for now
  *
@@ -29,6 +33,8 @@
 #include <stdlib.h>
 #include "libgate.h"
 
+#define SLOGSIZE  2048
+
 char logname[256]="";
 char copyright[256]="";
 char loglevel[32]="-$~`&^@=>%#!?*";
@@ -38,7 +44,7 @@ void logwrite(char level, char *format,...)
 { va_list arg;
   int flog;
   static int firstlog=1;
-  char slog[2048];
+  static char *slog=NULL;
   time_t curtime;
   struct tm *curtm;
   char *module, *p;
@@ -51,10 +57,22 @@ void logwrite(char level, char *format,...)
     module="F2UU";
   else
     module="UU2F";
+  if (slog==NULL)
+  {
+    slog = malloc(SLOGSIZE);
+    if (slog==NULL)
+    { 
+      fputs("Can't write to log, not enough memory:\n", stderr);
+      va_start(arg, format);
+      vfprintf(stderr, format, arg);
+      va_end(arg);
+      return;
+    }
+  }
   if (firstlog && strchr(loglevel, level))
   { firstlog=0;
     if (logstyle == FD_LOG)
-      logwrite('*',"\n-----------  %s %u %s %02u,  %s\n",
+      logwrite('*', "\n-----------  %s %u %s %02u,  %s\n",
         weekday[curtm->tm_wday], curtm->tm_mday, 
         montable[curtm->tm_mon], curtm->tm_year+1900, copyright);
 #ifdef HAVE_SYSLOG_H
@@ -79,7 +97,7 @@ void logwrite(char level, char *format,...)
       va_end(arg);
       debug(0, "Can't write to log:");
 #ifdef HAVE_SNPRINTF
-      vsnprintf(slog, sizeof(slog), format, arg);
+      vsnprintf(slog, SLOGSIZE, format, arg);
 #else
       vsprintf(slog, format, arg);
 #endif
@@ -100,7 +118,7 @@ void logwrite(char level, char *format,...)
     flog=-1;
   p=slog+strlen(slog);
 #ifdef HAVE_SNPRINTF
-  vsnprintf(p, sizeof(slog)-(p-slog),
+  vsnprintf(p, SLOGSIZE-(p-slog),
 #else
   vsprintf(p,
 #endif
