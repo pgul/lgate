@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.14  2002/11/17 21:00:26  gul
+ * Do not put TID to generated .msg
+ *
  * Revision 2.13  2002/11/17 20:55:26  gul
  * New option "tid" in gate.cfg
  *
@@ -851,7 +854,7 @@ wasreject:
       nline;
     }
   }
-  if (!notid)
+  if (!notid && (conf || packmail))
   { for(i=0; i<cheader; i++)
       if (strnicmp(pheader[i], "\x01TID:", 5)==0)
         break;
