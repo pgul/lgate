@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2004/03/27 09:45:31  gul
+ * Bugfix
+ *
  * Revision 2.3  2001/01/26 17:24:35  gul
  * translate comments
  *
@@ -371,7 +374,7 @@ int main(int argc, char *argv[])
     for (p=df->d_name; isdigit(*p); p++);
     if (stricmp(p, ".msg")) continue;
     strcpy(str, netdir);
-    addslash(netdir);
+    addslash(str);
     strcat(str, df->d_name);
     f=open(str, O_BINARY|O_RDONLY|O_DENYNONE);
     if (f==-1) continue;
