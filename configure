@@ -4884,7 +4884,7 @@ esac
 
 echo "$as_me:$LINENO: checking for buggy redhat gcc optimizer" >&5
 echo $ECHO_N "checking for buggy redhat gcc optimizer... $ECHO_C" >&6
-SAVES_CFLAGS="$CFLAGS"
+SAVED_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -O2"
 if test "$cross_compiling" = yes; then
   echo "$as_me:$LINENO: result: cross-compiling. No assumptions made" >&5

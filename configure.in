@@ -186,7 +186,7 @@ esac
 dnl -------------------------------------------------------------------------
 dnl Check for buggy optimizer
 AC_MSG_CHECKING(for buggy redhat gcc optimizer)
-SAVES_CFLAGS="$CFLAGS"
+SAVED_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -O2"
 AC_TRY_RUN([
 #include <ctype.h>
