@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2001/01/25 12:40:07  gul
+ * Minor changes for fix compile warnings
+ *
  * Revision 2.5  2001/01/21 10:20:00  gul
  * new cfg param 'fromtop'
  *
@@ -303,7 +306,7 @@ int params(int argc, char *argv[])
   { /* "/?" only */
     return 1;
   }
-#if HAVE_GETUID && HAVE_GETEUID && HAVE_GETGID && HAVE_GETEGID
+#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
   if (nconf[0] && (getuid()!=geteuid() || getgid()!=getegid()))
   { puts("You do not allow to use -c switch\n";
     return RET_ERR;

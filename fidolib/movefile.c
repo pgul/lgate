@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2001/01/25 12:40:07  gul
+ * Minor changes for fix compile warnings
+ *
  * Revision 2.0  2001/01/10 20:42:20  gul
  * We are under CVS for now
  *
@@ -13,6 +16,8 @@
 #include <unistd.h>
 #endif
 #include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "fidolib.h"
 
 int move(char *oldname, char *newname)
