@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.12  2003/03/25 19:46:39  gul
+ * Bugfix in retoss first message in badmail
+ *
  * Revision 2.11  2002/03/21 13:43:26  gul
  * Remove dest addr list length limitation
  *
@@ -504,7 +507,7 @@ void retoss(void)
       continue;
     curoffs=ftell(fbad);
     strcpy(str, badmail);
-    addslash(badmail);
+    addslash(str);
     strcat(str, df->d_name);
     debug(12, "ReToss: copy %s to %s", str, msgname);
     h=myopen(str, O_BINARY|O_RDONLY|O_EXCL);
