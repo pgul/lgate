@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/10/03 13:23:20  gul
+ * Create pkt in tmpdir and then move to pktout
+ *
  * Revision 2.3  2002/09/22 09:32:41  gul
  * syntax error fix
  *
@@ -144,12 +147,20 @@ void setvars(int reason)
 
 void closepkt(void)
 { unsigned i;
+  static long tpktname=0;
+  static char realname[FNAME_MAX];
 
   if (frej==NULL) return;
   i=0;
   fwrite(&i, 2, 1, frej);
   fclose(frej);
   frej=NULL;
+  if (tpktname==0)
+    tpktname=time(NULL);
+  sprintf(realname, "%s%08lx.pkt", pktout, tpktname++);
+  if (rmove(msgname, realname)==0)
+    return;
+  logwrite('?', "Can't rename %s!\n", msgname);
 }
 
 int writemsghdr(struct message *msghdr, FILE *fout)
@@ -328,7 +339,7 @@ void genlett(int reason, char *toname,
   { unsigned long maxnum, initmax;
     initmax=time(0);
     for (maxnum=initmax+1; maxnum!=initmax; maxnum++)
-    { sprintf(msgname, "%s%lx.pkt", pktout, maxnum);
+    { sprintf(msgname, "%s%lx.pkt", tmpdir, maxnum);
       h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL|O_DENYNONE, 0660);
       if (h!=-1 || errno!=EEXIST)
         break;
