@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2002/09/22 08:02:09  gul
+ * translate comments
+ *
  * Revision 2.0  2001/01/10 20:42:17  gul
  * We are under CVS for now
  *
@@ -48,13 +51,13 @@ int  packmail=0;
 int  seqf=0;
 
 static struct message msg;
-static DIR * d;
-static struct dirent * df;
+static DIR *d;
+static struct dirent *df;
 static unsigned r;
-static FILE * f=NULL;
+static FILE *f=NULL;
 static int i;
-static char tstr[80],msgname[FNAME_MAX],* p;
-static uword mzone,mnet,mnode,mpoint;
+static char tstr[80], msgname[FNAME_MAX], *p;
+static uword mzone, mnet, mnode, mpoint;
 
 char *strreason(int reason, int whatfor)
 { /* whatfor:
@@ -92,37 +95,37 @@ void setvars(int reason)
   debug(9, "SetVars: set Subject to '%s'", getvar("Subject"));
   setvar("oldsubject",msghdr.subj);
   debug(9, "SetVars: set OldSubject to '%s'", getvar("OldSubject"));
-  putaddr(tstr,myaka[curaka].zone,myaka[curaka].net,myaka[curaka].node,myaka[curaka].point);
-  setvar("gateaddr",tstr);
+  putaddr(tstr, myaka[curaka].zone, myaka[curaka].net, myaka[curaka].node, myaka[curaka].point);
+  setvar("gateaddr", tstr);
   debug(9, "SetVars: set GateAddr to '%s'", getvar("GateAddr"));
-  setvar("toaddr",tstr);
+  setvar("toaddr", tstr);
   debug(9, "SetVars: set ToAddr to '%s'", getvar("ToAddr"));
-  setvar("fromname",msghdr.from);
+  setvar("fromname", msghdr.from);
   debug(9, "SetVars: set FromName to '%s'", getvar("FromName"));
-  putaddr(tstr,zone,net,node,point);
-  setvar("fromaddr",tstr);
+  putaddr(tstr, zone, net, node, point);
+  setvar("fromaddr", tstr);
   debug(9, "SetVars: set FromAddr to '%s'", getvar("FromAddr"));
   if (reason==NOADDR)
-    setvar("toname",msghdr.to);
+    setvar("toname", msghdr.to);
   else
-    setvar("toname",to);
+    setvar("toname", to);
   debug(9, "SetVars: set ToName to '%s'", getvar("ToName"));
-  setvar("date",msghdr.date);
+  setvar("date", msghdr.date);
   debug(9, "SetVars: set Date to '%s'", getvar("Date"));
-  sprintf(tstr,"%ld",txtsize);
-  setvar("size",tstr);
+  sprintf(tstr,"%ld", txtsize);
+  setvar("size", tstr);
   debug(9, "SetVars: set Size to '%s'", getvar("Size"));
-  setvar("mastname",master);
+  setvar("mastname", master);
   debug(9, "SetVars: set MastName to '%s'", getvar("MastName"));
-  putaddr(tstr,mastzone,mastnet,mastnode,mastpoint);
-  setvar("mastaddr",tstr);
+  putaddr(tstr, mastzone, mastnet, mastnode, mastpoint);
+  setvar("mastaddr", tstr);
   debug(9, "SetVars: set MastAddr to '%s'", getvar("MastAddr"));
-  sprintf(tstr,"%02u %s %02u",curtm->tm_mday,montable[curtm->tm_mon],
+  sprintf(tstr,"%02u %s %02u", curtm->tm_mday, montable[curtm->tm_mon],
           curtm->tm_year%100);
-  setvar("localdate",tstr);
+  setvar("localdate", tstr);
   debug(9, "SetVars: set LocalDate to '%s'", getvar("LocalDate"));
-  sprintf(tstr,"%02u:%02u:%02u",curtm->tm_hour,curtm->tm_min,curtm->tm_sec);
-  setvar("localtime",tstr);
+  sprintf(tstr, "%02u:%02u:%02u", curtm->tm_hour, curtm->tm_min, curtm->tm_sec);
+  setvar("localtime", tstr);
   debug(9, "SetVars: set LocalTime to '%s'", getvar("LocalTime"));
   setvar("reason", strreason(reason, 0));
   debug(9, "SetVars: set Reason to '%s'", getvar("Reason"));
@@ -133,11 +136,11 @@ void closepkt(void)
 
   if (f==NULL) return;
   i=0;
-  fwrite(&i,2,1,f);
+  fwrite(&i, 2, 1, f);
   fclose(f);
 }
 
-int writemsghdr(struct message * msghdr,FILE * fout)
+int writemsghdr(struct message *msghdr, FILE *fout)
 { uword two;
   struct message msg;
 
@@ -145,23 +148,23 @@ int writemsghdr(struct message * msghdr,FILE * fout)
   memcpy(&msg, msghdr, sizeof(msg));
   msghdr_byteorder(&msg);
   two=chorders(htons(2));
-  fwrite(&two,2,1,fout);
-  fwrite(&(msg.orig_node),2,1,fout);
-  fwrite(&(msg.dest_node),2,1,fout);
-  fwrite(&(msg.orig_net),2,1,fout);
-  fwrite(&(msg.dest_net),2,1,fout);
-  fwrite(&(msg.attr),2,1,fout);
-  fwrite(&(msg.cost),2,1,fout);
-  fwrite(msghdr->date,strlen(msghdr->date)+1,1,fout);
-  fwrite(msghdr->to,strlen(msghdr->to)+1,1,fout);
-  fwrite(msghdr->from,strlen(msghdr->from)+1,1,fout);
-  if (fwrite(msghdr->subj,strlen(msghdr->subj)+1,1,fout))
+  fwrite(&two, 2, 1, fout);
+  fwrite(&(msg.orig_node), 2, 1, fout);
+  fwrite(&(msg.dest_node), 2, 1, fout);
+  fwrite(&(msg.orig_net), 2, 1, fout);
+  fwrite(&(msg.dest_net), 2, 1, fout);
+  fwrite(&(msg.attr), 2, 1, fout);
+  fwrite(&(msg.cost), 2, 1, fout);
+  fwrite(msghdr->date, strlen(msghdr->date)+1, 1, fout);
+  fwrite(msghdr->to, strlen(msghdr->to)+1, 1, fout);
+  fwrite(msghdr->from, strlen(msghdr->from)+1, 1, fout);
+  if (fwrite(msghdr->subj, strlen(msghdr->subj)+1, 1, fout))
     return 0;
   else
     return 1;
 }
 
-static void writepkthdr(FILE * f)
+static void writepkthdr(FILE *f)
 {
   time_t curtime;
   struct tm *curtm;
@@ -195,7 +198,7 @@ static void writepkthdr(FILE * f)
   pkthdr.ProdCodeH=MAJVER;
   pkthdr.ProdCodeL=MINVER;
 #endif
-  strncpy(pkthdr.password,pktpwd,8);
+  strncpy(pkthdr.password, pktpwd, 8);
   pkthdr.OrigZone=myaka[0].zone;
   pkthdr.DestZone=uplink[0].zone;
   pkthdr.AuxNet=0;
@@ -208,18 +211,18 @@ static void writepkthdr(FILE * f)
   pkthdr.ProductData[0]=0x7567;
   pkthdr.ProductData[1]=0x6C;
   pkthdr_byteorder(&pkthdr);
-  fwrite(&pkthdr,sizeof(pkthdr),1,f);
+  fwrite(&pkthdr, sizeof(pkthdr), 1, f);
 }
 
-void genlett(int reason,char * toname,
-             uword tozone,uword tonet,uword tonode,uword topoint,
+void genlett(int reason, char *toname,
+             uword tozone, uword tonet, uword tonode, uword topoint,
              int tomaster)
 {
   time_t curtime;
   struct tm *curtm;
 
-  /* формируем .msg с отлупом */
-  /* выясняем переменные */
+  /* create bounce .msg */
+  /* init vars */
   debug(9, "GenLett, to='%s', %d:%d/%d.%d, reason=%d", toname,
         tozone, tonet, tonode, topoint, reason);
   curtime=time(NULL);
@@ -230,29 +233,29 @@ void genlett(int reason,char * toname,
   gettextline=gettextline_;
   setvars(reason);
   if (tomaster)
-    setvar("tomaster","yes");
+    setvar("tomaster", "yes");
   if (msghdr.attr & msgRETREC)
-    setvar("DontSend","yes");
+    setvar("DontSend", "yes");
   if (r==0)
-    while (templateline(tstr,sizeof(tstr)));
+    while (templateline(tstr, sizeof(tstr)));
   if (getvar("dontsend"))
   { close_tpl();
     debug(6, "GenLett: DoNotSend set, don't send message");
     return;
   }
-  strcpy(msg.to,toname);
-  if (getfidoaddr(&mzone,&mnet,&mnode,&mpoint,getvar("gateaddr")))
+  strcpy(msg.to, toname);
+  if (getfidoaddr(&mzone, &mnet, &mnode, &mpoint, getvar("gateaddr")))
   { mzone=myaka[curaka].zone;
     mnode=myaka[curaka].node;
     mnet=myaka[curaka].net;
     mpoint=myaka[curaka].point;
   }
-  strncpy(msg.from,getvar("gatename"),sizeof(msg.from)-1);
-  strncpy(msg.subj,getvar("subject"),sizeof(msg.subj)-1);
+  strncpy(msg.from, getvar("gatename"), sizeof(msg.from)-1);
+  strncpy(msg.subj, getvar("subject"), sizeof(msg.subj)-1);
   close_tpl();
-  sprintf(msg.date,"%02u %s %02u  %02u:%02u:%02u",
-          curtm->tm_mday,montable[curtm->tm_mon],curtm->tm_year%100,
-          curtm->tm_hour,curtm->tm_min,curtm->tm_sec);
+  sprintf(msg.date, "%02u %s %02u  %02u:%02u:%02u",
+          curtm->tm_mday, montable[curtm->tm_mon], curtm->tm_year%100,
+          curtm->tm_hour, curtm->tm_min, curtm->tm_sec);
   msg.times_read=msg.cost=0;
   msg.dest_zone=tozone;
   msg.dest_node=tonode;
@@ -266,7 +269,7 @@ void genlett(int reason,char * toname,
   msg.attr=msgPRIVATE|msgKILLSENT|msgLOCAL|msgRETREC;
   if (!packmail)
   { unsigned maxnum;
-    /* находим максимальный номер *.msg */
+    /* find maximum *.msg number */
     maxnum=0;
     d=opendir(netmaildir);
     while ((d!=NULL) && ((df=readdir(d))!=NULL))
@@ -274,11 +277,11 @@ void genlett(int reason,char * toname,
       if (i>maxnum) maxnum=i;
     }
     if (d) closedir(d);
-    strcpy(msgname,netmaildir);
+    strcpy(msgname, netmaildir);
     if (netmaildir[strlen(netmaildir)-1]!=PATHSEP)
       strcat(msgname, PATHSTR);
-    sprintf(msgname+strlen(msgname),"%u.msg",maxnum+1);
-    f=fopen(msgname,"wb");
+    sprintf(msgname+strlen(msgname), "%u.msg", maxnum+1);
+    f=fopen(msgname, "wb");
     for (i=0; i<5; i++)
       if (flock(fileno(f), LOCK_EX|LOCK_NB))
         sleep(1);
@@ -290,12 +293,12 @@ void genlett(int reason,char * toname,
     }
   }
   else if (f==NULL)
-  { unsigned long maxnum,initmax;
+  { unsigned long maxnum, initmax;
     initmax=time(0);
-    for (maxnum=initmax+1;maxnum!=initmax;maxnum++)
-    { sprintf(msgname,"%s%lx.pkt",pktout,maxnum);
-      if (access(msgname,0)==0) continue;
-      f=fopen(msgname,"wb");
+    for (maxnum=initmax+1; maxnum!=initmax; maxnum++)
+    { sprintf(msgname, "%s%lx.pkt", pktout, maxnum);
+      if (access(msgname, 0)==0) continue;
+      f=fopen(msgname, "wb");
       if (f!=NULL)
         break;
     }
@@ -315,77 +318,77 @@ void genlett(int reason,char * toname,
   }
   debug(6, "GenLett: msgname is %s", msgname);
   if (f==NULL)
-  { logwrite('?',"Error! Can't create reject message to %s %u:%u/%u.%u!\n",
-             toname,tozone,tonet,tonode,topoint);
+  { logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
+             toname, tozone, tonet, tonode, topoint);
     return;
   }
   debug(9, "GenLett: %s created", msgname);
   if (!packmail)
   {
-    if (fwrite(&msg,sizeof(msg),1,f)!=1)
+    if (fwrite(&msg, sizeof(msg), 1, f)!=1)
     {
 errwrite:
       flock(fileno(f), LOCK_UN);
       fclose(f);
       f=NULL;
       unlink(msgname);
-      logwrite('?',"Error! Can't create reject message to %s %u:%u/%u.%u!\n",
-               toname,tozone,tonet,tonode,topoint);
+      logwrite('?', "Error! Can't create reject message to %s %u:%u/%u.%u!\n",
+               toname, tozone, tonet, tonode, topoint);
       return;
     }
   }
-  else if (writemsghdr(&msg,f)!=0)
+  else if (writemsghdr(&msg, f)!=0)
     goto errwrite;
-  fprintf(f,"\x01INTL %u:%u/%u %u:%u/%u\r",tozone,tonet,tonode,
-              mzone,mnet,mnode);
+  fprintf(f, "\x01INTL %u:%u/%u %u:%u/%u\r", tozone, tonet, tonode,
+              mzone, mnet, mnode);
   if (mpoint)
-    fprintf(f,"\x01""FMPT %u\r",mpoint);
+    fprintf(f, "\x01""FMPT %u\r", mpoint);
   if (topoint)
-    fprintf(f,"\x01TOPT %u\r",topoint);
-  fprintf(f,"\x01MSGID: %u:%u/%u",mzone,mnet,mnode);
+    fprintf(f, "\x01TOPT %u\r", topoint);
+  fprintf(f, "\x01MSGID: %u:%u/%u", mzone, mnet, mnode);
   if (mpoint)
-    fprintf(f,".%u",mpoint);
-  fprintf(f," %08lx\r", curtime*100+getpid()%100+seqf++);
+    fprintf(f, ".%u", mpoint);
+  fprintf(f, " %08lx\r", curtime*100+getpid()%100+seqf++);
   tplout=1;
   r=init_tpl(tpl_name);
   setvars(reason);
   if (tomaster)
-    setvar("tomaster","yes");
+    setvar("tomaster", "yes");
   if (r==0)
-  { while (templateline(tstr,sizeof(tstr)))
-    { for (p=tstr;*p;p++) if (*p=='\n') *p='\r';
-      fputs(tstr,f);
+  { while (templateline(tstr, sizeof(tstr)))
+    { for (p=tstr; *p; p++) if (*p=='\n') *p='\r';
+      fputs(tstr, f);
     }
   }
   else
-  { fprintf(f,"   Hello %s!\r",getvar("fromname"));
-    fprintf(f,"   Your message was rejected because ");
-    fprintf(f,strreason(reason, 1), to);
-    fprintf(f,".\r");
-    fprintf(f,"Original message was:\r"
+  { fprintf(f, "   Hello %s!\r", getvar("fromname"));
+    fprintf(f, "   Your message was rejected because ");
+    fprintf(f, strreason(reason, 1), to);
+    fprintf(f, ".\r");
+    fprintf(f, "Original message was:\r"
               "==============\r"
               "From: %s %s\r"
               "To:   %s %s\r"
               "Subj: %s\r"
               "Date: %s\r"
               "==============\r",
-              getvar("fromname"),getvar("fromaddr"),
-              getvar("to"),getvar("toaddr"),
-              getvar("oldsubject"),getvar("date"));
+              getvar("fromname"), getvar("fromaddr"),
+              getvar("to"), getvar("toaddr"),
+              getvar("oldsubject"), getvar("date"));
     if (!tomaster)
     { reset_text_();
-      while (gettextline_(tstr,sizeof(tstr)))
-        fputs(tstr,f);
-      fputs("==============\r",f);
+      while (gettextline_(tstr, sizeof(tstr)))
+        fputs(tstr, f);
+      fputs("==============\r", f);
     }
-    fprintf(f,"  Send your proposes and bug reports to %s %s.\r",
-            getvar("mastname"),getvar("mastaddr"));
-    fprintf(f,"                   Lucky Carrier,\r");
-    fprintf(f,"                             Gate Daemon.\r");
+    fprintf(f, "  Send your proposes and bug reports to %s %s.\r",
+            getvar("mastname"), getvar("mastaddr"));
+    fprintf(f, "                   Lucky Carrier,\r");
+    fprintf(f, "                             Gate Daemon.\r");
   }
   close_tpl();
-  fprintf(f,"--- "COPYRIGHT"\r");
-  if (fputc(0,f)==EOF)
+  fprintf(f, "--- "COPYRIGHT"\r");
+  if (fputc(0, f)==EOF)
     goto errwrite;
   if (fflush(f))
     goto errwrite;
