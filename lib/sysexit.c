@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2002/09/22 09:22:37  gul
+ * fix syntax error
+ *
  * Revision 2.3  2002/09/11 15:53:43  gul
  * Fix compiler warning
  *
@@ -64,7 +67,7 @@ static char *sendmailerr[] = {
 "configuration error"
 };
 
-#if !defined(HAVE_SYS_SIGNAME) && !defined(HAVE_SYS_SIGLIST) !defined(HAVE_STRSIGNAL)
+#if !defined(HAVE_SYS_SIGNAME) && !defined(HAVE_SYS_SIGLIST) && !defined(HAVE_STRSIGNAL)
 #define sys_signame _flib_sys_signame /* avoid exists but undeclared */
 static char *sys_signame[] = {
 "0",
