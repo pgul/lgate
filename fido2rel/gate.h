@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.11  2005/10/29 22:42:23  gul
+ * *** empty log message ***
+ *
  * Revision 2.10  2004/07/20 18:47:19  gul
  * \r\n -> \n
  *
@@ -247,7 +250,6 @@ extern struct echotype
          char _Far *usenet;
          char group;
        } _Huge *echoes;
-extern char _Far *echonames;
 extern struct grouptype
        { char newsserv[64];
          char distrib[16];
