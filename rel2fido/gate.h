@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2005/10/29 22:52:19  gul
+ * *** empty log message ***
+ *
  * Revision 2.7  2004/07/20 18:38:06  gul
  * \r\n -> \n
  *
@@ -264,7 +267,6 @@ extern void *regbufmsg;
 extern FILE *fout;
 #endif
 extern char charsetsdir[FNAME_MAX];
-extern char charsetalias[FNAME_MAX];
 extern int  putchrs;
 extern char freply[SSIZE], freplydomain[MAXADDR];
 extern int  notid;

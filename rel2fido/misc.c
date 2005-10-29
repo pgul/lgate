@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.17  2005/10/29 22:52:19  gul
+ * *** empty log message ***
+ *
  * Revision 2.16  2004/07/20 18:38:05  gul
  * \r\n -> \n
  *
@@ -2358,13 +2361,20 @@ void rexx_extchk(void *param)
 #include <EXTERN.h>
 #include <perl.h>
 
+#ifndef pTHXo
+#define pTHXo
+#endif
+#ifndef pTHXo_
+#define pTHXo_
+#endif
+
 static PerlInterpreter *my_perl;
 static int do_perl=1;
 extern char perlfile[];
 static char *perlargs[]={"", perlfile, NULL};
 char *newintsetname;
-void boot_DynaLoader(CV *cv);
-void xs_init(void)
+void boot_DynaLoader(pTHXo_ CV *cv);
+void xs_init(pTHXo)
 {
 #ifndef __OS2__
   dXSUB_SYS;
