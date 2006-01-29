@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.18  2006/01/29 11:53:45  gul
+ * *** empty log message ***
+ *
  * Revision 2.17  2004/07/20 18:38:06  gul
  * \r\n -> \n
  *
@@ -1885,7 +1888,7 @@ errspace:
   }
   if (area!=-1)
   {
-    logwrite('-', "AREA:%s\tFrom %s %lu butes OK\n", echoes[area].fido, fromaddr, maxmsgbuf+hdrsize);
+    logwrite('-', "AREA:%s\tFrom %s %lu bytes OK\n", echoes[area].fido, fromaddr, maxmsgbuf+hdrsize);
     if (!bypipe)
       retcode|=RET_ECHOMAIL;
   }
