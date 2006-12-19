@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.18  2006/12/19 13:18:52  gul
+ * Fix warnings
+ *
  * Revision 2.17  2004/07/20 18:47:19  gul
  * \r\n -> \n
  *
@@ -1976,11 +1979,11 @@ plaintext:
         if (point)
           sprintf(msgid+strlen(msgid), "%u-", point);
         sprintf(msgid+strlen(msgid), "%08lx",
-                time(NULL)*100+getpid()%100+seqf++);
+                (time(NULL)*100ul+getpid()%100+seqf++) & 0xfffffffful);
         strcat(msgid, "@");
       }
       else /* ifmail-style */
-      { sprintf(msgid, "%08lx", time(NULL)*100+getpid()%100+seqf++);
+      { sprintf(msgid, "%08lx", (time(NULL)*100ul+getpid()%100+seqf++) & 0xfffffffful);
         msgid[8]='@';
         if (point)
           sprintf(msgid+9, "p%u.f%u.n%u.z%u.", point, node, net, zone);
@@ -2104,7 +2107,7 @@ plaintext:
       { if (!isfield("Mime-Version:"))
           virt_fprintf(fout, "Mime-Version: 1.0\n");
         if (attr & msgFILEATT)
-        { sprintf(bound, "%ld%d/%s", time(0), seqf++, local);
+        { sprintf(bound, "%ld%d/%s", (unsigned long)time(NULL), seqf++, local);
           virt_fprintf(fout, "Content-Type: multipart/mixed; boundary=\"%s\"\n", bound);
           if (virt_putc('\n', fout)==EOF)
             goto errwrite1;

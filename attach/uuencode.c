@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2006/12/19 13:18:52  gul
+ * Fix warnings
+ *
  * Revision 2.3  2004/07/20 18:29:26  gul
  * \r\n -> \n
  *
@@ -261,7 +264,7 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm, char the
   curtm=localtime(&curtime);
   if (curpart==1)
     sprintf(part_id, "%08lx-%04x-%04x@%s",
-            time(NULL), (unsigned)getpid(), seqf++, local);
+            (unsigned long)time(NULL), (unsigned)getpid(), seqf++, local);
   if (uupcver != SENDMAIL)
     fprintf(h, "From %s %s %s %02u %02u:%02u:%02u %u\n",
             user, weekday[curtm->tm_wday],
@@ -273,7 +276,7 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm, char the
     fprintf(h, "Message-Id: <%s>\n", part_id);
   else
     fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
-              time(NULL), (unsigned)getpid(), seqf++, local);
+              (unsigned long)time(NULL), (unsigned)getpid(), seqf++, local);
   fname=basename(nearfname);
   if (parts>1)
     fprintf(h, "Subject: %s, %u/%u; %02u.%02u.%02u %02u:%02u:%02u\n",
@@ -292,7 +295,7 @@ static FILE *puthdr(int parts, int curpart, char *passwd, long confirm, char the
   if ((parts>1) && (curpart==1) && !thebat)
   { fprintf(h, "\n");
     fprintf(h, "Message-Id: <%08lx-%04x-%04x@%s>\n",
-            time(NULL), (unsigned)getpid(), seqf++, local);
+            (unsigned long)time(NULL), (unsigned)getpid(), seqf++, local);
     fprintf(h, "Subject: %s; %02u.%02u.%02u %02u:%02u:%02u\n",
             fname, ftime.tm_mday, ftime.tm_mon+1, ftime.tm_year%100,
             ftime.tm_hour, ftime.tm_min, ftime.tm_sec);
@@ -713,7 +716,7 @@ void sendack(char *addr, char *msgid, acktype result, char *reason)
           curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
           (tz<=0) ? '+' : '-', (tz<0) ? -tz : tz);
   fprintf(f, "Message-Id: <%08lx-%04x-%04x@%s>\n",
-          time(NULL), (unsigned)getpid(), seqf++, local);
+          (unsigned long)time(NULL), (unsigned)getpid(), seqf++, local);
   fprintf(f, "References: %s\n", msgid);
   fprintf(f, "Subject: Confirmation %sACK %s: %s\n",
           (result==ACK_OK) ? "" : "N", msgid, reason);

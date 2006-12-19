@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.12  2006/12/19 13:18:52  gul
+ * Fix warnings
+ *
  * Revision 2.11  2004/07/20 18:47:18  gul
  * \r\n -> \n
  *
@@ -425,7 +428,7 @@ errwrite:
   fprintf(frej, "\x01MSGID: %u:%u/%u", mzone, mnet, mnode);
   if (mpoint)
     fprintf(frej, ".%u", mpoint);
-  fprintf(frej, " %08lx\r", curtime*100+getpid()%100+seqf++);
+  fprintf(frej, " %08lx\r", (curtime*100ul+getpid()%100+seqf++) & 0xffffffff);
   if (!notid)
     fprintf(frej, "\x01%s: %s\r", packmail ? "TID" : "PID", NAZVA);
   tplout=1;

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2006/12/19 13:18:53  gul
+ * Fix warnings
+ *
  * Revision 2.6  2004/07/20 18:38:05  gul
  * \r\n -> \n
  *
@@ -313,7 +316,8 @@ void reject(int reason)
         curtm->tm_hour, curtm->tm_min, curtm->tm_sec,
         (tz<=0) ? '+' : '-', (tz>0) ? tz : -tz);
       fprintf(fout, "Message-Id: <%lx%04x%02d@%s>\n",
-              time(NULL)+tomaster, (unsigned)getpid(), seqf++, localdom);
+              (unsigned long)time(NULL)+tomaster, (unsigned)getpid(),
+              seqf++, localdom);
       if (getvar("Multipart")==NULL)
         setvar("Multipart", "No");
       if (tpl==0)
