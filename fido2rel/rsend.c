@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2006/12/19 13:29:53  gul
+ * Fix warnings
+ *
  * Revision 2.2  2004/07/20 18:47:19  gul
  * \r\n -> \n
  *
@@ -111,7 +114,7 @@ int rsend(char *to, VIRT_FILE *fin, int type)
     else
     { if (lasttype==G_DIR)
       { /* store packet */
-        for (l=time((time_t *)&l);;l++)
+        for (l=time(NULL);;l++)
         { sprintf(named, "%s%08lx.001", lastto, l);
           if (access(named, 0)) break;
         }

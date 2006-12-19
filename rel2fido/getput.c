@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2006/12/19 13:26:40  gul
+ * Fix warnings
+ *
  * Revision 2.7  2006/12/19 13:18:53  gul
  * Fix warnings
  *
@@ -91,7 +94,6 @@ void *regbufmsg = NULL;
 static int  maxmsg;
 static int  tomaster, tpl;
 static char *p;
-static long l;
 
 static int tpl_cont;
 
@@ -468,7 +470,8 @@ void badnews(void)
   else
   { i=myopen(namedel[0], O_BINARY|O_RDWR|O_EXCL);
     if (i!=-1)
-    { chsize(i, begdel);
+    { int l;
+      chsize(i, begdel);
       lseek(i, begdel, SEEK_SET);
       l=0;
       write(i, &l, 2);
@@ -923,7 +926,7 @@ char *renamepkt(char *tempname)
   static char realname[FNAME_MAX];
 
   if (tpktname==0)
-    tpktname=time((time_t *)&l);
+    tpktname=time(NULL);
   sprintf(realname, "%s%08lx.pkt", pktout, tpktname++);
   if (rmove(tempname, realname)==0)
     return realname;
@@ -1016,7 +1019,9 @@ int nextmsg(void)
   }
   /* pkt */
   if (fout)
-  { l=0;
+  { int l;
+
+    l=0;
     fwrite(&l, 1, 1, fout);
     if ((ftell(fout)>=pktsize*1024l) || (curaka!=curpktaka))
     { debug(4, "NextMsg: close current pkt (size %ld), make new", ftell(fout));
@@ -1047,10 +1052,12 @@ int nextmsg(void)
       return 0;
   }
   { int i, h;
+    time_t l;
+
     i=0;
-    l=time((time_t *)&l);
+    l=time(NULL);
     do
-    { sprintf(msgname, "%s%08lx.pkt", tmpdir, l++);
+    { sprintf(msgname, "%s%08lx.pkt", tmpdir, (unsigned long)l++);
       h=open(msgname, O_BINARY|O_RDWR|O_CREAT|O_EXCL, S_IREAD|S_IWRITE);
       i++;
     }

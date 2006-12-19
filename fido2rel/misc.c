@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.20  2006/12/19 13:29:53  gul
+ * Fix warnings
+ *
  * Revision 2.19  2005/10/29 22:41:41  gul
  * *** empty log message ***
  *
@@ -452,7 +455,7 @@ void retoss(void)
   { closedir(d);
     return;
   }
-  l=time((time_t *)&l);
+  l=time(NULL);
   do
   { sprintf(msgname, "%s%08lx.pkt", pktin, l);
     l++;
