@@ -17,6 +17,8 @@
 - ftrans "U:\\FILES.OUT\\OUTBOUND\\" "/fido/files.out/outbound/"
 - писать MIME-отлупы с частью Content-Type: message/delivery-status
   (rfc1891-1894, 2034).
+- attuucp: при resend или удалении непосланного писать в лог не только
+  имя файла в tmp, но и имя аттача и message-id
 - attuucp: transx compatibility
 - external checker: возможность сделать echomail из netmail и наоборот.
 - External filter.
@@ -43,6 +45,7 @@
 - attuucp: confirmations according to rfc3798.txt
 - attuucp: rfc3335.txt - secure peer to peer
 - attuucp: rfc3156.txt - MIME Security with OpenPGP
+- internal gzip (zlib)
 ? сначала проверять itwit*, а потом уже валидность "To:"
 
    Не уверен, надо ли и если надо, то как именно, поэтому далеко
