@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.19  2007/08/02 07:00:37  gul
+ * Cosmetics
+ *
  * Revision 2.18  2006/12/19 13:18:52  gul
  * Fix warnings
  *
@@ -2119,7 +2122,8 @@ plaintext:
                     wascyr ? myextsetname : "us-ascii")==EOF)
           goto errwrite1;
         if (!isfield("Content-Transfer-Encoding:"))
-          if (virt_fprintf(fout, "Content-Transfer-Encoding: 8bit\n")==EOF)
+          if (virt_fprintf(fout, "Content-Transfer-Encoding: %s\n",
+                    wascyr ? "8bit" : "7bit")==EOF)
             goto errwrite1;
       }
     if ((area!=-1) && stricmp(to, "all") && !xcomment)
