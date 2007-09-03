@@ -37,7 +37,7 @@ install:	attach/attuucp fido2rel/fido2rel rel2fido/rel2fido forward/forward mins
 	USER=${USER} GROUP=${GROUP} INSTALL=${INSTALL} make -f minstall install
 
 update:	attach/attuucp fido2rel/fido2rel rel2fido/rel2fido forward/forward minstall
-	make -f minstall -DUSER=${USER} -DGROUP=${GROUP} -DINSTALL=${INSTALL} install update
+	USER=${USER} GROUP=${GROUP} INSTALL=${INSTALL} make -f minstall update
 
 clean:
 	rm -f rel2fido/*.o fido2rel/*.o attach/*.o fidolib/*.o lib/*.o forwrd/*.o
