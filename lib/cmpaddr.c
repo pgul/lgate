@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.3  2007/09/03 21:11:39  gul
+ * Use posix regex if available
+ *
  * Revision 2.2  2004/07/20 17:50:59  gul
  * \r\n -> \n
  *
@@ -21,11 +24,19 @@
 #ifdef HAVE_ALLOC_H
 #include <alloc.h>
 #endif
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#include <regex.h>
+#else
 #include "regex.h"
+#endif
 #include "libgate.h"
 
 #define REG_TYPE REG_ICASE|REG_EXTENDED
 #define REG_MODE 0
+
+#ifndef REG_NOERROR
+#define REG_NOERROR 0
+#endif
 
 #define VIAREGEX 0 /* convert wildcard to regex and then check */
 

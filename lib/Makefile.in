@@ -11,8 +11,8 @@ SRCS = \
  debug.c \
  gettz.c \
  logwrite.c \
- myfopen.c \
- regex.c \
+ @myfopen_src@ \
+ @regex_src@ \
  run.c \
  rwmsghdr.c \
  savein.c \

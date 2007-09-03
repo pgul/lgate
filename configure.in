@@ -21,7 +21,7 @@ case $ac_cv_header_utime_h in
 esac
 AC_CHECK_HEADERS(sysexits.h sys/file.h sys/param.h netinet/in.h sys/wait.h)
 AC_CHECK_HEADERS(arpa/inet.h direct.h share.h process.h dos.h syslog.h)
-AC_CHECK_HEADERS(sys/time.h libgen.h pwd.h)
+AC_CHECK_HEADERS(sys/time.h libgen.h pwd.h regex.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 
@@ -33,7 +33,7 @@ AC_TRY_COMPILE([#include <string.h>
 int strsignal(int);], [], AC_MSG_RESULT(no),
 AC_DEFINE(DEFINED_STRSIGNAL) AC_MSG_RESULT(yes),
 AC_MSG_RESULT(cross-compiling. No assumptions made))
-AC_CHECK_FUNCS(mktime sopen strupr utime flock)
+AC_CHECK_FUNCS(mktime sopen strupr utime flock regcomp)
 AC_CHECK_FUNCS(getuid geteuid getgid getegid getpwuid setuid)
 case $ac_cv_func_flock in
  no) AC_CHECK_FUNCS(lockf) ;;
@@ -287,6 +287,22 @@ case x$PERLCFLAGS in
     LIBS="$OLD_LIBS"
     ;;
 esac
+
+case $ac_cv_header_share_h$ac_cv_func_sopen in
+  yesyes) AC_DEFINE_UNQUOTED(myfopen_src, myfopen.c)
+          ;;
+  *)      AC_DEFINE_UNQUOTED(myfopen_src, )
+          ;;
+esac
+AC_SUBST(myfopen_src)
+
+case $ac_cv_func_regcomp in
+  yes)    AC_DEFINE_UNQUOTED(regex_src, )
+          ;;
+    *)    AC_DEFINE_UNQUOTED(regex_src, regex.c)
+          ;;
+esac
+AC_SUBST(regex_src)
 
 AC_ARG_WITH(debug,
             [  --with-debug            generate debug info (default no)],
