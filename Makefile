@@ -34,7 +34,7 @@ configure:		configure.in
 	autoconf
 
 install:	attach/attuucp fido2rel/fido2rel rel2fido/rel2fido forward/forward minstall
-	make -f minstall -DUSER=${USER} -DGROUP=${GROUP} -DINSTALL=${INSTALL} install install
+	USER=${USER} GROUP=${GROUP} INSTALL=${INSTALL} make -f minstall install
 
 update:	attach/attuucp fido2rel/fido2rel rel2fido/rel2fido forward/forward minstall
 	make -f minstall -DUSER=${USER} -DGROUP=${GROUP} -DINSTALL=${INSTALL} install update
