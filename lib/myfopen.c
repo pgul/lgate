@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.2  2007/09/04 06:31:54  gul
+ * translate comment
+ *
  * Revision 2.1  2004/07/20 17:50:59  gul
  * \r\n -> \n
  *
@@ -21,7 +24,7 @@
 #include <share.h>
 #endif
 
-/* это все только из-за share :( */
+/* only for share :( */
 
 #if defined(HAVE_SHARE_H) && defined(HAVE_SOPEN)
 
