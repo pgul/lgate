@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.21  2007/09/04 08:28:35  gul
+ * Fix in message-id=fidogate
+ *
  * Revision 2.20  2007/09/04 08:10:52  gul
  * message-id=fidogate
  *
@@ -238,7 +241,9 @@ static void fidogaterfcid(char *p, char *msgid, int size)
 {
   int i;
 
-  for (i=0; *p && i<size; p++)
+  strcpy(msgid, "MSGID_");
+  msgid += 6;
+  for (i=0; *p && i<size-6; p++)
   { if (*p == ' ') msgid[i++] = '_';
     else if (strchr("()<>@,;:\\\"[]/=_", *p) || *p>=0x7f || *p<0x20)
     { sprintf(msgid+i, "=%02X", (unsigned char)*p);
