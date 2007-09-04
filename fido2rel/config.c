@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2007/09/04 08:10:52  gul
+ * message-id=fidogate
+ *
  * Revision 2.6  2004/07/20 18:47:18  gul
  * \r\n -> \n
  *
@@ -732,6 +735,8 @@ invparam:
         fscmsgid=1;
       else if (strnicmp(str+11, "if", 2)==0)
         fscmsgid=0;
+      else if (strnicmp(str+11, "fidogate", 8)==0)
+        fscmsgid=2;
       else
         goto invparam;
       continue;

@@ -1235,3 +1235,6 @@ ver 7.02 -
     письмах кладж TID.
   ! forward: не работал, если в netmail только одно сообщение.
   * rel2fido: из поля X-Comment-To теперь берем только realname.
+  + новый вариант message-id=fidogate - использовать алгоритм fidogate
+    конвертации MSGID в Message-Id (и, соответственно, REPLY->References).
+

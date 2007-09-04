@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.20  2007/09/04 08:10:52  gul
+ * message-id=fidogate
+ *
  * Revision 2.19  2007/08/02 07:00:37  gul
  * Cosmetics
  *
@@ -229,6 +232,22 @@ static void tofield(char *str, char **to, int *sizeto)
   p=strchr(to[0]+lento, '\n');
   if (p) *p=0;
   stripspc(to[0]+lento);
+}
+
+static void fidogaterfcid(char *p, char *msgid, int size)
+{
+  int i;
+
+  for (i=0; *p && i<size; p++)
+  { if (*p == ' ') msgid[i++] = '_';
+    else if (strchr("()<>@,;:\\\"[]/=_", *p) || *p>=0x7f || *p<0x20)
+    { sprintf(msgid+i, "=%02X", (unsigned char)*p);
+      i+=3;
+    }
+    else
+      msgid[i++] = *p;
+  }
+  msgid[i] = '@';
 }
 
 int one_message(char *msgname)
@@ -612,7 +631,9 @@ lbadmsg:
           if (msgid[0])
             continue;
           p=klopt;
-          if (fscmsgid)
+          if (fscmsgid == 2) /* fidogate */
+            fidogaterfcid(p, msgid, sizeof(msgid)-20);
+          else if (fscmsgid == 1)
           { strncpy(msgid, p, sizeof(msgid));
             msgid[sizeof(msgid)-2]='\0';
             p=strchr(msgid, '@');
@@ -731,7 +752,11 @@ lbadmsg:
             nextline;
             continue;
           }
-          if (fscmsgid)
+          if (fscmsgid == 2)
+          { chkkludge(strlen(klopt)*3);
+            fidogaterfcid(klopt, pheader[cheader]+strlen(pheader[cheader]), 256);
+          }
+          else if (fscmsgid)
           { p=strchr(klopt, '@');
             if (p)
               if ((strcmp(p, "@fidonet.org")==0) ||
@@ -2010,8 +2035,8 @@ plaintext:
       if ((p1==NULL || (*(p1-1)!='|' && *(p1-1)!='<') || *p!='|') &&
           strlen(msgid)+strlen(echoes[area].usenet)+1<sizeof(msgid))
       { int i=strlen(echoes[area].usenet);
-	for (p=msgid+strlen(msgid); p>=msgid; p--) p[i+1] = p[0];
-	/* memmove(msgid+strlen(echoes[area].usenet)+1, msgid, strlen(msgid));*/
+        for (p=msgid+strlen(msgid); p>=msgid; p--) p[i+1] = p[0];
+        /* memmove(msgid+strlen(echoes[area].usenet)+1, msgid, strlen(msgid));*/
         strcpy(msgid, echoes[area].usenet);
         msgid[i]='|';
       }
