@@ -2,6 +2,7 @@
 - recoding via iconv()
 - работа через pop/imap/nnrp/smtp/nntp
 - читать список статей через inn storage api (в виде Wnm)
+- man pages
 - fido2rel: разобраться с Gw-To, Gw-Cc, Gw-Bcc. Что в каком случае попадает
   в поле "To:" заголовка? Если нет ни To, ни Gw-To, а есть только Gw-Bcc?
   Если при этом есть клудж RFC-To:?
