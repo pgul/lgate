@@ -1,6 +1,7 @@
 # $Id$
 CC = tcc
 LINK = tlink20
+TASM = d:\bc\bin\tasm.exe /ml
 CFLAGS = 
 LIBDIR = d:\tc\lib
 INCDIR = d:\tc\include
@@ -9,6 +10,12 @@ OBJDIR = obj
 
 .c.obj:
   $(CC) $(CFLAGS) -o$@ $&
+
+.asm.obj:
+  $(TASM) $<,$@
+
+.c.asm:
+  $(CC) -S $(CFLAGS) -o$@ $&
 
 All: debug
 !ifndef DEBUG
@@ -34,8 +41,10 @@ debug: rel2fido.exe
 
 $(OBJDIR)\arbmath.obj:  arbmath.c lib.h turboc.cfg
   $(CC) $(CFLAGS) -o$@ $&
-$(OBJDIR)\config.obj:   config.c lib.h import.h gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
-  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.asm:   config.c lib.h import.h gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) -S $(CFLAGS) -o$@ $&
+$(OBJDIR)\config.obj: $(OBJDIR)\config.asm
+  $(TASM) $(OBJDIR)\config,$(OBJDIR)\config
 $(OBJDIR)\from.obj:     from.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
   $(CC) $(CFLAGS) -o$@ $&
 $(OBJDIR)\getput.obj:   getput.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
@@ -50,8 +59,10 @@ $(OBJDIR)\parseadr.obj: parseadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h 
   $(CC) $(CFLAGS) -o$@ $&
 $(OBJDIR)\readhdr.obj:  readhdr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
   $(CC) $(CFLAGS) -o$@ $&
-$(OBJDIR)\rel2fido.obj: rel2fido.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
-  $(CC) $(CFLAGS) -o$@ $&
+$(OBJDIR)\rel2fido.asm: rel2fido.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
+  $(CC) -S $(CFLAGS) -o$@ $&
+$(OBJDIR)\rel2fido.obj: $(OBJDIR)\rel2fido.asm
+  $(TASM) $(OBJDIR)\rel2fido,$(OBJDIR)\rel2fido
 $(OBJDIR)\transadr.obj: transadr.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
   $(CC) $(CFLAGS) -o$@ $&
 $(OBJDIR)\unmime.obj:   unmime.c gate.h ..\lib\libgate.h ..\fidolib\fidolib.h turboc.cfg
