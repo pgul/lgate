@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.18  2007/09/04 08:48:43  gul
+ * parse fidogate-style Message-Id
+ *
  * Revision 2.17  2005/10/29 22:52:19  gul
  * *** empty log message ***
  *
@@ -291,6 +294,32 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
     else
       sprintf(s, "%u:%u/%u %lx", zz, nn, ff, *msgid);
     return 1;
+  }
+  /* check for fidogate-style */
+  if (memcmp(p1, "MSGID_", 6) == 0)
+  { for (p1+=6, p=domainid; *p1 && *p1!='@' && *p1!='>' && (p-domainid) < MAXADDR-10; p1++)
+    { if (*p1 == '_') *p++ = ' ';
+      else if (*p1=='=' && isxdigit(p1[1]) && isxdigit(p1[2]))
+      { *p++=(isdigit(p1[1]) ? p1[1]-'0' : tolower(p1[1])-'a'+10) * 16 +
+              (isdigit(p1[2]) ? p1[2]-'0' : tolower(p1[2])-'a'+10);
+        p1+=2;
+      }
+      else
+        *p++ = *p1;
+    }
+    /* is it valid MSGID in result? */
+    p=strchr(domainid, ' ');
+    if (p && strlen(p+1) == 8)
+    { for (p1=p+1; *p1; p1++)
+        if (!isxdigit(*p1)) break;
+      if (!*p1)
+      {
+        sscanf(p+1, "%08lx", msgid);
+        return 1;
+      }
+    }
+    p1 = str;
+    if (*p1 == '>') p1++;
   }
   strncpy(domainid, p1+i+1, MAXADDR);
   domainid[MAXADDR-1]='\0';

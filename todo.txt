@@ -8,8 +8,6 @@
   Если при этом есть клудж RFC-To:?
   Gw-* удаляются из тела письма при пересылке по route-to и to-ifmail
 - fido2rel: REPLYTO/REPLYADDR -> Reply-To
-- Message-Id: <MSGID_2=3A463=2F68_3ca46ee9@fidonet.org> ->
-  "MSGID: 2:463/68 3ca46ee9" (fidogate)
 - cygwin check:
   - close-on-exec (no inherit);
   - libperl
