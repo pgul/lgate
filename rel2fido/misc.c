@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.19  2007/09/29 08:49:39  gul
+ * Debug
+ *
  * Revision 2.18  2007/09/04 08:48:43  gul
  * parse fidogate-style Message-Id
  *
@@ -2114,6 +2117,8 @@ int params(int argc, char *argv[])
   setglobal("[", "[");
   setglobal("`", "`");
   setglobal("OS", SYSTEM);
+  debug(4, "bypipe: %u, cnews: %u, noecho: %u, nonet: %u",
+        bypipe, cnews, noecho, nonet);
   if (bypipe && !cnews)
   {
     i++;
