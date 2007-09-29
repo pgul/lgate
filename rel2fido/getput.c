@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2007/09/29 07:58:33  gul
+ * Process gunbatch command in rnews
+ *
  * Revision 2.8  2006/12/19 13:26:40  gul
  * Fix warnings
  *
@@ -754,7 +757,7 @@ int rnews(void)
       }
     }
   }
-  if (strncmp(p, "cunbatch\n", 9))
+  if (strncmp(p, "cunbatch\n", 9) && strncmp(p, "gunbatch\n", 9))
   { logwrite('?', "Unknown command in cnews-packet!\n");
     return 1;
   }
