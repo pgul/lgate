@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2008/04/04 10:33:02  gul
+ * Change 8bit-header default to no
+ *
  * Revision 2.7  2007/09/04 08:10:52  gul
  * message-id=fidogate
  *
@@ -92,7 +95,7 @@ char echolog, fscmsgid;
 int  uucode, rcv2via, savehdr, touucp, byuux, deltransfiles;
 int  use_swap;
 int  nonet, noecho, tossbad, fake;
-int  hdr8bit=1;
+int  hdr8bit=0;
 #ifndef UNIX
 int  uupcver;
 #endif
