@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.22  2008/04/04 07:30:55  gul
+ * *** empty log message ***
+ *
  * Revision 2.21  2007/09/04 08:28:35  gul
  * Fix in message-id=fidogate
  *
@@ -185,7 +188,7 @@ static int xexpand(char **dest, int *dsize, int lsrc)
     { logwrite('!', "Not enough memory!\n"); 
       return -1;
     }
-    if (*dest==NULL) *new='\0';	/* for xstrcat() to NULL string */
+    if (*dest==NULL) *new='\0'; /* for xstrcat() to NULL string */
     *dest=new;
     *dsize=newsize;
   }
@@ -2326,9 +2329,9 @@ errwrite2:
               str[sizeof(msghdr.from)]=0;
               mkusername(str);
               /* strcat(cmdline, str); */
-	      xexpand(&cmdline, &sizecmdline, strlen(str)*2+strlen(myaka[curaka].domain)+40);
+              xexpand(&cmdline, &sizecmdline, strlen(str)*2+strlen(myaka[curaka].domain)+40);
               p2=cmdline+strlen(cmdline);
-	      *p2++=' ';
+              *p2++=' ';
               p=str;
               while (*p)
               {
@@ -2350,7 +2353,7 @@ errwrite2:
               p=strpbrk(str, "@%");
               if (p) *p=0;
               strcat(cmdline, str);
-	      *str='\0';
+              *str='\0';
             }
             else
               strcpy(str, gatemaster);
@@ -2376,9 +2379,9 @@ errwrite2:
               p = alias[i].to;
             }
             /* strcat(cmdline, p); */
-	    xexpand(&cmdline, &sizecmdline, strlen(p)*2+3);
+            xexpand(&cmdline, &sizecmdline, strlen(p)*2+3);
             p2=cmdline+strlen(cmdline);
-	    *p2++=' ';
+            *p2++=' ';
             while (*p)
             { if (strchr(METACHARS, *p))
 #ifdef UNIX
