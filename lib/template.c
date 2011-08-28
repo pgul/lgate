@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2011/08/28 20:50:20  gul
+ * *** empty log message ***
+ *
  * Revision 2.4  2004/07/20 17:51:00  gul
  * \r\n -> \n
  *
@@ -883,14 +886,16 @@ void setpath(char *fname)
 #if HAVE_GETPWUID && HAVE_GETEUID
   p=getpwuid(geteuid())->pw_dir;
   if (p)
-  { strcpy(str, p);
+  { debug(6, "Home of effective uid: %s", p);
+    strcpy(str, p);
     addslash(str);
     strcat(str, "etc/");
     strcat(str, fname);
     if (access(str, 0)==0)
     { strcpy(fname, str);
       return;
-    }
+    } else
+      debug(6, "Cannot access file %s: %s", str, strerror(errno));
   }
 #endif
 #if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)

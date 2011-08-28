@@ -47,6 +47,7 @@
 - attuucp: rfc3335.txt - secure peer to peer
 - attuucp: rfc3156.txt - MIME Security with OpenPGP
 - internal gzip (zlib)
+- bunbatch - bzip2
 ? сначала проверять itwit*, а потом уже валидность "To:"
 
    Не уверен, надо ли и если надо, то как именно, поэтому далеко
