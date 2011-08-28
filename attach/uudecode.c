@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2011/08/28 21:04:21  gul
+ * Minor bugs fixed
+ *
  * Revision 2.7  2004/07/20 18:29:26  gul
  * \r\n -> \n
  *
@@ -374,10 +377,11 @@ newmess:
         }
         if (decodepart==npart || decodepart==0)
         { if (tmp_arc[0]=='\0')
-            getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
-          if (tmp_arc)
-          { decodepart=npart;
-            if (enc == ENC_UUCP) enc = ENC_7BIT;
+          { getparam(sstr, "filename", tmp_arc, sizeof(tmp_arc));
+            if (tmp_arc[0])
+            { decodepart=npart;
+              if (enc == ENC_UUCP) enc = ENC_7BIT;
+            }
           }
         }
         if (gotnextline)

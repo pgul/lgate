@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.5  2011/08/28 21:04:21  gul
+ * Minor bugs fixed
+ *
  * Revision 2.4  2004/07/20 18:29:25  gul
  * \r\n -> \n
  *
@@ -1010,7 +1013,7 @@ invparam:
   { if (maildir[0])
     { strcpy(filebox, maildir);
       strcat(filebox, user);
-      if (mailext)
+      if (mailext[0])
       { strcat(filebox, ".");
         strcat(filebox, mailext);
       }

@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.19  2011/08/28 21:04:22  gul
+ * Minor bugs fixed
+ *
  * Revision 2.18  2006/01/29 11:53:45  gul
  * *** empty log message ***
  *
@@ -242,7 +245,7 @@ int one_message(void)
 
 /* convert to msg */
   /* fill default msg header */
-  debug(6, "One_Message started, Conf=%d, Addr=%s", conf, addr ? addr : "NULL");
+  debug(6, "One_Message started, Conf=%d, Addr=%s", conf, addr[0] ? addr : "NULL");
   fix=errl=nonews=curhops=0;
   origin[0]=tearline[0]=xorigin[0]=0;
   strcpy(msghdr.from, "uucp");
