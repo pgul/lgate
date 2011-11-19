@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.7  2011/11/19 08:39:03  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.6  2004/07/20 18:38:06  gul
  * \r\n -> \n
  *
@@ -142,7 +145,7 @@ static void set_path(char *fname)
   p=strchr(tstr, '.');
   if (p)
   { if (p-tstr>8)
-      strcpy(tstr+8, p);
+      mstrcpy(tstr+8, p);
   }
   else
     if (strlen(tstr)>8)
@@ -1391,7 +1394,7 @@ static int unmime(char *boundary, msg_type mtype, int alternate, char _Huge *up_
       { if (isspace(*p)) *p=',';
         if (*p!=',') continue;
         while (isspace(p[1]) || (p[1]==','))
-          strcpy(p, p+1);
+          mstrcpy(p, p+1);
         if (p[1]=='\0')
         { *p='\0';
           break;

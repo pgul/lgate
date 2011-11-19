@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.3  2004/07/20 18:29:26  gul
  * \r\n -> \n
  *
@@ -271,7 +274,7 @@ void chsubstr(char *str, char *from, char *to)
   p=str;
   while ((p=strstr(p, from))!=NULL)
   {
-    strcpy(p, p+strlen(from));
+    mstrcpy(p, p+strlen(from));
     for (i=strlen(p); i>=0; i--)
       p[i+strlen(to)]=p[i];
     strncpy(p, to, strlen(to));

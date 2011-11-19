@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.21  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.20  2006/12/19 13:29:53  gul
  * Fix warnings
  *
@@ -1391,7 +1394,7 @@ static void findpkt(void)
               continue;
             }
             if ((msgname[0]=='#') || (msgname[0]=='^'))
-              strcpy(msgname, msgname+1);
+              mstrcpy(msgname, msgname+1);
             if (msgname[0]==0)
               continue;
             if (access(msgname, 0))
@@ -1492,7 +1495,7 @@ boxes:
               continue;
             }
             if ((msgname[0]=='#') || (msgname[0]=='^'))
-              strcpy(msgname, msgname+1);
+              mstrcpy(msgname, msgname+1);
             if (msgname[0]==0)
               continue;
             if (access(msgname, 0))
@@ -2101,7 +2104,7 @@ void chsubstr(char *str, char *from, char *to)
     return;
   while ((p=strstr(p, from))!=NULL)
   {
-    strcpy(p, p+strlen(from));
+    mstrcpy(p, p+strlen(from));
     j=strlen(to);
     for (i=strlen(p); i>=0; i--)
       p[i+j]=p[i];
@@ -2602,7 +2605,7 @@ void getaddr(char *str)
   /* remove spaces */
   debug(6, "GetAddr('%s')", str);
   for(p=str; *p && isspace(*p); p++);
-  if (p!=str) strcpy(str, p);
+  if (p!=str) mstrcpy(str, p);
   if (*p=='\0') return;
   for(p=str+strlen(str)-1; isspace(*p); *p--='\0');
 
@@ -2623,7 +2626,7 @@ void getaddr(char *str)
         i--;
       }
       if (p1)
-        strcpy(p, p1+1);
+        mstrcpy(p, p1+1);
       if (*p==0)
         break;
     }
@@ -2635,7 +2638,7 @@ void getaddr(char *str)
     { strncpy(str, p+1, (int)(p1-p)-1);
       str[(int)(p1-p)-1]='\0';
     }
-  while (isspace(*str)) strcpy(str, str+1);
+  while (isspace(*str)) mstrcpy(str, str+1);
   if (*str)
     for (p=str+strlen(str)-1; isspace(*p); *(p--)='\0');
   debug(6, "GetAddr: address '%s'", str);

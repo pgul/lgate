@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.4  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.3  2004/07/20 17:51:01  gul
  * \r\n -> \n
  *
@@ -162,6 +165,7 @@ void msghdr_byteorder(struct message *msg);
 void pkthdr_byteorder(struct packet *pkt);
 void logwrite(char level,char * format,...);
 char *strsysexit(int retcode);
+char *mstrcpy(char *desc, const char *src);
 #ifndef HAVE_STRSIGNAL
 char *strsignal(int signo);
 #endif

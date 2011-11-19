@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.23  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.22  2008/04/04 07:30:55  gul
  * *** empty log message ***
  *
@@ -754,7 +757,7 @@ lbadmsg:
             if (area!=-1 && group[echoes[area].group].extmsgid)
             { p=strstr(p2, echoes[area].usenet);
               if (p && *(p-1)=='|' && p[strlen(echoes[area].usenet)]=='|')
-                strcpy(pheader[cheader]+13, p2);
+                mstrcpy(pheader[cheader]+13, p2);
             }
             strcat(pheader[cheader], "\n");
             nextline;
@@ -1401,7 +1404,7 @@ plaintext:
         xstrcpy(&curto, &sizecurto, p);
         debug(5, "To-address is '%s'", curto);
         if ((curto[0]=='<') && (curto[strlen(curto)-1]=='>'))
-        { strcpy(curto, curto+1);
+        { mstrcpy(curto, curto+1);
           curto[strlen(curto)-1]='\0';
         }
         if (curto[0]==0)
@@ -1418,11 +1421,11 @@ plaintext:
             continue;
           }
           *p1='\0';
-          strcpy(curto, p+1);
+          mstrcpy(curto, p+1);
 #else
           if (p && p1)
           { *p1='\0';
-            strcpy(curto, p+1);
+            mstrcpy(curto, p+1);
           }
 #endif
         }
@@ -1697,7 +1700,7 @@ plaintext:
       for (i=0; i<cheader; i++)
         if (strncmp(pheader[i], "Received: by ", 13)==0)
         { strcpy(pheader[i], "X-FTN-Via: ");
-          strcpy(pheader[i]+11, pheader[i]+13);
+          mstrcpy(pheader[i]+11, pheader[i]+13);
         }
     if ((curgate==ngates) && (!savehdr))
     { /* remove all x-ftn */
@@ -1721,7 +1724,7 @@ plaintext:
       { if (strnicmp(pheader[i], "X-FTN-PID:", 10)==0)
         { if (area==-1)
           { strcpy(pheader[i], "X-Mailer:");
-            strcpy(pheader[i]+9, pheader[i]+10);
+            mstrcpy(pheader[i]+9, pheader[i]+10);
           }
           else
           { memmove(pheader[i]+13, pheader[i]+10, strlen(pheader[i]+10)+1);

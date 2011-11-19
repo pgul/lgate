@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.6  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.5  2011/08/28 20:50:20  gul
  * *** empty log message ***
  *
@@ -695,9 +698,9 @@ int templateline(char *str, unsigned size)
         continue;
     }
     /* control line (started from '@') */
-    strcpy(str, p);
+    mstrcpy(str, p);
     while ((str[1]==' ') || (str[1]=='\t'))
-      strcpy(str+1, str+2);
+      mstrcpy(str+1, str+2);
     if (strnicmp(str+1, "if ", 3)==0)
     {
       if (iflevel==MAXIF)
@@ -858,18 +861,18 @@ static int unspace(char *str)
 { char *p, *p1;
   int  r=0;
 
-  while ((*str==' ') || (*str=='\t')) strcpy(str, str+1);
+  while ((*str==' ') || (*str=='\t')) mstrcpy(str, str+1);
   for (p=str; *p && (!isspace(*p)) && (*p!='='); p++);
   for (p1=p; isspace(*p1); p1++);
   if (*p1!='=') p++;
   if (p!=p1)
-  { strcpy(p, p1);
+  { mstrcpy(p, p1);
     r+=(int)(p1-p);
   }
   if (*p=='=')
   { p++;
     while (isspace(*p))
-    { strcpy(p, p+1);
+    { mstrcpy(p, p+1);
       r++;
     }
   }
@@ -984,7 +987,7 @@ int configline(char *str, unsigned size)
     }
     if (inconfig)
       while ((str[0]==' ') || (str[0]=='\t'))
-      { strcpy(str, str+1);
+      { mstrcpy(str, str+1);
         r--;
       }
     if (strchr(str, '\n')==NULL)
@@ -997,7 +1000,7 @@ int configline(char *str, unsigned size)
       if (strnicmp(p, "lgate", 5) || !isspace(p[5]))
         continue; /* not our application */
       for(p+=5; isspace(*p); p++);
-      strcpy(str, p);
+      mstrcpy(str, p);
     }
     for (p=str+strlen(str)-1; isspace(*p) && (p>str); *p--=0);
     if (isspace(*p)) *p=0;
@@ -1135,7 +1138,7 @@ int configline(char *str, unsigned size)
         continue;
       }
       for (p=str+7; (*p==' ') || (*p=='\t'); p++);
-      strcpy(str, p);
+      mstrcpy(str, p);
       setpath(str);
       strcpy(curtplname, str);
       farr[sp]=htpl;
@@ -1163,3 +1166,12 @@ int configline(char *str, unsigned size)
     return r;
   }
 }
+
+char *mstrcpy(char *dest, const char *src)
+{
+  char *p;
+
+  for (p=dest; (*p++=*src++););
+  return dest;
+}
+

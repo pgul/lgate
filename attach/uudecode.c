@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.9  2011/11/19 08:39:02  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.8  2011/08/28 21:04:21  gul
  * Minor bugs fixed
  *
@@ -350,7 +353,7 @@ newmess:
           if (scrc32[0])
             sscanf(scrc32, "%lX", &fcrc32);
           if (gotnextline)
-          { strcpy(sstr, sstr+strlen(sstr)+1);
+          { mstrcpy(sstr, sstr+strlen(sstr)+1);
             goto nextline;
           }
         }
@@ -385,7 +388,7 @@ newmess:
           }
         }
         if (gotnextline)
-        { strcpy(sstr, sstr+strlen(sstr)+1);
+        { mstrcpy(sstr, sstr+strlen(sstr)+1);
           goto nextline;
         }
       }
@@ -736,7 +739,7 @@ gotresendline:
         if (strcmp(s, msgid))
         { if (c)
           { *p=c;
-            strcpy(str, p);
+            mstrcpy(str, p);
             goto gotresendline;
           }
           continue;

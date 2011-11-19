@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.20  2011/11/19 08:39:03  gul
+ * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
+ *
  * Revision 2.19  2007/09/29 08:49:39  gul
  * Debug
  *
@@ -232,7 +235,7 @@ int fidomsgid(char *str, char *s, char *domainid, unsigned long *msgid)
   p=strchr(str, '|');
   if (conf && p && newsgroups && p-str>strlen(newsgroups) &&
       *(p-strlen(newsgroups)-1)=='<')
-    strcpy(p-strlen(newsgroups), p+1);
+    mstrcpy(p-strlen(newsgroups), p+1);
   p=strchr(str, '@');
   if (p==NULL)
   { /* must not occure */
@@ -770,7 +773,7 @@ char *rcvfrom(char *recv) /* save string recv */
     }
     if (*p==')')
     { if (incomment==2)
-      { strcpy(p1, p+1);
+      { mstrcpy(p1, p+1);
         p=p1-1;
       }
       incomment--;
@@ -801,9 +804,9 @@ rcvagain:
       else if (strnicmp(p, "helo=", 5)==0)
         p+=5;
       while (isspace(*p)) p++;
-      strcpy(from, p);
+      mstrcpy(from, p);
       if (*from=='[')
-      { strcpy(from, from+1);
+      { mstrcpy(from, from+1);
         p=strchr(from, ']');
         if (p) *p='\0';
       }
@@ -820,7 +823,7 @@ rcvagain:
   for (p=from+4; isspace(*p); p++);
   if (strncmp(p, "helo=", 5)==0)
     p+=5;
-  strcpy(from, p);
+  mstrcpy(from, p);
   for (p=from; *p && (!isspace(*p)) && (*p!='(') && (*p!='['); p++);
   *p='\0';
   if (strcmp(from, "localhost")==0)
@@ -838,7 +841,7 @@ makerecv:
   }
   /* in from - name, that must be in the "Recd from" */
   if (strnicmp(from, "root@", 5)==0)
-    strcpy(from, from+5);
+    mstrcpy(from, from+5);
   p=strchr(from, '@');
   if (p) p++;
   else p=from;
@@ -918,7 +921,7 @@ void rcvconv(char *recv)
       p1=strdup("?");
     debug(20, "by=%p", p1);
     *p=c;
-    strcpy(recv+5, by+3);
+    mstrcpy(recv+5, by+3);
     by=p1;
   }
   else
@@ -936,7 +939,7 @@ void rcvconv(char *recv)
 nextprod:
     if (*p==')' && incomment)
       if (--incomment==0)
-      { strcpy(p, p+1);
+      { mstrcpy(p, p+1);
         if (*p=='\0') break;
         goto nextprod;
       }
@@ -944,7 +947,7 @@ nextprod:
     { if (incomment++==0)
       { if (product[0] && (strlen(product)>=sizeof(product)-3))
           strcat(product, ", ");
-        strcpy(p, p+1);
+        mstrcpy(p, p+1);
         if (*p=='\0') break;
         goto nextprod;
       }
@@ -954,17 +957,17 @@ nextprod:
       continue;
     product[strlen(product)+1]='\0';
     product[strlen(product)]=*p;
-    strcpy(p, p+1);
+    mstrcpy(p, p+1);
     if (*p=='\0') break;
     goto nextprod;
   }
   for (p=by; isspace(*p); p++);
-  if (p!=by) strcpy(by, p);
+  if (p!=by) mstrcpy(by, p);
   if (*by=='\0')
     strcpy(by, "?");
   for (p=by+strlen(by)-1; isspace(*p); *p--='\0');
   if (strlen(by)>60 || ftndomain(by, &addr, domain))
-  { strcpy(recv+5, by);
+  { mstrcpy(recv+5, by);
     debug(20, "free(%p)", by);
     free(by);
     debug(20, "free(%p) done", by);
@@ -1784,8 +1787,8 @@ void badpst(char *reason)
     if (cnews && inhdr && !cont)
     { if (strnicmp(str, "Subject:", 8)==0)
       { write(fbad, "Subject: [News] ", 16);
-        strcpy(str, str+8);
-        while ((str[0]==' ') || (str[0]=='\t')) strcpy(str, str+1);
+        mstrcpy(str, str+8);
+        while ((str[0]==' ') || (str[0]=='\t')) mstrcpy(str, str+1);
       }
     }
     write(fbad, str, strlen(str));
@@ -2614,7 +2617,7 @@ chk_fork:
         hstr[plen-1]=' ';
         for (p=str; *p==' ' || *p=='\t'; p++);
         if (*p=='\0') p--;
-        strcpy(str, p);
+        mstrcpy(str, p);
       }
       if (p1==NULL) break;
       if (plen) p1[--plen]='\0'; /* remove last '\n' */
@@ -2794,7 +2797,7 @@ void chsubstr(char *str, char *from, char *to)
     return;
   while ((p=strstr(p, from))!=NULL)
   {
-    strcpy(p, p+strlen(from));
+    mstrcpy(p, p+strlen(from));
     j=strlen(to);
     for (i=strlen(p); i>=0; i--)
       p[i+j]=p[i];
