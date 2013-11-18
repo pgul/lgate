@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.8  2013/11/18 21:08:42  gul
+ * Fixed some arrays overflow
+ *
  * Revision 2.7  2011/11/19 08:39:03  gul
  * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
  *
@@ -91,17 +94,33 @@ char *longname;
 char *origmsgid=NULL;
 char charsetsdir[FNAME_MAX]="";
 
-static void get_uniq(char * attname)
+static void get_uniq(char * attname, int strsize)
 { int i=0;
   char *p;
 
+  if (strlen(attname)+4 > strsize-1)
+  { if (access(attname, 0))
+      debug(7, "UnMime: result filename is %s", attname);
+    else
+      debug(2, "Unmime: too long filename '%s', cannot get uniq", attname);
+    return;
+  }
   while (!access(attname, 0))
   { if (strchr(attname, '.')==NULL)
       strcat(attname, ".001");
-    p=strchr(attname, '.')+1;
+    p=strrchr(attname, '.')+1;
     while (strlen(p)<3) strcat(p, "0");
+    if (i>99999)
+    { debug(2, "Unmime: too long filename '%s', cannot get uniq", attname);
+      return;
+    }
     if (i>99)
-      sprintf(attname+strlen(attname)-3, "%3d", i);
+    { if (i>999 && strlen(attname)+1>strsize-1)
+      { debug(2, "Unmime: too long filename '%s', cannot get uniq", attname);
+        return;
+      }
+      sprintf(p, "%3d", i);
+    }
     else if (i>9)
       sprintf(attname+strlen(attname)-2, "%2d", i);
     else
@@ -111,9 +130,10 @@ static void get_uniq(char * attname)
   debug(7, "UnMime: result filename is %s", attname);
 }
 
-static void set_path(char *fname)
+static void set_path(char *fname, int strsize)
 {
   char *p, *p1;
+  int l;
   static char tstr[FNAME_MAX];
 
   p=strrchr(fname, '\\');
@@ -171,8 +191,9 @@ static void set_path(char *fname)
       p[4]='\0';
   }
 #endif
-  strcpy(fname, holdpath);
-  strcat(fname, tstr);
+  strncpy(fname, holdpath, strsize-1);
+  l = strlen(fname);
+  strncpy(fname+l, tstr, strsize-l-1);
 }
 
 static int unqp(int (*getbyte)(void), int (*putbyte)(char))
@@ -337,14 +358,14 @@ static int uudecode(int (*getbyte)(void), int (*putbyte)(char))
   while (isdigit(*p)) p++;
   while (isspace(*p)) p++;
   if (longname==NULL)
-  { strcpy(destname, p);
+  { strncpy(destname, p, sizeof(destname)-1);
     longname=destname;
     debug(4, "uudecode: get filename %s", longname);
     fclose(fatt);
     unlink(attname);
-    strcpy(attname, destname);
-    set_path(attname);
-    get_uniq(attname);
+    strncpy(attname, destname, sizeof(attname)-1);
+    set_path(attname, sizeof(attname));
+    get_uniq(attname, sizeof(attname));
   
     fatt=fopen(attname, "wb");
     if (fatt==NULL)
@@ -1955,9 +1976,9 @@ nomime:
   bound=boundary;
   if (destname[0] && !keepatt && !conf && !inreport)
   { /* get fileattach pathname */
-    strcpy(attname, destname);
-    set_path(attname);
-    get_uniq(attname);
+    strncpy(attname, destname, sizeof(attname)-1);
+    set_path(attname, sizeof(attname));
+    get_uniq(attname, sizeof(attname));
     
     fatt=fopen(attname, "wb");
     if (fatt==NULL)

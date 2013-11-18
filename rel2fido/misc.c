@@ -2,6 +2,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.21  2013/11/18 21:08:42  gul
+ * Fixed some arrays overflow
+ *
  * Revision 2.20  2011/11/19 08:39:03  gul
  * Fix strcpy(p,p+1) to own mstrcpy(p,p+1) which works correctly in this case
  *
@@ -1579,9 +1582,9 @@ int holdmsg(char *realname, char *fromaddr, char *subj)
     if (p) *p='\0';
   }
   hrewind();
-  strcpy(msghdr.subj, holdpath);
+  strncpy(msghdr.subj, holdpath, sizeof(msghdr.subj)-10);
   p=msghdr.subj+strlen(msghdr.subj);
-  for (i=1; ; i++)
+  for (i=1; i<99999; i++)
   { sprintf(p, "%u.txt", i);
     if (access(msghdr.subj, 0))
       break;
@@ -1622,7 +1625,7 @@ int holdatt(char *realname, char *fromaddr, char *subj)
     if (p) *p='\0';
   }
   hrewind();
-  strcpy(msghdr.subj, attname);
+  strncpy(msghdr.subj, attname, sizeof(msghdr.subj)-1);
   stat(attname, &st);
   tsize=st.st_size;
   strcpy(s, msghdr.date);
