@@ -142,7 +142,7 @@ static char tmpout[FNAME_MAX];
 static char *cmdline;
 static int  sizecmdline;
 static char rfcid;
-static char pref[MAXPREFIX+1];
+static char pref[MAXPREFIX+3];
 static char klname[2048], klopt[2048]; /* not less then sizeof(str)! */
 static char filelist[80];
 static unsigned long attr;
