@@ -1656,7 +1656,7 @@ int hgets(void)
         return 0;
       return 1;
     }
-    if (r=='ç') r=softCR;
+    if (r=='\x8d') r=softCR;
 #if 0
     if (r=='\n') r='\r';
     str[i++]=r;
