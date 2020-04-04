@@ -1180,9 +1180,9 @@ int moveatt(char *fname, unsigned long attr)
 
   if (strpbrk(fname, "/\\")==NULL)
   {
-    strcpy(tmpfname, inb_dir);
-    strncat(tmpfname, fname, sizeof(tmpfname)-1);
+    strncpy(tmpfname, inb_dir, sizeof(tmpfname));
     tmpfname[sizeof(tmpfname)-1]='\0';
+    strncat(tmpfname, fname, sizeof(tmpfname)-strlen(tmpfname)-1);
     fname=tmpfname;
   }
   if (access(fname, 0))

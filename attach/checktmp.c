@@ -201,7 +201,7 @@ gotline:
       { strcpy(cont_type, str);
         while (fgets(str, sizeof(str), fin))
         { if ((str[0]==' ') || (str[0]=='\t'))
-            strncat(cont_type, str, sizeof(cont_type));
+            strncat(cont_type, str, sizeof(cont_type)-strlen(cont_type)-1);
           else
           { getvalue(cont_type, sstr, sizeof(sstr));
             debug(8, "CheckTmp: content-type is %s", cont_type);
@@ -231,7 +231,7 @@ gotline:
       { strcpy(sstr, str);
         while (fgets(str, sizeof(str), fin))
         { if ((str[0]==' ') || (str[0]=='\t'))
-            strncat(sstr, str, sizeof(sstr));
+            strncat(sstr, str, sizeof(sstr)-strlen(sstr)-1);
           else
           { getparam(sstr, "filename", inname, sizeof(inname));
             if (inname[0]=='\0')
@@ -555,7 +555,7 @@ errfputs:
             { strcpy(cont_type, str);
               while (fgets(str, sizeof(str), fin))
               { if ((str[0]==' ') || (str[0]=='\t'))
-                  strncat(cont_type, str, sizeof(cont_type));
+                  strncat(cont_type, str, sizeof(cont_type)-strlen(cont_type)-1);
                 else
                 { if (decodepart==0 || decodepart==npart || inname[0]==0)
                   { getparam(cont_type, "name", inname, sizeof(inname));
@@ -589,7 +589,7 @@ errfputs:
             { strcpy(sstr, str);
               while (fgets(str, sizeof(str), fin))
               { if ((str[0]==' ') || (str[0]=='\t'))
-                  strncat(sstr, str, sizeof(sstr));
+                  strncat(sstr, str, sizeof(sstr)-strlen(sstr)-1);
                 else
                 { if (decodepart==0 || decodepart==npart || inname[0]==0)
                   { getparam(sstr, "filename", inname, sizeof(inname));

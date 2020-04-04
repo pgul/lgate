@@ -1556,8 +1556,7 @@ errlet:
           if ((wasmsgid & 2)==0 && domainmsgid==2 && domainid[0])
           { strncpy(s, domainid, sizeof(s));
             s[sizeof(s)-1]='\0';
-            strncat(s, echoes[j].fido, sizeof(s));
-            s[sizeof(s)-1]='\0';
+            strncat(s, echoes[j].fido, sizeof(s)-strlen(s)-1);
             msgid=(crc32(s)^0xfffffffflu)+part;
             for (i=0; i<cheader; i++)
               if (strnicmp(pheader[i], "\x01MSGID: ", 8)==0)
@@ -1586,8 +1585,7 @@ errlet:
         { unsigned long reply;
           strncpy(s, freplydomain, sizeof(s));
           s[sizeof(s)-1]='\0';
-          strncat(s, echoes[j].fido, sizeof(s));
-          s[sizeof(s)-1]='\0';
+          strncat(s, echoes[j].fido, sizeof(s)-strlen(s)-1);
           reply=crc32(s)^0xfffffffflu;
           for (i=0; i<cheader; i++)
             if (strnicmp(pheader[i], "\x01REPLY: ", 8)==0)
