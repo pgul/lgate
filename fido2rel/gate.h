@@ -165,6 +165,7 @@ void parsekludge(char *str, char *klname, char *klopt);
 void dateftn2rfc(char *ftndate, char *rfcdate, int tz);
 int  adduserline(char *str);
 int  moveatt(char *fname, unsigned long attr);
+int  addkillattfile(char *fname, unsigned long attr);
 void mkusername(char *str);
 int  one_message(char *msgname);
 void getaddr(char *str);

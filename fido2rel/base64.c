@@ -229,11 +229,7 @@ void delsentfiles(unsigned long attr, char *subj)
         strncpy(sfile, p, sizeof(sfile)); 
     if ((attr & msgKFS) ||
         ((attr & msgFORWD) && deltransfiles))
-    { if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-      { killattfiles[nkillattfiles].name=strdup(sfile);
-        killattfiles[nkillattfiles++].attr=msgKFS|msgSENT;
-      }
-      else
+    { if (addkillattfile(sfile, msgKFS|msgSENT))
       { if (unlink(sfile))
           logwrite('?', "Can't delete sent file %s: %s!\n", sfile, strerror(errno));
         else
@@ -241,11 +237,7 @@ void delsentfiles(unsigned long attr, char *subj)
       }
     }
     else if (attr & msgTFS)
-    { if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-      { killattfiles[nkillattfiles].name=strdup(sfile);
-        killattfiles[nkillattfiles++].attr=msgTFS|msgSENT;
-      }
-      else
+    { if (addkillattfile(sfile, msgTFS|msgSENT))
       { h=open(sfile, O_BINARY|O_RDWR|O_EXCL);
         if (h!=-1)
         { chsize(h, 0);

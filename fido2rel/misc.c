@@ -1173,6 +1173,28 @@ void parsekludge(char *str, char *klname, char *klopt)
   debug(11, "ParseKludge: klname='%s', klopt='%s'", klname, klopt);
 }
 
+int addkillattfile(char *fname, unsigned long attr)
+{
+  static int maxkillattfiles=0;
+  void *newptr;
+  if (nkillattfiles == maxkillattfiles)
+  { if (maxkillattfiles)
+    { newptr=realloc(killattfiles, sizeof(*killattfiles)*(maxkillattfiles*=2));
+      if (newptr == NULL) free(killattfiles);
+      killattfiles=newptr;
+    }
+    else
+      killattfiles=malloc(sizeof(*killattfiles)*(maxkillattfiles=32));
+    if (killattfiles == NULL)
+    { logwrite('!', "Not enough memory (%ld bytes needed)\n", sizeof(*killattfiles)*maxkillattfiles);
+      return 1;
+    }
+  }
+  killattfiles[nkillattfiles].name=strdup(fname);
+  killattfiles[nkillattfiles++].attr=attr;
+  return 0;
+}
+
 int moveatt(char *fname, unsigned long attr)
 { char *p, *p1;
   int i, h;
@@ -1201,29 +1223,7 @@ int moveatt(char *fname, unsigned long attr)
   strcpy(str, tmpdir);
   strcat(str, p1);
   if (stricmp(str, fname)==0)
-  {
-#if 1
-    static int maxkillattfiles=0;
-    void *newptr;
-    if (nkillattfiles==maxkillattfiles)
-    { if (maxkillattfiles)
-      { newptr=realloc(killattfiles,sizeof(*killattfiles)*(maxkillattfiles*=2));
-        if (newptr==NULL) free(killattfiles);
-        killattfiles=newptr;
-      }
-      else
-        killattfiles=malloc(sizeof(*killattfiles)*(maxkillattfiles=32));
-      if (killattfiles == NULL)
-      { logwrite('!', "Not enough memory (%ld bytes needed)\n", sizeof(*killattfiles)*maxkillattfiles);
-        return 0;
-      }
-    }
-#else
-    if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-#endif
-    { killattfiles[nkillattfiles].name=strdup(p1);
-      killattfiles[nkillattfiles++].attr=attr;
-    }
+  { addkillattfile(p1, attr);
     return 0;
   }
   /* make unique filename */
@@ -1251,20 +1251,14 @@ int moveatt(char *fname, unsigned long attr)
   if (attr & msgKFS)
     if (rename(fname, str)==0)
     { debug(5, "moveatt: %s renamed to %s", fname, str);
-      if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-      { killattfiles[nkillattfiles].name=strdup(p);
-        killattfiles[nkillattfiles++].attr=msgKFS;
-      }
+      addkillattfile(p, msgKFS);
       return 0;
     }
   if (copyfile(fname, str))
   { logwrite('?', "Can't copy %s to %s: %s!\n", fname, str, strerror(errno));
     return 1;
   }
-  if (nkillattfiles<sizeof(killattfiles)/sizeof(killattfiles[0]))
-  { killattfiles[nkillattfiles].name=strdup(p);
-    killattfiles[nkillattfiles++].attr=msgKFS;
-  }
+  addkillattfile(p, msgKFS);
   debug(5, "moveatt: %s copied to %s", fname, str);
   if (attr & msgKFS)
   { if (unlink(fname))
