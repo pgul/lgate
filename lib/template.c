@@ -438,7 +438,7 @@ static int _templateline(char *str, unsigned size)
         for (pp=environ; *pp; pp++)
         { p1=strchr(*pp, '=');
           if (p1==NULL) continue;
-          if ((unsigned)p1-(unsigned)(*pp)!=varlen)
+          if ((unsigned long)p1-(unsigned long)(*pp)!=varlen)
             continue;
           if (strnicmp(*pp, curvar, varlen)==0)
             break;
