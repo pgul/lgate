@@ -7,7 +7,7 @@ AC_PROG_AWK
 AC_PROG_CC
 AC_PATH_PROG(PERL, perl, perl)
 
-CFLAGS="-Wall -Wno-char-subscripts -funsigned-char"
+CFLAGS="-Wall -Wno-char-subscripts -funsigned-char -fPIC"
 LDFLAGS="-Wall"
 
 dnl Checks for header files.
@@ -315,7 +315,7 @@ case x$debug in
   xyes)	CFLAGS="$CFLAGS -g"
 	LDFLAGS="$LDFLAGS -g"
 	;;
-  *)	CFLAGS="$CFLAGS -O2 -s"
+  *)	CFLAGS="$CFLAGS -O2"
 	LDFLAGS="$LDFLAGS -O2 -s"
 	;;
 esac

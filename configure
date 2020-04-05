@@ -819,7 +819,7 @@ else
 fi
 
 
-CFLAGS="-Wall -Wno-char-subscripts -funsigned-char"
+CFLAGS="-Wall -Wno-char-subscripts -funsigned-char -fPIC"
 LDFLAGS="-Wall"
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
@@ -2065,7 +2065,7 @@ case x$debug in
   xyes)	CFLAGS="$CFLAGS -g"
 	LDFLAGS="$LDFLAGS -g"
 	;;
-  *)	CFLAGS="$CFLAGS -O2 -s"
+  *)	CFLAGS="$CFLAGS -O2"
 	LDFLAGS="$LDFLAGS -O2 -s"
 	;;
 esac
