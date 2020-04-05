@@ -240,20 +240,22 @@ case x$PERLCFLAGS in
      #include <EXTERN.h>
      #include <perl.h>
      PerlInterpreter *my_perl;
-     void boot_DynaLoader(CV *cv);
+     XSUBADDR_t boot_DynaLoader;
      void xs_init(void)
      { dXSUB_SYS;
        newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, "callperl");
      }
-     int main(int argc, char **argv, char **env)
+     int main(int _argc, char **_argv, char **_env)
      {
      char *embedding[] = { "", "-e", "sub test { \$var='a' if \$var eq 'v'; return \$_[0]; }", NULL };
+     int argc = sizeof(embedding)/sizeof(*embedding)-1;
      SV *var;
      char *retval;
      STRLEN n_a;
+     PERL_SYS_INIT3(&argc, (char ***)&embedding, NULL);
      my_perl = perl_alloc();
      perl_construct(my_perl);
-     if (perl_parse(my_perl, xs_init, 3, embedding, NULL))
+     if (perl_parse(my_perl, (XSINIT_t)xs_init, argc, embedding, NULL))
        return 1;
      perl_run(my_perl);
      var=perl_get_sv("var", TRUE);
@@ -275,6 +277,7 @@ case x$PERLCFLAGS in
        return 2;
      perl_destruct(my_perl);
      perl_free(my_perl);
+     PERL_SYS_TERM();
      return 0;
      }
      ],

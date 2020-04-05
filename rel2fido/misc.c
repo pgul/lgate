@@ -2412,6 +2412,7 @@ static PerlInterpreter *my_perl;
 static int do_perl=1;
 extern char perlfile[];
 static char *perlargs[]={"", perlfile, NULL};
+static int perlargc = sizeof(perlargs)/sizeof(*perlargs)-1;
 char *newintsetname;
 void boot_DynaLoader(pTHXo_ CV *cv);
 void xs_init(pTHXo)
@@ -2428,6 +2429,7 @@ static void exitperl(void)
   { perl_destruct(my_perl);
     perl_free(my_perl);
     my_perl=NULL;
+    PERL_SYS_TERM();
   }
 }
 #endif
@@ -2509,6 +2511,7 @@ externtype extcheck(char *to, char *from, char **news
       do_perl=0;
       return EXT_DEFAULT;
     }
+    PERL_SYS_INIT3(&perlargc, (char ***)&perlargs, NULL);
     my_perl = perl_alloc();
     perl_construct(my_perl);
 #ifdef HAVE_FORK
@@ -2520,7 +2523,7 @@ chk_fork:
       dup2(perlpipe[1], fileno(stderr));
       close(perlpipe[0]);
       close(perlpipe[1]);
-      h=perl_parse(my_perl, xs_init, 2, perlargs, NULL);
+      h=perl_parse(my_perl, (XSINIT_t)xs_init, perlargc, perlargs, NULL);
       dup2(saveerr, fileno(stderr));
       close(saveerr);
       waitpid(pid, perlpipe, 0);
