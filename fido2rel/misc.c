@@ -2257,14 +2257,15 @@ char *qphdr(char *str)
     { if (*pl=='(')
       { if (lword==8)
         { strcpy(pldest, "?= ");
-          pldest+=2;
+          pldest+=3;
           lword=7;
         }
         *pldest++=*pl++;
       }
       else if (*pl==')')
       { if (lword==8)
-        { strcpy(pldest, "?=");
+        { strcpy(pldest, "?= ");
+          pldest+=3;
           lword=7;
         }
         *pldest++=*pl++;
