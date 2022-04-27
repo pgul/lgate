@@ -187,11 +187,13 @@ void convrcv(char *via, char *rcv)
     /* ищем время, дописываем, если нет */
     p=strrchr(rcv, ';');
     if (p)
-    { for (; !isdigit(*p); p++);
+    {
+      for (; !isdigit(*p); p++);
       if ((atoi(p)>0) && (atoi(p)<=31))
       { p=strpbrk(p, " \t");
         if (p)
-        { for(; (*p==' ') || (*p=='\t'); p++);
+        {
+          for(; (*p==' ') || (*p=='\t'); p++);
           for (mon=0; mon<12; mon++)
             if (strnicmp(p, montable[mon], 3)==0) break;
           if (mon<12)

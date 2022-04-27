@@ -253,7 +253,8 @@ static void addftncharset(char *ftn, char *rfc)
     fp=ftnchrs;
   }
   else
-  { for (fp=ftnchrs; fp->next; fp=fp->next);
+  {
+    for (fp=ftnchrs; fp->next; fp=fp->next);
     fp->next=malloc(sizeof(*fp)+strlen(ftn)+strlen(rfc)+2);
     fp=fp->next;
   }
@@ -846,8 +847,8 @@ invparam:
         cdomain[ncdomain].relcom[sizeof(cdomain[0].relcom)-1]=0;
       }
       else
-      { strncpy(cdomain[ncdomain].relcom, p, (unsigned)p1-(unsigned)p);
-        cdomain[ncdomain].relcom[(unsigned)p1-(unsigned)p]=0;
+      { strncpy(cdomain[ncdomain].relcom, p, (unsigned long)p1-(unsigned long)p);
+        cdomain[ncdomain].relcom[(unsigned long)p1-(unsigned long)p]=0;
       }
       for (p=p1; (*p==' ') || (*p=='\t'); p++);
       if (strpbrk(p, " \t"))
@@ -873,7 +874,8 @@ invparam:
       checksubj=1;
       j=0;
       for(p=p1=str+5; p1;)
-      { for (p=p1; (*p==' ') || (*p=='\t'); p++);
+      {
+        for (p=p1; (*p==' ') || (*p=='\t'); p++);
         if (*p=='\"')
           p1=strchr(++p, '\"');
         else

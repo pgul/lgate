@@ -794,7 +794,8 @@ rcvagain:
     else
     { /* simple get first word */
       if (isdigit(p[1]) && strstr(p, "bytes"))
-      { for (*p--='\0'; isspace(*p) && p>=from; *p--='\0');
+      {
+        for (*p--='\0'; isspace(*p) && p>=from; *p--='\0');
         goto rcvagain;
       }
       p++;
@@ -1191,7 +1192,8 @@ static void setvars(char *realname, char *fromaddr, char *subj)
   else
   { for (i=0; i<cheader; i++)
     { if (strnicmp(pheader[i], "\1RFCID:", 7)==0)
-      { for (p=pheader[i]+7; isspace(*p); p++);
+      {
+        for (p=pheader[i]+7; isspace(*p); p++);
         p=strdup(p-1);
         if (p==NULL) break;
         *p='<';

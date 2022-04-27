@@ -68,7 +68,8 @@ static void doonelo(char *lopath, char *path, int zone, char attr,
     sscanf(p,"%04hx%04hx.",&to.net,&to.node);
   }
   if ((p>lopath+2) && (*(p-1)==PATHSEP))
-  { for (p-=2; (p>lopath) && isxdigit(*p); p--);
+  {
+    for (p-=2; (p>lopath) && isxdigit(*p); p--);
     if ((*p=='.') && (p[4]==PATHSEP))
       sscanf(p+1, "%03hx", &to.zone);
   }

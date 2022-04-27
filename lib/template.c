@@ -807,7 +807,8 @@ int templateline(char *str, unsigned size)
       continue;
     }
     if (strnicmp(str+1, "vars ", 5)==0)
-    { for (p=str+strlen(str)-1; isspace(*p); *p--='\0');
+    {
+      for (p=str+strlen(str)-1; isspace(*p); *p--='\0');
       for (p=str+5; isspace(*p); p++);
       if (stricmp(p, "yes")==0)
         findvars=TRUE;
@@ -1090,7 +1091,8 @@ int configline(char *str, unsigned size)
       if (!condition)
         continue;
       if (strnicmp(str, "vars ", 5)==0)
-      { for (p=str+strlen(str)-1; isspace(*p); *p--='\0');
+      {
+        for (p=str+strlen(str)-1; isspace(*p); *p--='\0');
         for (p=str+5; isspace(*p); p++);
         if (stricmp(p, "yes")==0)
           findvars=TRUE;

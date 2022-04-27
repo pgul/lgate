@@ -842,7 +842,8 @@ static void one_pkt(char *msgname)
       return;
     }
     if (i==0)
-    { while ((i=hgetc(h))==0);
+    {
+      while ((i=hgetc(h))==0);
       if (i!=EOF)
       { logwrite('!', "Warning: data exists after logical EOF in %s!\n",
                  msgname);

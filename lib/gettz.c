@@ -150,7 +150,8 @@ doshift:
   if (curtm->tm_mon+1==mons)
   { for (day=1;i!=days;day++) i=(i+1)%7;
     if (weeks<0)
-    { for (;day+7<daymon[mons-1];day+=7);
+    {
+      for (;day+7<daymon[mons-1];day+=7);
       for (;weeks<-1;weeks++) day-=7;
     }
     else
@@ -166,7 +167,8 @@ doshift:
   }
   for (day=1;i!=dayw;day++) i=(i+1)%7;
   if (weekw<0)
-  { for (;day+7<daymon[monw-1];day+=7);
+  {
+    for (;day+7<daymon[monw-1];day+=7);
     for (;weekw<-1;weekw++) day-=7;
   }
   else

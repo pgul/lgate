@@ -431,7 +431,8 @@ char *getsign(char *fname)
   { if (allocated==siglen)
     pgpsig=realloc(pgpsig, allocated+=256);
     if (pgpsig==NULL)
-    { while (fgetc(f)!=EOF);
+    {
+      while (fgetc(f)!=EOF);
       break;
     }
     siglen+=fread(pgpsig+siglen, 1, allocated-siglen, f);
