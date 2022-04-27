@@ -1,0 +1,12 @@
+*.o
+*.a
+*/Makefile
+attach/attuucp
+forward/forward
+fido2rel/fido2rel
+rel2fido/rel2fido
+autom4te.cache/
+config.cache
+config.log
+config.status
+minstall
