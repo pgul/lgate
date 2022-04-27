@@ -2370,10 +2370,10 @@ char *qphdr(char *str)
     }
     lword=8;
     if ((*pl=='\0') || (*pl=='\n'))
-    { free(s);
-      strcpy(pldest, "?=");
+    { strcpy(pldest, "?=");
       if (*pl=='\n')
         strcat(pldest, "\n");
+      free(s);
       debug(7, "QPhdr: result '%s'", sdest);
       return sdest;
     }
